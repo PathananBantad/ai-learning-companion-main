@@ -1,0 +1,61 @@
+export interface LessonData {
+  id: string;
+  topic: string;
+  learningOutcomes: string[];
+  keyConcepts: { title: string; description: string }[];
+  commonMisconceptions: { title: string; explanation: string }[];
+  knowledgeBaseStatus: 'idle' | 'uploading' | 'ready';
+  uploadedFiles: string[];
+  summary: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  conceptMatched: string;
+}
+
+export interface QuizAttempt {
+  answers: { [key: string]: number }; // questionId -> selectedIndex
+  score: number; // percentage
+  strengths: string[];
+  weaknesses: string[];
+  misconceptionsTriggered: string[];
+  recommendations: string[];
+}
+
+export interface StudentAnalytics {
+  id: string;
+  name: string;
+  quizScore: number;
+  learningProgress: number; // percentage (e.g. 0 to 100)
+  learningOutcomeAchievement: { name: string; score: number }[];
+  strengths: string[];
+  weaknesses: string[];
+  commonMisconceptions: string[];
+  aiFeedbackSummary: string;
+  recommendedTopics: string[];
+  lastActivity: string;
+}
+
+export interface AnalyticsData {
+  averageScore: number;
+  outcomeAchievement: { name: string; score: number }[];
+  mostIncorrectTopic: string;
+  mostAskedQuestions: { question: string; count: number }[];
+  commonMisconceptions: { topic: string; count: number; description: string }[];
+  studentSubmissionsCount: number;
+  weeklyTrend: { day: string; averageScore: number; activeStudents: number }[];
+  aiInsight: string;
+  students?: StudentAnalytics[];
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: 'student' | 'ai';
+  text: string;
+  timestamp: string;
+}

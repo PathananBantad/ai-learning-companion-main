@@ -1,0 +1,6 @@
+{
+  "name": "AI Learning Companion",
+  "description": "A modern, minimal AI Learning Companion for university students and instructors to teach smarter and learn better.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
