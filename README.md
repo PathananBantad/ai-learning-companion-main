@@ -26,7 +26,7 @@
 
 ### 1. โคลนโปรเจกต์ (Clone the Repository)
 `
-git clone [https://github.com/PathananBantad/ai-learning-companion-main.git](https://github.com/PathananBantad/ai-learning-companion-main.git)
+git clone https://github.com/PathananBantad/ai-learning-companion-main.git
 cd ai-learning-companion-main
 `
 ### 2. ติดตั้ง `npm install `
