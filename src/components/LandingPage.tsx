@@ -20,10 +20,10 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
           </span>
         </div>
         <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
-          <span>University Portal</span>
+          <span>พอร์ทัลมหาวิทยาลัย</span>
           <span className="text-slate-300">|</span>
           <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-            <CheckCircle className="w-3.5 h-3.5" /> AI Engine Online
+            <CheckCircle className="w-3.5 h-3.5" /> ระบบ AI พร้อมใช้งาน
           </span>
         </div>
       </header>
@@ -39,19 +39,19 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
             className="space-y-4"
           >
             <div className="inline-flex items-center gap-1.5 bg-brand-blue/10 text-brand-blue px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase">
-              <Sparkles className="w-3.5 h-3.5" /> Next-Gen AI Learning
+              <Sparkles className="w-3.5 h-3.5" /> AI เพื่อการเรียนรู้ยุคใหม่
             </div>
             
             <h1 className="font-display font-bold text-5xl md:text-6xl tracking-tight text-slate-900 leading-[1.1]">
-              AI Learning <br />
+              ผู้ช่วยการเรียนรู้ <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-purple">
-                Companion
+                ด้วย AI
               </span>
             </h1>
 
             <p className="text-lg text-slate-600 max-w-lg leading-relaxed font-sans font-medium">
-              Helping Students Learn Better.<br />
-              Helping Teachers Teach Smarter.
+              ช่วยให้นักศึกษาเรียนรู้ได้อย่างมีประสิทธิภาพ<br />
+              ช่วยให้อาจารย์จัดการเรียนการสอนได้อย่างชาญฉลาด
             </p>
           </motion.div>
 
@@ -67,7 +67,7 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
               className="flex-1 bg-slate-900 text-white hover:bg-slate-800 transition-all font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-[0.98]"
             >
               <GraduationCap className="w-5 h-5" />
-              <span>Continue as Teacher</span>
+              <span>เข้าสู่ระบบสำหรับอาจารย์</span>
               <ArrowRight className="w-4 h-4 ml-1 opacity-70" />
             </button>
 
@@ -77,7 +77,7 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
               className="flex-1 bg-white text-slate-900 hover:bg-slate-50 border border-slate-200 transition-all font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-sm hover:shadow-md active:scale-[0.98]"
             >
               <BookOpen className="w-5 h-5 text-brand-blue" />
-              <span>Continue as Student</span>
+              <span>เข้าสู่ระบบสำหรับนักศึกษา</span>
               <ArrowRight className="w-4 h-4 ml-1 opacity-70 text-slate-400" />
             </button>
           </motion.div>
@@ -90,12 +90,12 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
             className="pt-6 border-t border-slate-200 grid grid-cols-2 gap-4 text-xs font-semibold text-slate-500"
           >
             <div>
-              <span className="block text-slate-900 text-sm font-bold mb-1">Knowledge Sync</span>
-              Upload PDFs and generate custom interactive lessons instantly.
+              <span className="block text-slate-900 text-sm font-bold mb-1">ซิงค์องค์ความรู้</span>
+              อัปโหลดไฟล์ PDF และสร้างบทเรียนแบบโต้ตอบได้ทันที
             </div>
             <div>
-              <span className="block text-slate-900 text-sm font-bold mb-1">Personalized Feedbacks</span>
-              Instant smart evaluation of strength, weakness, and misconceptions.
+              <span className="block text-slate-900 text-sm font-bold mb-1">ข้อเสนอแนะเฉพาะบุคคล</span>
+              วิเคราะห์จุดแข็ง จุดอ่อน และความเข้าใจที่คลาดเคลื่อนด้วย AI
             </div>
           </motion.div>
         </div>
@@ -110,18 +110,18 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
           >
             <img
               src="/src/assets/images/ai_learning_illustration_1783089221326.jpg"
-              alt="AI Learning Companion Dashboard"
+              alt="แดชบอร์ดผู้ช่วยการเรียนรู้ด้วย AI"
               className="w-full h-full object-cover rounded-2xl"
               referrerPolicy="no-referrer"
             />
             {/* Soft decorative floaters */}
             <div className="absolute top-6 left-6 bg-white/95 backdrop-blur shadow-lg rounded-2xl p-3 border border-slate-100/50 flex items-center gap-2.5 animate-bounce [animation-duration:6s]">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-xs font-bold text-slate-700">Student Progress: 82%</span>
+              <span className="text-xs font-bold text-slate-700">ความก้าวหน้าของนักศึกษา : 82%</span>
             </div>
             <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur shadow-lg rounded-2xl p-3 border border-slate-100/50 flex items-center gap-2.5 animate-bounce [animation-duration:8s]">
               <Sparkles className="w-4 h-4 text-brand-purple" />
-              <span className="text-xs font-bold text-slate-700">AI Tutor: Active</span>
+              <span className="text-xs font-bold text-slate-700">ผู้ช่วย AI : พร้อมใช้งาน</span>
             </div>
           </motion.div>
         </div>
@@ -129,11 +129,11 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
 
       {/* Footer */}
       <footer className="max-w-7xl mx-auto w-full px-6 py-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 font-medium">
-        <p>© 2026 Aegis Academic AI. Designed for university instructors and undergraduate courses.</p>
+        <p>© 2569 Aegis Academic AI ระบบผู้ช่วยการเรียนรู้ด้วย AI สำหรับมหาวิทยาลัย</p>
         <div className="flex gap-4 mt-2 sm:mt-0">
-          <a href="#terms" className="hover:text-slate-600 transition">Academic Policy</a>
+          <a href="#terms" className="hover:text-slate-600 transition">นโยบายวิชาการ</a>
           <span>•</span>
-          <a href="#privacy" className="hover:text-slate-600 transition">Data Privacy</a>
+          <a href="#privacy" className="hover:text-slate-600 transition">นโยบายความเป็นส่วนตัว</a>
         </div>
       </footer>
     </div>
