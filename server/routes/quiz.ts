@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
-
+import { supabase } from '../lib/supabase';
 const router = Router();
 
 // Get current lesson content
@@ -209,8 +209,12 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 });
 
 // Submit student quiz answers
-router.post('/quiz/submit', (req: Request, res: Response) => {
-  const { answers } = req.body;
+router.post('/quiz/submit', async (req: Request, res: Response) => {
+  const {
+    answers,
+    studentName,
+    classCode
+  } = req.body;
   if (!answers) {
     res.status(400).json({ error: 'Missing answers' });
     return;
@@ -300,7 +304,28 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
     misconceptionsTriggered,
     recommendations
   };
+  try {
+    const { error } = await supabase
+        .from('quiz_results')
+        .insert({
+          name: studentName || 'Unknown Student',
+          class_code: classCode || null,
+          score: score,
+          total_questions: state.quizQuestions.length,
+          ai_feedback: {
+            strengths,
+            weaknesses,
+            misconceptionsTriggered,
+            recommendations
+          }
+        });
 
+    if (error) {
+      console.error('Supabase insert error:', error);
+    }
+  } catch (err) {
+    console.error('Quiz save error:', err);
+  }
   res.json(attemptResult);
 });
 
