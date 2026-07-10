@@ -13,15 +13,18 @@ dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = 3001;
 
   app.use(express.json());
 
-  // API Endpoints
+// API Endpoints
   app.use('/api', classRouter);
   app.use('/api', quizRouter);
   app.use('/api', analyticsRouter);
   app.use('/api', chatRouter);
+
+// Supabase class validation
+  app.use('/api/class', classRoutes);
 
   // Serve static client files in production, use Vite middleware in development
   if (process.env.NODE_ENV !== 'production') {

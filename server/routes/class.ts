@@ -1,38 +1,38 @@
 import { Router, Request, Response } from 'express';
-import { state } from '../data/lesson';
+import { validateClassCode } from '../services/class.service';
 
 const router = Router();
 
-// Get active class code
-router.get('/class/code', (req: Request, res: Response) => {
-  res.json({ activeClassCode: state.activeClassCode });
-});
-
-// Generate or set a custom class code
-router.post('/class/generate', (req: Request, res: Response) => {
-  const { customCode } = req.body;
-  if (customCode && customCode.trim()) {
-    state.activeClassCode = customCode.trim().toUpperCase();
-  } else {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 4; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    state.activeClassCode = `AEG-${result}`;
-  }
-  res.json({ activeClassCode: state.activeClassCode });
-});
-
 // Verify entered class code from student join screen
-router.post('/class/verify', (req: Request, res: Response) => {
+router.post('/class/verify', async (req: Request, res: Response) => {
   const { code } = req.body;
+
   if (!code) {
-    res.status(400).json({ error: 'Code is required' });
-    return;
+    return res.status(400).json({
+      success: false,
+      error: 'Code is required'
+    });
   }
-  const isCorrect = code.trim().toUpperCase() === state.activeClassCode.toUpperCase();
-  res.json({ success: isCorrect, activeClassCode: state.activeClassCode });
+
+  try {
+    const result = await validateClassCode(code);
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      class: result.data
+    });
+  } catch (error) {
+    console.error('Error validating class code:', error);
+
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
 });
 
 export default router;
