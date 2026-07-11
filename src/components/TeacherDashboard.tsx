@@ -28,17 +28,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 95,
     learningProgress: 90,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 100 },
-      { name: "Stateless HTTP & Sessions", score: 95 },
-      { name: "Idempotency Concepts", score: 90 },
-      { name: "Web Security (POST/HTTPS)", score: 95 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 100 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 95 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 90 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 95 }
     ],
-    strengths: ["HTTP Verbs", "Stateless Session Management"],
-    weaknesses: ["None"],
-    commonMisconceptions: ["None"],
-    aiFeedbackSummary: "Demonstrated exemplary mastery across all domains. Fully understands REST design constraints and idempotency guarantees.",
-    recommendedTopics: ["Advanced GraphQL federated architectures"],
-    lastActivity: "Completed diagnostic quiz on 07/03 08:12"
+    strengths: ["คำสั่ง HTTP", "การจัดการเซสชันแบบไร้สถานะ"],
+    weaknesses: ["ไม่มี"],
+    commonMisconceptions: ["ไม่มี"],
+    aiFeedbackSummary: "แสดงความเชี่ยวชาญในทุกด้านอย่างยอดเยี่ยม เข้าใจข้อจำกัดการออกแบบ REST และหลักการ idempotency ได้อย่างครบถ้วน",
+    recommendedTopics: ["สถาปัตยกรรม GraphQL แบบ federated ขั้นสูง"],
+    lastActivity: "ทำแบบทดสอบวินิจฉัยเสร็จเมื่อ 03/07 08:12 น."
   },
   {
     id: "STU-4412",
@@ -46,17 +46,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 75,
     learningProgress: 70,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 90 },
-      { name: "Stateless HTTP & Sessions", score: 80 },
-      { name: "Idempotency Concepts", score: 50 },
-      { name: "Web Security (POST/HTTPS)", score: 80 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 90 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 80 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 50 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 80 }
     ],
-    strengths: ["REST verbs", "Status codes"],
-    weaknesses: ["Idempotency semantics of PUT/POST"],
-    commonMisconceptions: ["Assumed POST is safe & idempotent"],
-    aiFeedbackSummary: "Excellent overall foundation but struggles with idempotency constraints. Needs to clarify why repeating a POST payload can duplicate database resources.",
-    recommendedTopics: ["Idempotent operations vs Safe operations"],
-    lastActivity: "Engaged with AI Tutor on Idempotency on 07/03 07:45"
+    strengths: ["คำสั่ง REST", "รหัสสถานะ (Status codes)"],
+    weaknesses: ["ความหมายของ Idempotency ใน PUT/POST"],
+    commonMisconceptions: ["เข้าใจผิดว่า POST ปลอดภัยและเป็น idempotent"],
+    aiFeedbackSummary: "พื้นฐานโดยรวมยอดเยี่ยม แต่ยังมีปัญหาเรื่องข้อจำกัดของ idempotency ต้องทำความเข้าใจเพิ่มเติมว่าทำไมการส่ง POST payload ซ้ำจึงทำให้ข้อมูลในฐานข้อมูลซ้ำซ้อนได้",
+    recommendedTopics: ["การดำเนินการแบบ Idempotent เทียบกับ Safe"],
+    lastActivity: "เรียนกับ AI Tutor เรื่อง Idempotency เมื่อ 03/07 07:45 น."
   },
   {
     id: "STU-3109",
@@ -64,17 +64,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 85,
     learningProgress: 82,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 95 },
-      { name: "Stateless HTTP & Sessions", score: 85 },
-      { name: "Idempotency Concepts", score: 80 },
-      { name: "Web Security (POST/HTTPS)", score: 80 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 95 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 85 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 80 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 80 }
     ],
-    strengths: ["CRUD implementation", "Idempotency"],
-    weaknesses: ["JWT statelessness"],
-    commonMisconceptions: ["Believes session state must reside on the DB"],
-    aiFeedbackSummary: "Solid comprehension of REST constraints. Slight misunderstanding of stateless scaling implications using JWT vs stateful session cookies.",
-    recommendedTopics: ["Stateless authentication with JWT", "Token invalidation strategies"],
-    lastActivity: "Submitted Quiz 1 on 07/02 16:30"
+    strengths: ["การใช้งาน CRUD", "Idempotency"],
+    weaknesses: ["ความไร้สถานะของ JWT"],
+    commonMisconceptions: ["เข้าใจว่าสถานะเซสชันต้องเก็บไว้ในฐานข้อมูลเท่านั้น"],
+    aiFeedbackSummary: "เข้าใจข้อจำกัดของ REST ได้ดี แต่ยังเข้าใจคลาดเคลื่อนเล็กน้อยเกี่ยวกับผลกระทบของการขยายระบบแบบไร้สถานะเมื่อใช้ JWT เทียบกับ session cookie แบบมีสถานะ",
+    recommendedTopics: ["การยืนยันตัวตนแบบไร้สถานะด้วย JWT", "กลยุทธ์การยกเลิกความถูกต้องของโทเคน"],
+    lastActivity: "ส่งแบบทดสอบที่ 1 เมื่อ 02/07 16:30 น."
   },
   {
     id: "STU-7201",
@@ -82,17 +82,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 60,
     learningProgress: 55,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 70 },
-      { name: "Stateless HTTP & Sessions", score: 60 },
-      { name: "Idempotency Concepts", score: 50 },
-      { name: "Web Security (POST/HTTPS)", score: 60 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 70 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 60 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 50 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 60 }
     ],
-    strengths: ["Basic GET/POST routing"],
-    weaknesses: ["Stateless HTTP architecture", "Idempotency of PUT vs PATCH"],
-    commonMisconceptions: ["Equates HTTP POST with database encryption by default"],
-    aiFeedbackSummary: "Requires review of core stateless paradigms. Struggled with secure transmission concepts and confused raw payload payloads with transport-layer security.",
-    recommendedTopics: ["Statelessness vs state persistence", "TLS/HTTPS transport layers"],
-    lastActivity: "Completed practice flashcards on 07/02 11:20"
+    strengths: ["การกำหนดเส้นทาง GET/POST พื้นฐาน"],
+    weaknesses: ["สถาปัตยกรรม HTTP แบบไร้สถานะ", "Idempotency ของ PUT เทียบกับ PATCH"],
+    commonMisconceptions: ["เข้าใจผิดว่า HTTP POST เข้ารหัสข้อมูลในฐานข้อมูลโดยอัตโนมัติ"],
+    aiFeedbackSummary: "ต้องทบทวนหลักการพื้นฐานของระบบไร้สถานะ มีปัญหาเรื่องแนวคิดการส่งข้อมูลอย่างปลอดภัย และสับสนระหว่าง payload ดิบกับความปลอดภัยระดับชั้นการขนส่ง",
+    recommendedTopics: ["ความไร้สถานะเทียบกับการคงสถานะ", "ชั้นการขนส่งแบบ TLS/HTTPS"],
+    lastActivity: "ทำแบบฝึกหัดการ์ดคำศัพท์เสร็จเมื่อ 02/07 11:20 น."
   },
   {
     id: "STU-1102",
@@ -100,17 +100,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 90,
     learningProgress: 88,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 100 },
-      { name: "Stateless HTTP & Sessions", score: 90 },
-      { name: "Idempotency Concepts", score: 80 },
-      { name: "Web Security (POST/HTTPS)", score: 90 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 100 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 90 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 80 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 90 }
     ],
-    strengths: ["Web Security", "HTTP Verbs and Responses"],
-    weaknesses: ["Edge cases in PUT vs PATCH"],
-    commonMisconceptions: ["None"],
-    aiFeedbackSummary: "Exceptional grasp of network fundamentals and security patterns. Minor confusion on standard idempotency profiles for PATCH verbs.",
-    recommendedTopics: ["RFC 5789 PATCH specifications"],
-    lastActivity: "Submitted diagnostic quiz on 07/03 08:29"
+    strengths: ["ความปลอดภัยเว็บ", "คำสั่ง HTTP และการตอบกลับ"],
+    weaknesses: ["กรณีขอบเขตพิเศษของ PUT เทียบกับ PATCH"],
+    commonMisconceptions: ["ไม่มี"],
+    aiFeedbackSummary: "เข้าใจพื้นฐานเครือข่ายและรูปแบบความปลอดภัยได้อย่างยอดเยี่ยม มีความสับสนเล็กน้อยเกี่ยวกับมาตรฐาน idempotency ของคำสั่ง PATCH",
+    recommendedTopics: ["ข้อกำหนด RFC 5789 สำหรับ PATCH"],
+    lastActivity: "ส่งแบบทดสอบวินิจฉัยเมื่อ 03/07 08:29 น."
   },
   {
     id: "STU-5541",
@@ -118,17 +118,17 @@ const defaultStudents: StudentAnalytics[] = [
     quizScore: 45,
     learningProgress: 40,
     learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: 60 },
-      { name: "Stateless HTTP & Sessions", score: 40 },
-      { name: "Idempotency Concepts", score: 30 },
-      { name: "Web Security (POST/HTTPS)", score: 50 }
+      { name: "คำสั่ง HTTP หลักและ CRUD", score: 60 },
+      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 40 },
+      { name: "แนวคิดเรื่อง Idempotency", score: 30 },
+      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 50 }
     ],
-    strengths: ["Basic CRUD ideas"],
-    weaknesses: ["Sessions and cookie security", "Idempotency definitions", "POST vs PUT"],
-    commonMisconceptions: ["Believes POST is secure by default", "Confused PUT with safe reads"],
-    aiFeedbackSummary: "Struggling with standard HTTP web-model definitions. Triggered multiple major misconceptions on basic POST routing and encryption rules. Needs targeted instructor counseling.",
-    recommendedTopics: ["Intro to Web Architecture", "HTTP methods and their safety guarantees"],
-    lastActivity: "Attempted quiz 2 times on 07/01 14:02"
+    strengths: ["แนวคิด CRUD พื้นฐาน"],
+    weaknesses: ["ความปลอดภัยของเซสชันและคุกกี้", "นิยามของ Idempotency", "POST เทียบกับ PUT"],
+    commonMisconceptions: ["เข้าใจผิดว่า POST ปลอดภัยโดยอัตโนมัติ", "สับสนระหว่าง PUT กับการอ่านข้อมูลแบบปลอดภัย"],
+    aiFeedbackSummary: "ยังมีปัญหากับนิยามพื้นฐานของโมเดลเว็บแบบ HTTP เกิดความเข้าใจผิดสำคัญหลายจุดเกี่ยวกับการกำหนดเส้นทาง POST พื้นฐานและกฎการเข้ารหัส ต้องการคำแนะนำเฉพาะจากผู้สอน",
+    recommendedTopics: ["บทนำสู่สถาปัตยกรรมเว็บ", "วิธีการ HTTP และการรับประกันความปลอดภัย"],
+    lastActivity: "พยายามทำแบบทดสอบ 2 ครั้งเมื่อ 01/07 14:02 น."
   }
 ];
 
@@ -162,16 +162,16 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
       {/* Upper Headers */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-6">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Instructor Board</span>
-          <h1 className="font-display font-bold text-3xl text-slate-900 mt-1">Class Diagnostic Analytics</h1>
-          <p className="text-slate-500 text-sm mt-1">Track student mastery levels, monitor trends, and analyze systemic misconceptions.</p>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">แดชบอร์ดผู้สอน</span>
+          <h1 className="font-display font-bold text-3xl text-slate-900 mt-1">สรุปผลการวิเคราะห์ชั้นเรียน</h1>
+          <p className="text-slate-500 text-sm mt-1">ติดตามผลการเรียนของนักศึกษา วิเคราะห์แนวโน้ม และตรวจสอบความเข้าใจที่คลาดเคลื่อน</p>
         </div>
         
         <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center gap-3">
           <Users className="w-5 h-5 text-slate-400 shrink-0" />
           <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase">Total Submissions</div>
-            <div className="text-base font-extrabold text-slate-800">{analytics.studentSubmissionsCount} active students</div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase">จำนวนนักศึกษาที่ส่งแบบทดสอบ</div>
+            <div className="text-base font-extrabold text-slate-800">{analytics.studentSubmissionsCount} คน</div>
           </div>
         </div>
       </div>
@@ -188,7 +188,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           id="tab-class-overview"
         >
           <BarChart2 className="w-4 h-4" />
-          <span>Class Overview</span>
+          <span>ภาพรวมชั้นเรียน</span>
         </button>
         <button
           onClick={() => setActiveTab('students')}
@@ -200,7 +200,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           id="tab-individual-students"
         >
           <Users className="w-4 h-4" />
-          <span>Individual Students</span>
+          <span>นักศึกษารายบุคคล</span>
         </button>
       </div>
 
@@ -212,21 +212,21 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
         {/* Card: Average Score */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">Average Score</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">คะแนนเฉลี่ย</span>
             <div className="bg-blue-50 text-brand-blue p-1.5 rounded-lg">
               <Award className="w-4 h-4" />
             </div>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-800">{analytics.averageScore}%</div>
-            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Out of 100 max points</span>
+            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">จากคะแนนเต็ม 100</span>
           </div>
         </div>
 
         {/* Card: Learning Outcome Achievement */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">Outcome Mastery</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">ความเชี่ยวชาญตามผลลัพธ์</span>
             <div className="bg-purple-50 text-brand-purple p-1.5 rounded-lg">
               <Compass className="w-4 h-4" />
             </div>
@@ -238,14 +238,14 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 : 0
               }%
             </div>
-            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Class understanding index</span>
+            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">ดัชนีความเข้าใจของชั้นเรียน</span>
           </div>
         </div>
 
         {/* Card: Most Incorrect Topic */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">Critical Concept Gap</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">จุดบกพร่องแนวคิดสำคัญ</span>
             <div className="bg-red-50 text-red-500 p-1.5 rounded-lg">
               <AlertCircle className="w-4 h-4" />
             </div>
@@ -254,14 +254,14 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
             <div className="text-base font-extrabold text-slate-800 truncate" title={analytics.mostIncorrectTopic}>
               {analytics.mostIncorrectTopic}
             </div>
-            <span className="text-[10px] text-red-500 font-semibold mt-1 block">Needs revision in next lecture</span>
+            <span className="text-[10px] text-red-500 font-semibold mt-1 block">ต้องทบทวนในการบรรยายครั้งถัดไป</span>
           </div>
         </div>
 
         {/* Card: Active Misconceptions Count */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-2 flex flex-col justify-between">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">Logged Misconceptions</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">ความเข้าใจผิดที่บันทึกไว้</span>
             <div className="bg-amber-50 text-amber-500 p-1.5 rounded-lg">
               <Lightbulb className="w-4 h-4" />
             </div>
@@ -270,7 +270,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
             <div className="text-3xl font-extrabold text-slate-800">
               {analytics.commonMisconceptions.reduce((acc, val) => acc + (val.count || 0), 0)}
             </div>
-            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Targeted students flagged</span>
+            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">นักศึกษาที่ถูกระบุเป็นกลุ่มเป้าหมาย</span>
           </div>
         </div>
 
@@ -286,8 +286,8 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-slate-800 text-sm">Instructor Copilot Insights</h3>
-                <p className="text-[10px] text-slate-400 font-semibold">Gemini Academic Advisor</p>
+                <h3 className="font-display font-bold text-slate-800 text-sm">ข้อมูลเชิงลึกจากผู้ช่วยอาจารย์ (AI)</h3>
+                <p className="text-[10px] text-slate-400 font-semibold">ที่ปรึกษาด้านวิชาการ Gemini</p>
               </div>
             </div>
             
@@ -297,15 +297,15 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   onClick={onRefreshInsight}
                   disabled={isGeneratingInsight}
                   className="bg-brand-purple/10 hover:bg-brand-purple/20 text-brand-purple text-xs font-bold py-1.5 px-3 rounded-xl flex items-center gap-1.5 transition disabled:opacity-50"
-                  title="Generate Fresh AI Recommendations"
+                  title="สร้างคำแนะนำ AI ใหม่"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingInsight ? 'animate-spin' : ''}`} />
-                  <span>Regenerate</span>
+                  <span>สร้างใหม่</span>
                 </button>
               )}
               {!apiKeySet && (
                 <span className="bg-amber-50 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase">
-                  Demo Insight
+                  ข้อมูลตัวอย่าง (Demo)
                 </span>
               )}
             </div>
@@ -315,7 +315,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
             {isGeneratingInsight ? (
               <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
                 <RefreshCw className="w-4 h-4 animate-spin text-brand-purple" />
-                <span>Generating custom syllabus recommendations...</span>
+                <span>กำลังสร้างคำแนะนำหลักสูตรเฉพาะบุคคล...</span>
               </div>
             ) : (
               <p className="text-slate-700 text-xs leading-relaxed font-semibold">
@@ -333,12 +333,12 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
         <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-slate-400" />
-            Learning Outcome Achievement Index
+            ดัชนีความสำเร็จตามผลลัพธ์การเรียนรู้
           </h3>
           
           <div className="w-full h-64 text-xs font-semibold">
             {analytics.outcomeAchievement.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-slate-400">No submissions received yet</div>
+              <div className="h-full flex items-center justify-center text-slate-400">ยังไม่มีการส่งแบบทดสอบ</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.outcomeAchievement} margin={{ left: -20, right: 10, bottom: 20 }}>
@@ -364,12 +364,12 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
         <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4 flex flex-col justify-between">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-slate-400" />
-            Common Misconceptions
+            ความเข้าใจผิดที่พบบ่อย
           </h3>
           
           <div className="w-full h-48 text-xs font-semibold relative flex items-center justify-center">
             {pieData.length === 0 ? (
-              <div className="text-slate-400">No data</div>
+              <div className="text-slate-400">ไม่มีข้อมูล</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -400,7 +400,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
                   <span className="truncate text-slate-700" title={item.name}>{item.name}</span>
                 </div>
-                <span className="font-extrabold text-slate-900 shrink-0">{item.value} students</span>
+                <span className="font-extrabold text-slate-900 shrink-0">{item.value} คน</span>
               </div>
             ))}
           </div>
@@ -412,7 +412,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
       <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-slate-400" />
-          Weekly Engagement & Performance Trend
+          แนวโน้มการมีส่วนร่วมและผลการเรียนรายสัปดาห์
         </h3>
         
         <div className="w-full h-64 text-xs font-semibold">
@@ -424,7 +424,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
               <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
               <Legend verticalAlign="top" height={36} iconType="circle" />
               <Line 
-                name="Average Score (%)" 
+                name="คะแนนเฉลี่ย (%)" 
                 type="monotone" 
                 dataKey="averageScore" 
                 stroke="#3b82f6" 
@@ -433,7 +433,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 activeDot={{ r: 6 }} 
               />
               <Line 
-                name="Active Students" 
+                name="นักศึกษาที่ใช้งานอยู่" 
                 type="monotone" 
                 dataKey="activeStudents" 
                 stroke="#a855f7" 
@@ -456,9 +456,9 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           <div>
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <Users className="w-4 h-4 text-brand-blue" />
-              Student Performance & Progress Analytics
+              การวิเคราะห์ผลการเรียนและความก้าวหน้าของนักศึกษา
             </h3>
-            <p className="text-xs text-slate-500 mt-1">Monitor individual student quiz outcomes, learning gaps, and targeted AI interventions.</p>
+            <p className="text-xs text-slate-500 mt-1">ติดตามผลแบบทดสอบ ช่องว่างการเรียนรู้ และการแทรกแซงของ AI สำหรับนักศึกษารายบุคคล</p>
           </div>
           
           {/* Search bar */}
@@ -468,7 +468,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
             </span>
             <input
               type="text"
-              placeholder="Search by ID, Name, strengths..."
+              placeholder="ค้นหาด้วยรหัส ชื่อ จุดแข็ง..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition bg-slate-50/50 text-slate-800 placeholder:text-slate-400"
@@ -481,13 +481,13 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                <th className="py-3.5 px-4">Student ID / Name</th>
-                <th className="py-3.5 px-4 text-center">Quiz Score</th>
-                <th className="py-3.5 px-4">Learning Progress</th>
-                <th className="py-3.5 px-4 hidden md:table-cell">Strengths</th>
-                <th className="py-3.5 px-4 hidden lg:table-cell">Common Gaps</th>
-                <th className="py-3.5 px-4">Last Activity</th>
-                <th className="py-3.5 px-4 text-right">Details</th>
+                <th className="py-3.5 px-4">รหัส/ชื่อนักศึกษา</th>
+                <th className="py-3.5 px-4 text-center">คะแนนแบบทดสอบ</th>
+                <th className="py-3.5 px-4">ความก้าวหน้าในการเรียน</th>
+                <th className="py-3.5 px-4 hidden md:table-cell">จุดแข็ง</th>
+                <th className="py-3.5 px-4 hidden lg:table-cell">จุดบกพร่องที่พบบ่อย</th>
+                <th className="py-3.5 px-4">กิจกรรมล่าสุด</th>
+                <th className="py-3.5 px-4 text-right">รายละเอียด</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 text-xs">
@@ -507,7 +507,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   return (
                     <tr>
                       <td colSpan={7} className="text-center py-8 text-slate-400 font-medium">
-                        No student records match your current search query.
+                        ไม่พบข้อมูลนักศึกษาที่ตรงกับคำค้นหาของคุณ
                       </td>
                     </tr>
                   );
@@ -551,7 +551,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                       <td className="py-4 px-4 hidden md:table-cell">
                         <div className="flex flex-wrap gap-1 max-w-[160px]">
                           {student.strengths[0] === "None" ? (
-                            <span className="text-slate-400 italic text-[10px]">None</span>
+                            <span className="text-slate-400 italic text-[10px]">ไม่มี</span>
                           ) : (
                             student.strengths.slice(0, 1).map((s, idx) => (
                               <span key={idx} className="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded-md truncate max-w-full">
@@ -560,7 +560,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                             ))
                           )}
                           {student.strengths.length > 1 && (
-                            <span className="text-[9px] text-slate-400 font-bold self-center">+{student.strengths.length - 1} more</span>
+                            <span className="text-[9px] text-slate-400 font-bold self-center">อีก {student.strengths.length - 1} รายการ</span>
                           )}
                         </div>
                       </td>
@@ -568,7 +568,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                       <td className="py-4 px-4 hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1 max-w-[160px]">
                           {student.weaknesses[0] === "None" || student.weaknesses.length === 0 ? (
-                            <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded-md">All Clear</span>
+                            <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded-md">ไม่พบปัญหา</span>
                           ) : (
                             student.weaknesses.slice(0, 1).map((w, idx) => (
                               <span key={idx} className="bg-rose-50 text-rose-600 text-[10px] font-semibold px-2 py-0.5 rounded-md truncate max-w-full">
@@ -577,7 +577,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                             ))
                           )}
                           {student.weaknesses.length > 1 && student.weaknesses[0] !== "None" && (
-                            <span className="text-[9px] text-slate-400 font-bold self-center">+{student.weaknesses.length - 1} more</span>
+                            <span className="text-[9px] text-slate-400 font-bold self-center">อีก {student.weaknesses.length - 1} รายการ</span>
                           )}
                         </div>
                       </td>
@@ -592,7 +592,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                           className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-brand-blue text-white hover:text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition duration-150"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>View Details</span>
+                          <span>ดูรายละเอียด</span>
                         </button>
                       </td>
                     </tr>
@@ -624,7 +624,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   </div>
                   <div>
                     <h4 className="font-display font-extrabold text-slate-800 text-base">{selectedStudent.name}</h4>
-                    <span className="font-mono text-xs text-slate-400 block mt-0.5">Student ID: {selectedStudent.id}</span>
+                    <span className="font-mono text-xs text-slate-400 block mt-0.5">รหัสนักศึกษา: {selectedStudent.id}</span>
                   </div>
                 </div>
                 
@@ -643,19 +643,19 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Quiz Score Card */}
                   <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Quiz Performance</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">ผลคะแนนแบบทดสอบ</span>
                     <div className="flex items-baseline gap-1 mt-2">
                       <span className="text-3xl font-extrabold text-slate-900">{selectedStudent.quizScore}%</span>
                       <span className="text-xs text-slate-400 font-semibold">/ 100</span>
                     </div>
-                    <span className="text-[10px] text-slate-500 mt-1 block">Syllabus Quiz Outcome</span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">ผลลัพธ์แบบทดสอบตามหลักสูตร</span>
                   </div>
 
                   {/* Learning Progress Card */}
                   <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Overall Progress</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">ความก้าวหน้าโดยรวม</span>
                     <div className="mt-2 space-y-1">
-                      <div className="text-xl font-extrabold text-slate-800">{selectedStudent.learningProgress}% Completed</div>
+                      <div className="text-xl font-extrabold text-slate-800">เสร็จสมบูรณ์ {selectedStudent.learningProgress}%</div>
                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-brand-blue rounded-full" 
@@ -663,17 +663,17 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                         />
                       </div>
                     </div>
-                    <span className="text-[10px] text-slate-500 mt-1 block">Course Syllabus Index</span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">ดัชนีหลักสูตรรายวิชา</span>
                   </div>
 
                   {/* Last Activity Card */}
                   <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Activity</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">กิจกรรมล่าสุด</span>
                     <div className="flex items-center gap-1.5 mt-2 text-slate-800">
                       <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
                       <span className="font-semibold text-xs leading-snug">{selectedStudent.lastActivity}</span>
                     </div>
-                    <span className="text-[10px] text-slate-500 mt-1 block">Live Engagement Track</span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">ติดตามการมีส่วนร่วมแบบเรียลไทม์</span>
                   </div>
                 </div>
 
@@ -681,7 +681,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 <div className="space-y-3">
                   <div className="flex items-center gap-1.5">
                     <Target className="w-4 h-4 text-brand-blue shrink-0" />
-                    <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Learning Outcome Achievement</h5>
+                    <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">ผลสัมฤทธิ์ตามผลลัพธ์การเรียนรู้</h5>
                   </div>
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3.5">
                     {selectedStudent.learningOutcomeAchievement.map((outcome, index) => (
@@ -706,7 +706,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   {/* Strengths */}
                   <div className="bg-white border border-slate-200/60 p-4 rounded-2xl space-y-2.5">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> Verified Strengths
+                      <Zap className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> จุดแข็งที่ยืนยันแล้ว
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedStudent.strengths.map((s, idx) => (
@@ -720,7 +720,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   {/* Weaknesses / Knowledge Gaps */}
                   <div className="bg-white border border-slate-200/60 p-4 rounded-2xl space-y-2.5">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-rose-500 shrink-0" /> Target Knowledge Gaps
+                      <Target className="w-3.5 h-3.5 text-rose-500 shrink-0" /> ช่องว่างความรู้เป้าหมาย
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedStudent.weaknesses.map((w, idx) => (
@@ -736,7 +736,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                 {selectedStudent.commonMisconceptions && selectedStudent.commonMisconceptions.length > 0 && (
                   <div className="bg-amber-50/50 border border-amber-200/60 rounded-2xl p-4.5 space-y-2">
                     <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" /> Systemic Misconceptions Triggered
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" /> ความเข้าใจผิดเชิงระบบที่พบ
                     </span>
                     <div className="flex flex-wrap gap-2 pt-1">
                       {selectedStudent.commonMisconceptions.map((m, idx) => (
@@ -753,17 +753,17 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   <div className="absolute top-0 right-0 w-16 h-16 bg-brand-purple/10 blur-xl rounded-full" />
                   <div className="flex items-center gap-1.5 relative">
                     <Sparkles className="w-4 h-4 text-brand-purple shrink-0 animate-pulse" />
-                    <span className="text-[10px] font-bold text-brand-purple uppercase tracking-wider">AI feedback Summary</span>
+                    <span className="text-[10px] font-bold text-brand-purple uppercase tracking-wider">สรุปผลตอบรับจาก AI</span>
                   </div>
                   <p className="text-slate-700 text-xs leading-relaxed font-semibold relative">
                     "{selectedStudent.aiFeedbackSummary}"
                   </p>
                 </div>
 
-                {/* Recommended Topics to Review */}
+                {/* หัวข้อที่แนะนำให้ทบทวน */}
                 <div className="space-y-2.5">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
-                    <Brain className="w-3.5 h-3.5 text-brand-blue shrink-0" /> Recommended Topics to Review
+                    <Brain className="w-3.5 h-3.5 text-brand-blue shrink-0" /> หัวข้อที่แนะนำให้ทบทวน
                   </span>
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
                     <ul className="space-y-2 text-xs font-semibold text-slate-700">

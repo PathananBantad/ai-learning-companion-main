@@ -19,15 +19,14 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm text-center py-16 space-y-5" id="feedback-page">
         <Award className="w-12 h-12 text-brand-blue mx-auto animate-bounce" />
-        <h3 className="font-display font-bold text-xl text-slate-800">No Assessment Feedback Found</h3>
+        <h3 className="font-display font-bold text-xl text-slate-800">ยังไม่มีผลการประเมิน</h3>
         <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed">
-          Take the active lesson quiz first to generate a personalized strength & weakness profile and correct your misconceptions.
-        </p>
+          กรุณาทำแบบทดสอบของบทเรียนก่อน เพื่อให้ระบบวิเคราะห์จุดแข็ง จุดอ่อน และข้อเข้าใจผิดของคุณ        </p>
         <button
           onClick={() => onNavigate('quiz')}
           className="bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-blue-500/10 inline-flex items-center gap-2"
         >
-          <span>Take Quiz Now</span>
+          <span>เริ่มทำแบบทดสอบ</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -39,24 +38,24 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
   // Grade classification
   let gradeLetter = 'F';
   let gradeColor = 'text-red-500 bg-red-50 border-red-200';
-  let gradeFeedback = 'Requires thorough revision. Let\'s review your weaknesses with our AI companion.';
+  let gradeFeedback = 'ควรทบทวนเนื้อหาเพิ่มเติม และใช้ผู้ช่วย AI เพื่อเสริมความเข้าใจ';
 
   if (score >= 90) {
     gradeLetter = 'A';
     gradeColor = 'text-emerald-600 bg-emerald-50 border-emerald-100';
-    gradeFeedback = 'Magnificent! You have shown a deep, conceptual understanding of this material.';
+    gradeFeedback = 'ยอดเยี่ยม! คุณมีความเข้าใจเนื้อหาในบทเรียนนี้เป็นอย่างดี';
   } else if (score >= 80) {
     gradeLetter = 'B';
     gradeColor = 'text-blue-600 bg-blue-50 border-blue-100';
-    gradeFeedback = 'Great job! You have grasped the main objectives. A little more revision will make it perfect.';
+    gradeFeedback = 'ดีมาก! คุณเข้าใจเนื้อหาส่วนใหญ่ เหลือเพียงทบทวนเพิ่มเติมอีกเล็กน้อย';
   } else if (score >= 70) {
     gradeLetter = 'C';
     gradeColor = 'text-amber-600 bg-amber-50 border-amber-100';
-    gradeFeedback = 'Passed. Some crucial concepts (such as statelessness or idempotency) still require attention.';
+    gradeFeedback = 'ผ่านเกณฑ์ แต่ยังมีบางหัวข้อที่ควรศึกษาเพิ่มเติม';
   } else if (score >= 50) {
     gradeLetter = 'D';
     gradeColor = 'text-orange-600 bg-orange-50 border-orange-100';
-    gradeFeedback = 'Passed with reservations. Several core concepts were missed.';
+    gradeFeedback = 'ผ่านแบบมีเงื่อนไข ควรทบทวนแนวคิดพื้นฐานอีกครั้ง';
   }
 
   return (
@@ -67,18 +66,18 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
         
         {/* Score & Grade Display */}
         <div className="md:col-span-5 bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Diagnostic Score</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">คะแนนการประเมิน</span>
           
           <div className="relative flex items-center justify-center">
             {/* grade circle */}
             <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center font-display ${gradeColor}`}>
               <span className="text-4xl font-extrabold leading-none">{gradeLetter}</span>
-              <span className="text-xs font-bold mt-1">{score}% Score</span>
+              <span className="text-xs font-bold mt-1">{score}% </span>
             </div>
           </div>
 
           <div className="space-y-1 max-w-xs">
-            <h4 className="font-display font-bold text-slate-800 text-sm">Feedback Grade Summary</h4>
+            <h4 className="font-display font-bold text-slate-800 text-sm">สรุปผลการประเมิน</h4>
             <p className="text-slate-500 text-xs leading-relaxed">{gradeFeedback}</p>
           </div>
         </div>
@@ -86,10 +85,11 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
         {/* Learning Progress Tracking */}
         <div className="md:col-span-7 bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-6">
           <div className="space-y-1.5">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Personal Study Progress</span>
-            <h3 className="font-display font-bold text-xl text-slate-900">Current Unit Milestones</h3>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">ความก้าวหน้าทางการเรียน</span>
+            <h3 className="font-display font-bold text-xl text-slate-900">ความก้าวหน้าของบทเรียน</h3>
             <p className="text-slate-500 text-xs leading-relaxed">
-              Based on your quiz results, we have plotted your active progress. Completing recommended AI chats completes the learning loop.
+            ระบบวิเคราะห์ผลการเรียนจากแบบทดสอบ
+            เพื่อแนะนำแนวทางการเรียนรู้ที่เหมาะสมสำหรับคุณ
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
           <div className="space-y-4 pt-2">
             <div>
               <div className="flex justify-between items-center text-xs font-semibold mb-1">
-                <span className="text-slate-700">Theoretical Knowledge Mastery</span>
+                <span className="text-slate-700">ความเข้าใจเนื้อหา</span>
                 <span className="text-brand-blue font-bold">{score}%</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -107,7 +107,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
 
             <div>
               <div className="flex justify-between items-center text-xs font-semibold mb-1">
-                <span className="text-slate-700">Analogy & Misconception Review</span>
+                <span className="text-slate-700">การแก้ไขความเข้าใจที่คลาดเคลื่อน</span>
                 <span className="text-brand-purple font-bold">
                   {misconceptionsTriggered.length === 0 ? '100%' : '50%'}
                 </span>
@@ -127,14 +127,14 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
               className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-800 transition"
             >
               <RotateCcw className="w-4 h-4 text-slate-400" />
-              <span>Retake Quiz</span>
+              <span>ทำแบบทดสอบอีกครั้ง</span>
             </button>
             <button
               onClick={() => onNavigate('chat')}
               className="flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-blue-700 transition"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Clarify with AI</span>
+              <span>สอบถาม AI</span>
             </button>
           </div>
 
@@ -149,9 +149,9 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-            Your Strengths
+            จุดแข็งของคุณ
           </h3>
-          <p className="text-slate-500 text-xs">Concepts you have thoroughly understood in this week's assessment:</p>
+          <p className="text-slate-500 text-xs">หัวข้อที่คุณมีความเข้าใจเป็นอย่างดี</p>
           
           <div className="space-y-3">
             {strengths.map((str, idx) => (
@@ -159,7 +159,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
                 <Check className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-bold text-emerald-900">{str}</h4>
-                  <p className="text-emerald-800/80 text-[11px] mt-0.5">Mastered. You demonstrated solid critical reasoning in related questions.</p>
+                  <p className="text-emerald-800/80 text-[11px] mt-0.5">คุณมีความเข้าใจหัวข้อนี้เป็นอย่างดี</p>
                 </div>
               </div>
             ))}
@@ -170,14 +170,14 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0" />
-            Concepts to Improve
+            หัวข้อที่ควรพัฒนา
           </h3>
-          <p className="text-slate-500 text-xs">Areas where you experienced difficulties or held minor misconceptions:</p>
+          <p className="text-slate-500 text-xs">หัวข้อที่ควรทบทวนเพิ่มเติม</p>
 
           <div className="space-y-3">
             {weaknesses.length === 0 ? (
               <div className="p-4 bg-emerald-50 text-emerald-800 text-xs rounded-xl font-medium">
-                No weaknesses detected! You nailed every concept.
+                ยอดเยี่ยม! ไม่พบจุดอ่อนในการทำแบบทดสอบ
               </div>
             ) : (
               weaknesses.map((weak, idx) => (
@@ -185,7 +185,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
                   <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs font-bold text-amber-900">{weak}</h4>
-                    <p className="text-amber-800/80 text-[11px] mt-0.5">Review this concept using the AI Tutor sidebar prompts.</p>
+                    <p className="text-amber-800/80 text-[11px] mt-0.5">แนะนำให้ทบทวนหัวข้อนี้กับผู้ช่วย AI</p>
                   </div>
                 </div>
               ))
@@ -200,10 +200,10 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
         <div className="bg-red-50/60 rounded-2xl p-6 border border-red-200 text-red-900 space-y-3">
           <h4 className="font-display font-bold text-sm flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
-            Alert: Misconceptions Triggered
+            ตรวจพบความเข้าใจที่คลาดเคลื่อน
           </h4>
           <p className="text-xs text-red-800 leading-relaxed">
-            Your choices triggered a common academic misconception. Our system detected that you associate the following:
+          ระบบตรวจพบว่าคุณมีความเข้าใจที่อาจคลาดเคลื่อนในหัวข้อต่อไปนี้
           </p>
           <div className="space-y-2">
             {misconceptionsTriggered.map((mis, idx) => (
@@ -220,7 +220,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-brand-purple shrink-0" />
-          AI Recommendations for Next Action
+          คำแนะนำจาก AI
         </h3>
         
         <div className="space-y-4">

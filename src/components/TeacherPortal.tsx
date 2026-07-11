@@ -91,7 +91,7 @@ export default function TeacherPortal({
 
   const handleGenerate = async () => {
     if (!topicInput.trim()) {
-      setErrorMsg('Please specify a lesson topic or title.');
+      setErrorMsg('กรุณาระบุหัวข้อหรือชื่อบทเรียน');
       return;
     }
     setErrorMsg(null);
@@ -103,17 +103,17 @@ export default function TeacherPortal({
       {/* Intro Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-6">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Weekly Lesson Setup</span>
-          <h1 className="font-display font-bold text-3xl text-slate-900 mt-1">Course Curriculum & Knowledge Sync</h1>
-          <p className="text-slate-500 text-sm mt-1">Configure active lessons, ingest syllabi PDFs, and build localized student study material.</p>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">ตั้งค่าบทเรียนรายสัปดาห์</span>
+          <h1 className="font-display font-bold text-3xl text-slate-900 mt-1">ซิงค์หลักสูตรและฐานความรู้รายวิชา</h1>
+          <p className="text-slate-500 text-sm mt-1">ตั้งค่าบทเรียนที่ใช้งานอยู่ นำเข้าไฟล์ PDF หลักสูตร และสร้างสื่อการเรียนสำหรับนักศึกษา</p>
         </div>
         
         {!apiKeySet && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 max-w-sm flex items-start gap-2.5">
             <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold block mb-0.5">Offline Demonstration Mode</span>
-              Gemini key is missing. Generations use static curricula. Add `GEMINI_API_KEY` in the secrets panel to enable live AI generation.
+              <span className="font-bold block mb-0.5">โหมดสาธิตแบบออฟไลน์</span>
+              ไม่พบคีย์ Gemini การสร้างเนื้อหาจะใช้หลักสูตรแบบคงที่ กรุณาเพิ่ม `GEMINI_API_KEY` ในแผงข้อมูลลับเพื่อเปิดใช้งานการสร้างเนื้อหาด้วย AI แบบสด
             </div>
           </div>
         )}
@@ -128,24 +128,24 @@ export default function TeacherPortal({
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <h2 className="font-display font-bold text-lg text-slate-800 flex items-center gap-2">
               <span className="bg-brand-blue/10 text-brand-blue p-1.5 rounded-lg text-xs">01</span>
-              Define Lesson Topic
+              กำหนดหัวข้อบทเรียน
             </h2>
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-2">Topic or Lecture Title</label>
+              <label className="block text-xs font-bold uppercase text-slate-400 mb-2">หัวข้อหรือชื่อการบรรยาย</label>
               <input
                 type="text"
                 value={topicInput}
                 onChange={(e) => setTopicInput(e.target.value)}
-                placeholder="e.g. Introduction to Database Normalization (1NF, 2NF, 3NF)"
+                placeholder="เช่น บทนำสู่การทำ Database Normalization (1NF, 2NF, 3NF)"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-2">Custom AI Instructions (Optional)</label>
+              <label className="block text-xs font-bold uppercase text-slate-400 mb-2">คำสั่งพิเศษสำหรับ AI (ไม่บังคับ)</label>
               <textarea
                 value={manualPrompt}
                 onChange={(e) => setManualPrompt(e.target.value)}
-                placeholder="e.g. Focus specifically on explaining idempotency. Add a misconception about GET requests having payloads."
+                placeholder="เช่น เน้นอธิบายเรื่อง idempotency โดยเฉพาะ และเพิ่มความเข้าใจผิดเกี่ยวกับการที่คำขอ GET มี payload"
                 rows={3}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm transition resize-none"
               />
@@ -156,7 +156,7 @@ export default function TeacherPortal({
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <h2 className="font-display font-bold text-lg text-slate-800 flex items-center gap-2">
               <span className="bg-brand-blue/10 text-brand-blue p-1.5 rounded-lg text-xs">02</span>
-              Upload Course Materials
+              อัปโหลดสื่อการสอน
             </h2>
             
             {/* Drag Zone */}
@@ -171,8 +171,8 @@ export default function TeacherPortal({
               onClick={() => document.getElementById('file-upload-input')?.click()}
             >
               <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
-              <p className="text-slate-700 text-sm font-semibold">Drag & drop course PDF here, or click to browse</p>
-              <p className="text-slate-400 text-xs mt-1">Supports PDF, TXT, or markdown (Max 10MB)</p>
+              <p className="text-slate-700 text-sm font-semibold">ลากและวางไฟล์ PDF ของรายวิชาที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+              <p className="text-slate-400 text-xs mt-1">รองรับไฟล์ PDF, TXT หรือ markdown (สูงสุด 10MB)</p>
               <input
                 id="file-upload-input"
                 type="file"
@@ -186,7 +186,7 @@ export default function TeacherPortal({
             {/* List of files */}
             {uploadedFiles.length > 0 && (
               <div className="space-y-2 pt-2">
-                <label className="block text-xs font-bold uppercase text-slate-400">Uploaded Course Documents ({uploadedFiles.length})</label>
+                <label className="block text-xs font-bold uppercase text-slate-400">เอกสารรายวิชาที่อัปโหลดแล้ว ({uploadedFiles.length})</label>
                 <div className="max-h-40 overflow-y-auto space-y-1.5 pr-2">
                   {uploadedFiles.map((filename, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
@@ -224,12 +224,12 @@ export default function TeacherPortal({
             {isGenerating ? (
               <>
                 <RefreshCw className="w-5 h-5 animate-spin" />
-                <span>Generating Syllabus and Smart Quiz...</span>
+                <span>กำลังสร้างหลักสูตรและแบบทดสอบอัจฉริยะ...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-5 h-5 text-white/90" />
-                <span>Generate Knowledge Base</span>
+                <span>สร้างฐานความรู้</span>
               </>
             )}
           </button>
@@ -247,17 +247,17 @@ export default function TeacherPortal({
                   <Key className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-slate-800 text-sm">Class Access Code</h3>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Student Gatekeeper</p>
+                  <h3 className="font-display font-bold text-slate-800 text-sm">รหัสเข้าชั้นเรียน</h3>
+                  <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">ด่านตรวจสอบสิทธิ์นักศึกษา</p>
                 </div>
               </div>
               <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/50 uppercase flex items-center gap-1">
-                <Users className="w-3.5 h-3.5" /> Live Sync
+                <Users className="w-3.5 h-3.5" /> ซิงค์แบบสด
               </span>
             </div>
 
             <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4.5 flex flex-col items-center justify-center text-center relative overflow-hidden">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Active Code</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">รหัสที่ใช้งานอยู่</span>
               <div className="flex items-center gap-3">
                 <span className="font-mono font-extrabold text-2xl tracking-widest text-slate-900 bg-white px-4 py-1.5 rounded-xl border border-slate-200/80 shadow-xs">
                   {classCode}
@@ -266,14 +266,14 @@ export default function TeacherPortal({
                 <button
                   onClick={handleCopyCode}
                   className="bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 p-2.5 rounded-xl transition shadow-xs active:scale-95"
-                  title="Copy Class Code to Clipboard"
+                  title="คัดลอกรหัสชั้นเรียนไปยังคลิปบอร์ด"
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
 
               <p className="text-[11px] text-slate-500 mt-3 leading-relaxed">
-                Students will be prompted to enter this code to access your custom syllabus and diagnostic quiz.
+                นักศึกษาจะต้องกรอกรหัสนี้เพื่อเข้าถึงหลักสูตรเฉพาะและแบบทดสอบวินิจฉัยของคุณ
               </p>
             </div>
 
@@ -284,7 +284,7 @@ export default function TeacherPortal({
                     type="text"
                     value={customCode}
                     onChange={(e) => setCustomCode(e.target.value)}
-                    placeholder="Enter Custom Code"
+                    placeholder="กรอกรหัสที่กำหนดเอง"
                     maxLength={12}
                     className="flex-grow px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-800 uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-brand-blue"
                   />
@@ -292,13 +292,13 @@ export default function TeacherPortal({
                     onClick={handleSetCustomCode}
                     className="bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
                   >
-                    Save
+                    บันทึก
                   </button>
                   <button
                     onClick={() => { setIsEditingCode(false); setCustomCode(''); }}
                     className="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-3 py-2 rounded-xl transition"
                   >
-                    Cancel
+                    ยกเลิก
                   </button>
                 </div>
               ) : (
@@ -309,13 +309,13 @@ export default function TeacherPortal({
                     className="flex-grow bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     <Shuffle className="w-3.5 h-3.5 text-slate-300" />
-                    <span>Generate New Code</span>
+                    <span>สร้างรหัสใหม่</span>
                   </button>
                   <button
                     onClick={() => setIsEditingCode(true)}
                     className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold py-2.5 px-3.5 rounded-xl transition shadow-xs"
                   >
-                    Customize
+                    ปรับแต่งเอง
                   </button>
                 </>
               )}
@@ -324,7 +324,7 @@ export default function TeacherPortal({
 
           {/* Status Panel */}
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-6">
-            <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider">Knowledge Base Status</h3>
+            <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider">สถานะฐานความรู้</h3>
             
             <div className="space-y-4">
               
@@ -334,11 +334,11 @@ export default function TeacherPortal({
                   <CheckCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase text-slate-400">Knowledge Base Status</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">สถานะฐานความรู้</div>
                   <div className="text-sm font-bold text-slate-800 mt-0.5">
-                    {isGenerating ? 'AI Syncing...' : 'Ready & Deployed'}
+                    {isGenerating ? 'กำลังซิงค์ AI...' : 'พร้อมใช้งานและเผยแพร่แล้ว'}
                   </div>
-                  <p className="text-slate-500 text-xs mt-0.5">Accessible by registered undergraduate students.</p>
+                  <p className="text-slate-500 text-xs mt-0.5">เข้าถึงได้โดยนักศึกษาระดับปริญญาตรีที่ลงทะเบียนแล้ว</p>
                 </div>
               </div>
 
@@ -348,11 +348,11 @@ export default function TeacherPortal({
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase text-slate-400">Files Uploaded</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">ไฟล์ที่อัปโหลดแล้ว</div>
                   <div className="text-sm font-bold text-slate-800 mt-0.5">
-                    {uploadedFiles.length} Course File(s)
+                    ไฟล์รายวิชา {uploadedFiles.length} ไฟล์
                   </div>
-                  <p className="text-slate-500 text-xs mt-0.5">PDF syllabus and slide documents loaded as source context.</p>
+                  <p className="text-slate-500 text-xs mt-0.5">ไฟล์ PDF หลักสูตรและสไลด์ถูกโหลดเป็นข้อมูลอ้างอิงต้นทาง</p>
                 </div>
               </div>
 
@@ -362,14 +362,14 @@ export default function TeacherPortal({
                   <Sparkles className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase text-slate-400">AI Status</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">สถานะ AI</div>
                   <div className="text-sm font-bold text-slate-800 mt-0.5">
-                    {isGenerating ? 'Active Generation' : 'Syllabus Synthesized'}
+                    {isGenerating ? 'กำลังสร้างเนื้อหา' : 'สังเคราะห์หลักสูตรแล้ว'}
                   </div>
                   <p className="text-slate-500 text-xs mt-0.5">
                     {isGenerating 
-                      ? 'Rebuilding student study summary and practice testing parameters...'
-                      : 'Equipped to resolve student Q&A and formulate dynamic tutoring responses.'
+                      ? 'กำลังสร้างสรุปการเรียนและพารามิเตอร์แบบทดสอบใหม่...'
+                      : 'พร้อมตอบคำถามของนักศึกษาและสร้างคำตอบติวเข้มแบบไดนามิก'
                     }
                   </p>
                 </div>
@@ -384,13 +384,13 @@ export default function TeacherPortal({
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-blue/20 blur-2xl rounded-full" />
 
             <div className="relative space-y-3">
-              <span className="bg-white/10 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Active Lecture</span>
+              <span className="bg-white/10 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">การบรรยายที่กำลังใช้งาน</span>
               <h4 className="font-display font-bold text-xl leading-tight text-white">{lesson.topic}</h4>
               <p className="text-slate-300 text-xs leading-relaxed">{lesson.summary}</p>
               
               <div className="border-t border-white/10 pt-3 flex items-center justify-between text-xs text-slate-400">
-                <span>Learning Outcomes: {lesson.learningOutcomes.length}</span>
-                <span>Concepts mapped: {lesson.keyConcepts.length}</span>
+                <span>ผลลัพธ์การเรียนรู้: {lesson.learningOutcomes.length}</span>
+                <span>แนวคิดที่จับคู่แล้ว: {lesson.keyConcepts.length}</span>
               </div>
             </div>
           </div>
@@ -412,7 +412,7 @@ export default function TeacherPortal({
             <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
               <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Learning Outcomes
+                ผลลัพธ์การเรียนรู้
               </h3>
               <ul className="space-y-3">
                 {lesson.learningOutcomes.map((outcome, i) => (
@@ -428,7 +428,7 @@ export default function TeacherPortal({
             <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
               <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-brand-purple" />
-                Key Concepts
+                แนวคิดสำคัญ
               </h3>
               <div className="space-y-4">
                 {lesson.keyConcepts.map((concept, i) => (
@@ -444,7 +444,7 @@ export default function TeacherPortal({
             <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
               <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-orange-500" />
-                Common Misconceptions
+                ความเข้าใจผิดที่พบบ่อย
               </h3>
               <div className="space-y-4">
                 {lesson.commonMisconceptions.map((mis, i) => (

@@ -21,9 +21,9 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm text-center py-16 space-y-4" id="quiz-page">
         <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
-        <h3 className="font-display font-bold text-xl text-slate-800">No active quiz questions generated</h3>
+        <h3 className="font-display font-bold text-xl text-slate-800">ยังไม่มีการสร้างคำถามแบบทดสอบ</h3>
         <p className="text-slate-500 text-sm max-w-sm mx-auto">
-          Please ask the instructor to upload a syllabus PDF or enter a custom topic inside the Weekly Lesson Setup to generate interactive testing parameters.
+          กรุณาแจ้งให้ผู้สอนอัปโหลดไฟล์ PDF หลักสูตร หรือกรอกหัวข้อที่ต้องการในส่วนตั้งค่าบทเรียนรายสัปดาห์ เพื่อสร้างแบบทดสอบเชิงโต้ตอบ
         </p>
       </div>
     );
@@ -57,7 +57,7 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
   const handleSubmit = async () => {
     // Validate if all questions are answered
     if (answeredCount < totalQuestions) {
-      setErrorMsg(`You have answered ${answeredCount} of ${totalQuestions} questions. Please provide answers for all questions before submitting.`);
+      setErrorMsg(`คุณตอบไปแล้ว ${answeredCount} จาก ${totalQuestions} ข้อ กรุณาตอบให้ครบทุกข้อก่อนส่งแบบทดสอบ`);
       return;
     }
     setErrorMsg(null);
@@ -72,9 +72,9 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
         <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
           <div className="flex items-center gap-1.5">
             <Compass className="w-4 h-4 text-brand-blue" />
-            <span>Syllabus Diagnostic Test</span>
+            <span>แบบทดสอบวินิจฉัยตามหลักสูตร</span>
           </div>
-          <span>{answeredCount} of {totalQuestions} answered</span>
+          <span>ตอบแล้ว {answeredCount} จาก {totalQuestions} ข้อ</span>
         </div>
 
         {/* Question Nodes indicators */}
@@ -93,7 +93,7 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
                       ? 'bg-emerald-400' 
                       : 'bg-slate-100'
                 }`}
-                title={`Go to Question ${idx + 1}`}
+                title={`ไปที่คำถามข้อที่ ${idx + 1}`}
               />
             );
           })}
@@ -113,10 +113,10 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
           {/* Question Tag */}
           <div className="flex justify-between items-center border-b border-slate-50 pb-4">
             <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Question {currentIndex + 1} of {totalQuestions}
+              คำถามข้อที่ {currentIndex + 1} จาก {totalQuestions}
             </span>
             <span className="bg-slate-50 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-100">
-              Concept: {currentQuestion.conceptMatched}
+              แนวคิด: {currentQuestion.conceptMatched}
             </span>
           </div>
 
@@ -180,7 +180,7 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
             className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-800 disabled:opacity-40 disabled:pointer-events-none transition bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Previous</span>
+            <span>ก่อนหน้า</span>
           </button>
 
           {currentIndex === totalQuestions - 1 ? (
@@ -193,12 +193,12 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
               {isSubmitting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Submitting Diagnostics...</span>
+                  <span>กำลังส่งผลการวินิจฉัย...</span>
                 </>
               ) : (
                 <>
                   <Award className="w-4 h-4" />
-                  <span>Submit Quiz</span>
+                  <span>ส่งแบบทดสอบ</span>
                 </>
               )}
             </button>
@@ -207,7 +207,7 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
               onClick={handleNext}
               className="flex items-center gap-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition rounded-xl px-5 py-2.5 shadow-md"
             >
-              <span>Next</span>
+              <span>ถัดไป</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           )}

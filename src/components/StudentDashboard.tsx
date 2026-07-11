@@ -26,13 +26,13 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-blue/5 to-brand-purple/5 blur-3xl rounded-full -z-10" />
         <div className="space-y-2 max-w-xl">
           <div className="inline-flex items-center gap-1 bg-blue-50 text-brand-blue px-2.5 py-1 rounded-full text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" /> University Student Portal
+            <Sparkles className="w-3.5 h-3.5" /> พอร์ทัลนักศึกษามหาวิทยาลัย
           </div>
           <h1 className="font-display font-bold text-3xl text-slate-900">
-            Welcome back to your Study Companion
+            ยินดีต้อนรับกลับสู่ผู้ช่วยการเรียนของคุณ
           </h1>
           <p className="text-slate-500 text-sm leading-relaxed">
-            Your instructor has loaded this week's custom knowledge base. Ask questions, take personalized tests, and clarify misconceptions with instant feedback.
+            ผู้สอนของคุณได้โหลดฐานความรู้เฉพาะของสัปดาห์นี้แล้ว ถามคำถาม ทำแบบทดสอบเฉพาะบุคคล และแก้ไขความเข้าใจผิดด้วยผลตอบรับทันที
           </p>
         </div>
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 shrink-0 flex items-center gap-4">
@@ -40,8 +40,8 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
             A+
           </div>
           <div>
-            <div className="text-xs text-slate-400 font-bold uppercase">Today's Progress</div>
-            <div className="text-lg font-bold text-slate-800">{progressPercent}% Completed</div>
+            <div className="text-xs text-slate-400 font-bold uppercase">ความคืบหน้าวันนี้</div>
+            <div className="text-lg font-bold text-slate-800">เสร็จสมบูรณ์ {progressPercent}%</div>
           </div>
         </div>
       </div>
@@ -52,15 +52,15 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
         {/* Lesson Overview */}
         <div className="md:col-span-8 bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Today's Lecture Focus</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">จุดเน้นการบรรยายวันนี้</span>
             <h2 className="font-display font-bold text-2xl text-slate-900">{lesson.topic}</h2>
             <p className="text-slate-600 text-sm leading-relaxed">{lesson.summary}</p>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-              <span>Learning Objective Target</span>
-              <span>{progressPercent}% Mastery</span>
+              <span>เป้าหมายผลลัพธ์การเรียนรู้</span>
+              <span>เชี่ยวชาญ {progressPercent}%</span>
             </div>
             {/* Progress Bar */}
             <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
@@ -73,7 +73,7 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
 
           {/* Quick learning outcomes list */}
           <div className="pt-4 border-t border-slate-100 space-y-3">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Key Learning outcomes</h3>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">ผลลัพธ์การเรียนรู้ที่สำคัญ</h3>
             <div className="grid sm:grid-cols-2 gap-3">
               {lesson.learningOutcomes.slice(0, 4).map((outcome, idx) => (
                 <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
@@ -90,10 +90,10 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/20 blur-2xl rounded-full" />
           
           <div className="space-y-4 relative">
-            <span className="bg-white/10 text-slate-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Syllabus Quiz</span>
-            <h3 className="font-display font-bold text-xl leading-snug">Test Your Knowledge</h3>
+            <span className="bg-white/10 text-slate-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">แบบทดสอบตามหลักสูตร</span>
+            <h3 className="font-display font-bold text-xl leading-snug">ทดสอบความรู้ของคุณ</h3>
             <p className="text-slate-300 text-xs leading-relaxed">
-              Take the AI-generated quiz to measure your understanding. Your scores automatically update the class dashboard.
+              ทำแบบทดสอบที่สร้างโดย AI เพื่อวัดความเข้าใจของคุณ คะแนนของคุณจะอัปเดตแดชบอร์ดของชั้นเรียนโดยอัตโนมัติ
             </p>
           </div>
 
@@ -101,14 +101,14 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
             {quizAttempt ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Previous Score</span>
+                  <span className="text-slate-400">คะแนนครั้งก่อน</span>
                   <span className={`font-bold ${quizScore >= 75 ? 'text-emerald-400' : 'text-amber-400'}`}>{quizScore}%</span>
                 </div>
                 <button
                   onClick={() => onNavigate('feedback')}
                   className="w-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
                 >
-                  <span>View Breakdown Feedback</span>
+                  <span>ดูรายละเอียดผลตอบรับ</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -118,7 +118,7 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
                 id="start-practice-quiz-btn"
                 className="w-full bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
               >
-                <span>Start Practice Quiz</span>
+                <span>เริ่มทำแบบทดสอบฝึกหัด</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -129,7 +129,7 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
 
       {/* Three Large Action Cards */}
       <div>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Study Tools</h3>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">เครื่องมือการเรียน</h3>
         <div className="grid md:grid-cols-3 gap-6">
           
           {/* Action Card: Ask AI */}
@@ -141,13 +141,13 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
               <div className="bg-brand-blue/10 text-brand-blue w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition">
                 <MessageSquare className="w-5 h-5" />
               </div>
-              <h4 className="font-display font-bold text-base text-slate-800">Ask AI Companion</h4>
+              <h4 className="font-display font-bold text-base text-slate-800">ถามผู้ช่วย AI</h4>
               <p className="text-slate-500 text-xs leading-relaxed">
-                Clear up doubts, ask for dynamic analogies, and simplify hard terms.
+                ไขข้อสงสัย ขอตัวอย่างเปรียบเทียบ และทำความเข้าใจศัพท์ยากให้ง่ายขึ้น
               </p>
             </div>
             <div className="text-xs font-bold text-brand-blue flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              <span>Start Conversation</span>
+              <span>เริ่มการสนทนา</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -161,13 +161,13 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
               <div className="bg-emerald-50 text-emerald-600 w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition">
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <h4 className="font-display font-bold text-base text-slate-800">Practice Quiz</h4>
+              <h4 className="font-display font-bold text-base text-slate-800">แบบทดสอบฝึกหัด</h4>
               <p className="text-slate-500 text-xs leading-relaxed">
-                Take an interactive syllabus testing block to track misconceptions.
+                ทำแบบทดสอบเชิงโต้ตอบตามหลักสูตรเพื่อติดตามความเข้าใจผิด
               </p>
             </div>
             <div className="text-xs font-bold text-brand-blue flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              <span>{quizAttempt ? 'Retake Quiz' : 'Take Practice Quiz'}</span>
+              <span>{quizAttempt ? 'ทำแบบทดสอบอีกครั้ง' : 'ทำแบบทดสอบฝึกหัด'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -181,13 +181,13 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
               <div className="bg-purple-50 text-brand-purple w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-brand-purple group-hover:text-white transition">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <h4 className="font-display font-bold text-base text-slate-800">Review Summary</h4>
+              <h4 className="font-display font-bold text-base text-slate-800">สรุปทบทวน</h4>
               <p className="text-slate-500 text-xs leading-relaxed">
-                Read a consolidated overview of main course topics generated from the syllabus PDF.
+                อ่านภาพรวมสรุปหัวข้อหลักของรายวิชาที่สร้างจากไฟล์ PDF หลักสูตร
               </p>
             </div>
             <div className="text-xs font-bold text-brand-blue flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              <span>Generate Summary</span>
+              <span>สร้างสรุป</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -199,12 +199,12 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
           <Clock className="w-4 h-4 text-slate-400" />
-          Recent Activity
+          กิจกรรมล่าสุด
         </h3>
         
         <div className="space-y-3.5">
           {recentActivity.length === 0 ? (
-            <p className="text-slate-400 text-xs">No recent study sessions. Click "Start Practice Quiz" to begin!</p>
+            <p className="text-slate-400 text-xs">ยังไม่มีกิจกรรมการเรียนล่าสุด คลิก "เริ่มทำแบบทดสอบฝึกหัด" เพื่อเริ่มต้น!</p>
           ) : (
             recentActivity.map((activity, index) => (
               <div key={index} className="flex items-center gap-3 text-xs text-slate-600 border-b border-slate-50 pb-3 last:border-b-0 last:pb-0">

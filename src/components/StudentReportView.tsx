@@ -57,40 +57,40 @@ export default function StudentReportView({ student, onBack }: StudentReportView
   }, [student.id]);
   
   // Custom mock data to enrich the Individual Student Report with realistic details
-  const overallStatus = student.quizScore >= 90 ? 'Excellent Mastery' : student.quizScore >= 75 ? 'Consistent Progress' : 'Needs Intervention';
+  const overallStatus = student.quizScore >= 90 ? 'เชี่ยวชาญยอดเยี่ยม' : student.quizScore >= 75 ? 'ความก้าวหน้าสม่ำเสมอ' : 'ต้องการความช่วยเหลือ';
   const overallStatusColor = student.quizScore >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : student.quizScore >= 75 ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-rose-700 bg-rose-50 border-rose-200';
 
   // Academic activity timeline representation
   const timelineActivities = [
     {
-      time: 'Today, 08:30 AM',
+      time: 'วันนี้ 08:30 น.',
       type: 'quiz',
-      title: 'Completed Web Concepts Assessment',
-      desc: `Scored ${student.quizScore}% on final attempts. Recorded core competencies.`,
+      title: 'ทำแบบประเมินแนวคิดเว็บเสร็จสิ้น',
+      desc: `ได้คะแนน ${student.quizScore}% ในความพยายามครั้งสุดท้าย บันทึกความสามารถหลักแล้ว`,
       icon: Award,
       color: 'bg-blue-50 text-brand-blue border-blue-100'
     },
     {
-      time: 'Yesterday, 04:15 PM',
+      time: 'เมื่อวาน 16:15 น.',
       type: 'chat',
-      title: 'Consulted AI Learning Companion',
-      desc: 'Asked 3 clarifying questions regarding REST design patterns and cookie statelessness.',
+      title: 'ปรึกษาผู้ช่วยการเรียนรู้ AI',
+      desc: 'ถามคำถามเพื่อความกระจ่าง 3 ข้อ เกี่ยวกับรูปแบบการออกแบบ REST และความไร้สถานะของคุกกี้',
       icon: MessageSquare,
       color: 'bg-purple-50 text-brand-purple border-purple-100'
     },
     {
-      time: '2 days ago, 11:10 AM',
+      time: '2 วันที่แล้ว 11:10 น.',
       type: 'study',
-      title: 'Reviewed Syllabus Lecture Notes',
-      desc: 'Downloaded active lesson slides and code reference sheets.',
+      title: 'ทบทวนสรุปการบรรยายตามหลักสูตร',
+      desc: 'ดาวน์โหลดสไลด์บทเรียนปัจจุบันและเอกสารอ้างอิงโค้ด',
       icon: BookOpen,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-100'
     },
     {
-      time: '3 days ago, 02:40 PM',
+      time: '3 วันที่แล้ว 14:40 น.',
       type: 'system',
-      title: 'Registered to the Class',
-      desc: 'Synchronized with Active Course Group.',
+      title: 'ลงทะเบียนเข้าชั้นเรียน',
+      desc: 'ซิงค์ข้อมูลกับกลุ่มรายวิชาที่กำลังศึกษาแล้ว',
       icon: CheckCircle2,
       color: 'bg-slate-50 text-slate-500 border-slate-200'
     }
@@ -99,44 +99,44 @@ export default function StudentReportView({ student, onBack }: StudentReportView
   // Specific Student FAQs asked or flagged
   const studentFAQs = [
     {
-      q: 'Why are standard GET routes considered safe if query params can be logged?',
-      a: 'GET requests are "safe" in an HTTP context because they do not modify backend server state. Transport-layer visibility is a separate network security scope solved by TLS/HTTPS, not route semantics.'
+      q: 'ทำไมเส้นทาง GET มาตรฐานจึงถูกมองว่าปลอดภัย ทั้งที่พารามิเตอร์ query อาจถูกบันทึกล็อกได้?',
+      a: 'คำขอ GET ถือว่า "ปลอดภัย" ในบริบทของ HTTP เพราะไม่เปลี่ยนแปลงสถานะของเซิร์ฟเวอร์ฝั่งหลังบ้าน ส่วนการมองเห็นข้อมูลในชั้นการขนส่งเป็นเรื่องความปลอดภัยเครือข่ายอีกส่วนหนึ่งที่แก้ไขด้วย TLS/HTTPS ไม่ใช่ความหมายของเส้นทาง'
     },
     {
-      q: 'How does JWT avoid storing session records in the database?',
-      a: 'JWT is self-contained. The client holds the signature-verified state. The server only validates the cryptographic signature upon reception without database read operations.'
+      q: 'JWT หลีกเลี่ยงการเก็บบันทึกเซสชันในฐานข้อมูลได้อย่างไร?',
+      a: 'JWT เป็นแบบครบในตัวเอง (self-contained) ฝั่งไคลเอนต์เป็นผู้เก็บสถานะที่ผ่านการยืนยันลายเซ็นแล้ว เซิร์ฟเวอร์เพียงตรวจสอบลายเซ็นเชิงเข้ารหัสเมื่อได้รับข้อมูล โดยไม่ต้องอ่านข้อมูลจากฐานข้อมูล'
     }
   ];
 
   // Learning Path Steps
   const learningPathSteps = [
     {
-      title: 'Fortify Core REST Semantics',
+      title: 'เสริมความแข็งแกร่งความหมายหลักของ REST',
       status: 'completed',
-      desc: 'Understand HTTP response statuses and stateless REST APIs.'
+      desc: 'ทำความเข้าใจสถานะการตอบกลับของ HTTP และ REST API แบบไร้สถานะ'
     },
     {
-      title: 'Secure Header Configuration',
+      title: 'การตั้งค่าเฮดเดอร์ที่ปลอดภัย',
       status: student.quizScore >= 75 ? 'completed' : 'active',
-      desc: 'Verify CORS, origin policies, and standard HTTPS handshakes.'
+      desc: 'ตรวจสอบ CORS นโยบายแหล่งที่มา และการจับมือ HTTPS มาตรฐาน'
     },
     {
-      title: 'Enterprise Idempotency Guardrails',
+      title: 'มาตรการป้องกัน Idempotency ระดับองค์กร',
       status: student.quizScore >= 90 ? 'completed' : 'active',
-      desc: 'Configure PUT vs POST database mutation protocols to block duplicate records.'
+      desc: 'กำหนดค่าโปรโตคอลการเปลี่ยนแปลงข้อมูลระหว่าง PUT กับ POST เพื่อป้องกันข้อมูลซ้ำซ้อน'
     },
     {
-      title: 'Next Gen Federated API Design',
+      title: 'การออกแบบ Federated API ยุคถัดไป',
       status: 'locked',
-      desc: 'Implement highly scalable GraphQL resolvers and subscription systems.'
+      desc: 'พัฒนา GraphQL resolver และระบบ subscription ที่รองรับการขยายตัวสูง'
     }
   ];
 
   // Quiz history trend data
   const quizHistory = [
-    { attempt: 'Mock Unit 1', score: 60, progress: 40 },
-    { attempt: 'Practice Run 2', score: Math.round(student.quizScore * 0.85), progress: 65 },
-    { attempt: 'Diagnostic Quiz', score: student.quizScore, progress: student.learningProgress }
+    { attempt: 'แบบทดสอบจำลอง หน่วยที่ 1', score: 60, progress: 40 },
+    { attempt: 'ฝึกทำครั้งที่ 2', score: Math.round(student.quizScore * 0.85), progress: 65 },
+    { attempt: 'แบบทดสอบวินิจฉัย', score: student.quizScore, progress: student.learningProgress }
   ];
 
   return (
@@ -148,13 +148,13 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           <button
             onClick={onBack}
             className="flex items-center justify-center bg-white hover:bg-slate-100 border border-slate-200 p-2.5 rounded-2xl transition shadow-xs active:scale-95"
-            title="Return to Student list"
+            title="กลับไปยังรายชื่อนักศึกษา"
           >
             <ArrowLeft className="w-4 h-4 text-slate-600" />
           </button>
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Student Profile Report</span>
-            <h1 className="font-display font-bold text-2xl text-slate-900 mt-1">Individual Diagnostics</h1>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">รายงานโปรไฟล์นักศึกษา</span>
+            <h1 className="font-display font-bold text-2xl text-slate-900 mt-1">การวินิจฉัยรายบุคคล</h1>
           </div>
         </div>
 
@@ -164,7 +164,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
             <span>{overallStatus}</span>
           </span>
           <span className="text-slate-300">|</span>
-          <span className="text-slate-400 text-xs font-semibold">Active Unit Sync</span>
+          <span className="text-slate-400 text-xs font-semibold">ซิงค์หน่วยเรียนที่ใช้งานอยู่</span>
         </div>
       </div>
 
@@ -181,23 +181,23 @@ export default function StudentReportView({ student, onBack }: StudentReportView
             
             <div>
               <h2 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">{student.name}</h2>
-              <p className="text-slate-500 text-xs font-mono mt-1">Student Identifier: {student.id}</p>
+              <p className="text-slate-500 text-xs font-mono mt-1">รหัสประจำตัวนักศึกษา: {student.id}</p>
             </div>
           </div>
 
           <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600 font-medium">
             <div className="flex justify-between">
-              <span className="text-slate-400 font-bold uppercase text-[10px]">Academic Status</span>
-              <span className="text-slate-800 font-bold">Undergraduate Student</span>
+              <span className="text-slate-400 font-bold uppercase text-[10px]">สถานะทางวิชาการ</span>
+              <span className="text-slate-800 font-bold">นักศึกษาระดับปริญญาตรี</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400 font-bold uppercase text-[10px]">Engagement Streak</span>
+              <span className="text-slate-400 font-bold uppercase text-[10px]">สถิติการมีส่วนร่วมต่อเนื่อง</span>
               <span className="text-amber-600 font-bold flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> 5 Days
+                <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> 5 วัน
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400 font-bold uppercase text-[10px]">Last Sync</span>
+              <span className="text-slate-400 font-bold uppercase text-[10px]">ซิงค์ล่าสุด</span>
               <span className="text-slate-800">{student.lastActivity}</span>
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               <div className="bg-brand-purple/10 text-brand-purple p-1.5 rounded-lg">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <h3 className="font-display font-bold text-slate-800 text-sm">Instructor Copilot Report Summary</h3>
+              <h3 className="font-display font-bold text-slate-800 text-sm">สรุปรายงานจากผู้ช่วยอาจารย์ (AI)</h3>
             </div>
             
             <p className="text-slate-700 text-xs leading-relaxed font-semibold">
@@ -219,10 +219,10 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           </div>
 
           <div className="bg-white border border-slate-200/60 p-4 rounded-xl space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Recommended Syllabus Path</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">เส้นทางหลักสูตรที่แนะนำ</span>
             <div className="text-xs font-semibold text-slate-700 flex items-center gap-2">
               <Milestone className="w-4 h-4 text-brand-blue" />
-              <span>Prioritize: <strong className="text-slate-900">{student.recommendedTopics[0]}</strong></span>
+              <span>ให้ความสำคัญก่อน: <strong className="text-slate-900">{student.recommendedTopics[0]}</strong></span>
             </div>
           </div>
         </div>
@@ -240,9 +240,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
             </div>
             <div>
               <h3 className="font-display font-extrabold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
-                Personalized AI Learning Insight & Advisor
+                ข้อมูลเชิงลึกและคำแนะนำการเรียนรู้เฉพาะบุคคลจาก AI
               </h3>
-              <p className="text-xs text-slate-500 mt-1">Real-time deep cognitive evaluation powered by Google Gemini API.</p>
+              <p className="text-xs text-slate-500 mt-1">การประเมินเชิงลึกแบบเรียลไทม์ ขับเคลื่อนโดย Google Gemini API</p>
             </div>
           </div>
 
@@ -250,10 +250,10 @@ export default function StudentReportView({ student, onBack }: StudentReportView
             onClick={fetchInsight}
             disabled={loading}
             className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-brand-purple/40 transition duration-150 active:scale-95 disabled:opacity-50"
-            title="Refresh Diagnostic Analysis"
+            title="รีเฟรชการวิเคราะห์การวินิจฉัย"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-brand-purple ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Analyzing...' : 'Recalculate'}</span>
+            <span>{loading ? 'กำลังวิเคราะห์...' : 'คำนวณใหม่'}</span>
           </button>
         </div>
 
@@ -263,20 +263,20 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               <div className="absolute inset-0 rounded-full border-4 border-brand-purple/25 animate-ping" />
               <div className="absolute inset-0 rounded-full border-4 border-t-brand-purple border-r-transparent border-b-transparent border-l-transparent animate-spin" />
             </div>
-            <span className="text-xs font-semibold text-slate-500 animate-pulse">Synthesizing learning history with Gemini model...</span>
+            <span className="text-xs font-semibold text-slate-500 animate-pulse">กำลังประมวลผลประวัติการเรียนรู้ร่วมกับโมเดล Gemini...</span>
           </div>
         ) : error ? (
           <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-xs text-rose-700 relative z-10">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div>
-              <p className="font-bold">Error compiling report</p>
+              <p className="font-bold">เกิดข้อผิดพลาดในการรวบรวมรายงาน</p>
               <p className="mt-0.5">{error}</p>
             </div>
             <button 
               onClick={fetchInsight}
               className="ml-auto bg-rose-100 hover:bg-rose-200 px-3 py-1.5 rounded-xl font-bold transition"
             >
-              Retry
+              ลองใหม่
             </button>
           </div>
         ) : insight ? (
@@ -287,7 +287,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               {/* Current Understanding Level */}
               <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-2.5 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Brain className="w-3.5 h-3.5 text-brand-purple" /> Understanding Level
+                  <Brain className="w-3.5 h-3.5 text-brand-purple" /> ระดับความเข้าใจ
                 </span>
                 <p className="text-slate-800 text-xs font-semibold leading-relaxed">
                   {insight.understandingLevel}
@@ -297,7 +297,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               {/* Main Misconceptions */}
               <div className="bg-amber-50/45 border border-amber-100 p-5 rounded-2xl space-y-3 shadow-xs">
                 <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> Key Misconceptions
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> ความเข้าใจผิดสำคัญ
                 </span>
                 <ul className="space-y-2">
                   {insight.misconceptions && insight.misconceptions.map((mis, index) => (
@@ -315,7 +315,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               {/* Learning Strengths */}
               <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-3 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Core Learning Strengths
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> จุดแข็งหลักในการเรียนรู้
                 </span>
                 <ul className="space-y-2.5">
                   {insight.strengths && insight.strengths.map((st, index) => (
@@ -332,7 +332,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               {/* Learning Weaknesses */}
               <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-3 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-rose-500" /> Focus Learning Gaps
+                  <Target className="w-3.5 h-3.5 text-rose-500" /> ช่องว่างการเรียนรู้ที่ควรเน้น
                 </span>
                 <ul className="space-y-2.5">
                   {insight.weaknesses && insight.weaknesses.map((wk, index) => (
@@ -352,7 +352,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               {/* Personalized Recommendations */}
               <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-3 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Lightbulb className="w-3.5 h-3.5 text-brand-blue" /> Actionable Tips
+                  <Lightbulb className="w-3.5 h-3.5 text-brand-blue" /> คำแนะนำที่นำไปปฏิบัติได้
                 </span>
                 <ul className="space-y-3">
                   {insight.recommendations && insight.recommendations.map((rec, index) => (
@@ -370,7 +370,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               <div className="bg-purple-950 text-purple-100 p-5 rounded-2xl space-y-3 shadow-md relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-brand-purple/20 blur-xl rounded-full" />
                 <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-brand-purple" /> Suggested Next Activities
+                  <Compass className="w-3.5 h-3.5 text-brand-purple" /> กิจกรรมถัดไปที่แนะนำ
                 </span>
                 <ul className="space-y-3">
                   {insight.nextActivities && insight.nextActivities.map((act, index) => (
@@ -397,9 +397,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           <div className="flex items-center justify-between">
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <Target className="w-4 h-4 text-slate-400" />
-              Learning Outcome Achievement
+              ผลสัมฤทธิ์ตามผลลัพธ์การเรียนรู้
             </h3>
-            <span className="text-[10px] text-slate-400 font-bold">4 Active Objectives</span>
+            <span className="text-[10px] text-slate-400 font-bold">เป้าหมาย 4 ข้อที่ใช้งานอยู่</span>
           </div>
 
           <div className="w-full h-64 text-xs font-semibold">
@@ -426,9 +426,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           <div>
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-slate-400" />
-              Progress & Quiz History Trend
+              แนวโน้มความคืบหน้าและประวัติแบบทดสอบ
             </h3>
-            <p className="text-slate-500 text-[11px] mt-1">Comparing quiz scoring and curriculum completeness over time.</p>
+            <p className="text-slate-500 text-[11px] mt-1">เปรียบเทียบคะแนนแบบทดสอบและความสมบูรณ์ของหลักสูตรตามช่วงเวลา</p>
           </div>
 
           <div className="w-full h-48 text-xs font-semibold">
@@ -448,15 +448,15 @@ export default function StudentReportView({ student, onBack }: StudentReportView
                 <XAxis dataKey="attempt" tick={{ fill: '#64748b' }} tickLine={false} />
                 <YAxis tick={{ fill: '#64748b' }} tickLine={false} />
                 <Tooltip />
-                <Area type="monotone" name="Quiz Score" dataKey="score" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorScore)" />
-                <Area type="monotone" name="Completeness" dataKey="progress" stroke="#a855f7" strokeWidth={2.5} fillOpacity={1} fill="url(#colorProgress)" />
+                <Area type="monotone" name="คะแนนแบบทดสอบ" dataKey="score" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorScore)" />
+                <Area type="monotone" name="ความสมบูรณ์" dataKey="progress" stroke="#a855f7" strokeWidth={2.5} fillOpacity={1} fill="url(#colorProgress)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           <div className="flex gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-t border-slate-50 pt-3">
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-blue-500 rounded-full inline-block" /> Quiz Score</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-purple-500 rounded-full inline-block" /> Completeness</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-blue-500 rounded-full inline-block" /> คะแนนแบบทดสอบ</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-purple-500 rounded-full inline-block" /> ความสมบูรณ์</span>
           </div>
         </div>
 
@@ -469,9 +469,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            Verified Strengths
+            จุดแข็งที่ยืนยันแล้ว
           </h3>
-          <p className="text-slate-500 text-xs">Concepts fully mastered based on active assessment results:</p>
+          <p className="text-slate-500 text-xs">แนวคิดที่เชี่ยวชาญอย่างสมบูรณ์ตามผลการประเมินล่าสุด:</p>
           
           <div className="space-y-3">
             {student.strengths.map((str, idx) => (
@@ -479,7 +479,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
                 <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-bold text-emerald-900">{str}</h4>
-                  <p className="text-emerald-800/80 text-[10px] mt-0.5">High comprehension index. No correction required.</p>
+                  <p className="text-emerald-800/80 text-[10px] mt-0.5">ดัชนีความเข้าใจสูง ไม่จำเป็นต้องแก้ไข</p>
                 </div>
               </div>
             ))}
@@ -490,14 +490,14 @@ export default function StudentReportView({ student, onBack }: StudentReportView
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
-            Knowledge Gaps
+            ช่องว่างความรู้
           </h3>
-          <p className="text-slate-500 text-xs">Concepts needing active review or targeted teacher intervention:</p>
+          <p className="text-slate-500 text-xs">แนวคิดที่ต้องทบทวนอย่างจริงจังหรือต้องการความช่วยเหลือเฉพาะจากผู้สอน:</p>
 
           <div className="space-y-3">
             {student.weaknesses[0] === "None" || student.weaknesses.length === 0 ? (
               <div className="p-4 bg-emerald-50 text-emerald-800 text-xs rounded-xl font-medium border border-emerald-100">
-                Excellent. No remaining knowledge gaps detected.
+                ยอดเยี่ยม ไม่พบช่องว่างความรู้ที่เหลืออยู่
               </div>
             ) : (
               student.weaknesses.map((weak, idx) => (
@@ -505,7 +505,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
                   <AlertCircle className="w-4.5 h-4.5 text-rose-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs font-bold text-rose-900">{weak}</h4>
-                    <p className="text-rose-800/80 text-[10px] mt-0.5">Recommended focus area for this student's learning module.</p>
+                    <p className="text-rose-800/80 text-[10px] mt-0.5">พื้นที่ที่แนะนำให้เน้นสำหรับโมดูลการเรียนรู้ของนักศึกษาคนนี้</p>
                   </div>
                 </div>
               ))
@@ -517,14 +517,14 @@ export default function StudentReportView({ student, onBack }: StudentReportView
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-amber-500 shrink-0" />
-            Misconceptions Triggered
+            ความเข้าใจผิดที่พบ
           </h3>
-          <p className="text-slate-500 text-xs">Common misconceptions flagged by diagnostic choices:</p>
+          <p className="text-slate-500 text-xs">ความเข้าใจผิดที่พบบ่อยซึ่งถูกระบุจากตัวเลือกในการวินิจฉัย:</p>
 
           <div className="space-y-3">
             {student.commonMisconceptions[0] === "None" || student.commonMisconceptions.length === 0 ? (
               <div className="p-4 bg-slate-50 text-slate-500 text-xs rounded-xl font-medium border border-slate-100">
-                All clear. Student has not triggered standard misconceptions.
+                ไม่พบปัญหา นักศึกษาไม่มีความเข้าใจผิดมาตรฐานที่ถูกระบุ
               </div>
             ) : (
               student.commonMisconceptions.map((mis, idx) => (
@@ -532,7 +532,7 @@ export default function StudentReportView({ student, onBack }: StudentReportView
                   <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs font-bold text-amber-900">{mis}</h4>
-                    <p className="text-amber-800/80 text-[10px] mt-0.5">Review dynamic feedback during lecture discussions.</p>
+                    <p className="text-amber-800/80 text-[10px] mt-0.5">ทบทวนผลตอบรับแบบไดนามิกระหว่างการอภิปรายในชั้นเรียน</p>
                   </div>
                 </div>
               ))
@@ -546,9 +546,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-brand-purple shrink-0" />
-          Flagged Dynamic Chat Queries
+          คำถามจากแชทที่ถูกบันทึกไว้
         </h3>
-        <p className="text-slate-500 text-xs">Questions this student submitted to the AI Study Assistant for conceptual clarity:</p>
+        <p className="text-slate-500 text-xs">คำถามที่นักศึกษาคนนี้ส่งให้ผู้ช่วยการเรียน AI เพื่อความกระจ่างในเชิงแนวคิด:</p>
 
         <div className="grid md:grid-cols-2 gap-6 pt-2">
           {studentFAQs.map((faq, idx) => (
@@ -573,9 +573,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
         <div className="md:col-span-8 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <Milestone className="w-5 h-5 text-brand-blue shrink-0" />
-            Recommended Adaptive Learning Path
+            เส้นทางการเรียนรู้แบบปรับตามผู้เรียนที่แนะนำ
           </h3>
-          <p className="text-slate-500 text-xs">AI-plotted milestone steps dynamically configured based on individual gaps:</p>
+          <p className="text-slate-500 text-xs">ขั้นตอนสำคัญที่ AI วางแผนไว้ ปรับเปลี่ยนตามช่องว่างของแต่ละบุคคล:</p>
 
           <div className="space-y-4 pt-2">
             {learningPathSteps.map((step, idx) => {
@@ -584,16 +584,16 @@ export default function StudentReportView({ student, onBack }: StudentReportView
               
               let borderClass = 'border-slate-100 bg-white';
               let badgeClass = 'bg-slate-100 text-slate-400';
-              let badgeText = 'Locked';
+              let badgeText = 'ล็อกอยู่';
 
               if (isActive) {
                 borderClass = 'border-brand-blue bg-blue-50/20';
                 badgeClass = 'bg-brand-blue text-white';
-                badgeText = 'Active Focus';
+                badgeText = 'กำลังเน้น';
               } else if (isDone) {
                 borderClass = 'border-slate-200 bg-white opacity-85';
                 badgeClass = 'bg-emerald-500 text-white';
-                badgeText = 'Completed';
+                badgeText = 'เสร็จสมบูรณ์';
               }
 
               return (
@@ -623,9 +623,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           <div className="space-y-3">
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
               <Brain className="w-5 h-5 text-brand-purple shrink-0" />
-              Topics to Review
+              หัวข้อที่ควรทบทวน
             </h3>
-            <p className="text-slate-500 text-xs">Curated key concepts targeted for revision prior to future unit exams:</p>
+            <p className="text-slate-500 text-xs">แนวคิดสำคัญที่คัดสรรไว้สำหรับทบทวนก่อนการสอบหน่วยถัดไป:</p>
 
             <div className="space-y-2 pt-1">
               {student.recommendedTopics.map((topic, idx) => (
@@ -640,8 +640,8 @@ export default function StudentReportView({ student, onBack }: StudentReportView
           </div>
 
           <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-4 text-center">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Recommended Material</span>
-            <span className="text-xs font-extrabold text-slate-800 mt-1 block">Lecture 03 Supplementary Code</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">สื่อการเรียนที่แนะนำ</span>
+            <span className="text-xs font-extrabold text-slate-800 mt-1 block">โค้ดเสริมการบรรยายที่ 3</span>
           </div>
         </div>
 
@@ -651,9 +651,9 @@ export default function StudentReportView({ student, onBack }: StudentReportView
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
         <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
           <Activity className="w-5 h-5 text-slate-400 shrink-0" />
-          Timeline of Student Activities
+          ไทม์ไลน์กิจกรรมของนักศึกษา
         </h3>
-        <p className="text-slate-500 text-xs">A comprehensive history of this student's interactions within the active class:</p>
+        <p className="text-slate-500 text-xs">ประวัติที่ครอบคลุมการมีส่วนร่วมของนักศึกษาคนนี้ในชั้นเรียนปัจจุบัน:</p>
 
         <div className="relative border-l border-slate-100 ml-4 pl-6 space-y-6 pt-2">
           {timelineActivities.map((act, idx) => {

@@ -18,10 +18,26 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
-    { label: 'Explain Again', text: 'Can you explain the main concepts of this lesson in simple terms?', icon: RefreshCw },
-    { label: 'Give Example', text: 'Can you give me a real-world scenario illustrating the primary misconception in today\'s topic?', icon: Lightbulb },
-    { label: 'Summarize Lesson', text: 'Provide a concise, bullet-pointed summary of this week\'s lesson outcomes.', icon: BookOpen },
-    { label: 'Quiz Me', text: 'Ask me a quick multiple-choice question to test my understanding of the material!', icon: HelpCircle }
+    {
+      label: 'อธิบายอีกครั้ง',
+      text: 'ช่วยอธิบายแนวคิดหลักของบทเรียนนี้ด้วยภาษาที่เข้าใจง่าย',
+      icon: RefreshCw
+    },
+    {
+      label: 'ยกตัวอย่าง',
+      text: 'ช่วยยกตัวอย่างสถานการณ์จริงที่เกี่ยวข้องกับหัวข้อในบทเรียนนี้',
+      icon: Lightbulb
+    },
+    {
+      label: 'สรุปบทเรียน',
+      text: 'ช่วยสรุปสาระสำคัญของบทเรียนนี้เป็นหัวข้อสั้น ๆ',
+      icon: BookOpen
+    },
+    {
+      label: 'ทดสอบความรู้',
+      text: 'ช่วยตั้งคำถามแบบปรนัยเพื่อทดสอบความเข้าใจของฉัน',
+      icon: HelpCircle
+    }
   ];
 
   const handleSend = async (textToSend: string) => {
@@ -51,10 +67,10 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <Sparkles className="w-5 h-5 text-brand-blue shrink-0" />
-              <h3 className="font-display font-bold text-sm text-slate-800">Suggested Prompts</h3>
+              <h3 className="font-display font-bold text-sm text-slate-800">คำแนะนำสำหรับการถาม AI</h3>
             </div>
             
-            <p className="text-xs text-slate-400">Click any prompt to instantly query your tailored AI tutor.</p>
+            <p className="text-xs text-slate-400">เลือกคำถามด้านล่างเพื่อสอบถามผู้ช่วย AI ได้ทันที</p>
             
             <div className="space-y-2.5">
               {suggestedPrompts.map((p, idx) => {
@@ -80,8 +96,8 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
           </div>
 
           <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400 leading-relaxed font-medium">
-            <span className="block font-bold text-slate-700 mb-1">Knowledge Context</span>
-            Active Course Material:<br />
+            <span className="block font-bold text-slate-700 mb-1">ข้อมูลอ้างอิงของบทเรียน</span>
+            บทเรียนที่กำลังใช้งาน<br />
             <span className="font-bold text-brand-blue truncate block">{lesson.topic}</span>
           </div>
         </div>
@@ -97,11 +113,11 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800">Aegis AI Copilot</h3>
-              <p className="text-[10px] text-slate-400 font-medium">Expert University Tutoring Agent</p>
+              <h3 className="text-sm font-bold text-slate-800">ผู้ช่วยการเรียนรู้ด้วย AI</h3>
+              <p className="text-[10px] text-slate-400 font-medium">ผู้ช่วยติวอัจฉริยะสำหรับการเรียนระดับมหาวิทยาลัย</p>
             </div>
           </div>
-          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Active Context</span>
+          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">กำลังใช้งาน</span>
         </div>
 
         {/* Message Panel */}
@@ -153,7 +169,7 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
                     <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
                     <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
                   </div>
-                  <span>AI Companion is thinking...</span>
+                  <span>AI กำลังคิดคำตอบ...</span>
                 </div>
               </motion.div>
             )}
@@ -168,7 +184,7 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask a question about the active lesson..."
+              placeholder="พิมพ์คำถามเกี่ยวกับบทเรียนที่กำลังเรียน..."
               rows={1}
               className="w-full pl-4 pr-12 py-3.5 bg-transparent border-0 text-xs text-slate-800 focus:outline-none focus:ring-0 resize-none max-h-24 font-medium"
             />
@@ -181,7 +197,7 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
             </button>
           </div>
           <div className="text-[10px] text-slate-400 text-center mt-2 font-medium">
-            Press Enter to submit. Press Shift+Enter for new line.
+            กด Enter เพื่อส่งข้อความ • กด Shift + Enter เพื่อขึ้นบรรทัดใหม่
           </div>
         </div>
 
