@@ -30,6 +30,8 @@ export interface QuizQuestion {
   correctIndex: number;
   explanation: string;
   conceptMatched: string;
+  misconceptionMap?: { [optionIndex: string]: string };
+  recommendationMap?: { [optionIndex: string]: string };
 }
 
 export interface Submission {
@@ -293,3 +295,6 @@ export const state = {
   simulatedSubmissions: defaultSimulatedSubmissions,
   simulatedAnalytics: defaultSimulatedAnalytics
 };
+
+
+//Misconceptions 
