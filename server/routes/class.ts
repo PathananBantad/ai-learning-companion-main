@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
+import { createClass, validateClassCode, enrollStudent } from '../services/class.service';
 
 const router = Router();
 
@@ -8,8 +9,8 @@ router.get('/class/code', (req: Request, res: Response) => {
   res.json({ activeClassCode: state.activeClassCode });
 });
 
-// Generate or set a custom class code
-router.post('/class/generate', (req: Request, res: Response) => {
+// Generate or set a custom class code — now also persisted to Supabase
+router.post('/class/generate', async (req: Request, res: Response) => {
   const { customCode } = req.body;
   if (customCode && customCode.trim()) {
     state.activeClassCode = customCode.trim().toUpperCase();
@@ -21,18 +22,29 @@ router.post('/class/generate', (req: Request, res: Response) => {
     }
     state.activeClassCode = `AEG-${result}`;
   }
+
+  await createClass(state.activeClassCode, state.currentLesson?.topic);
+
   res.json({ activeClassCode: state.activeClassCode });
 });
 
-// Verify entered class code from student join screen
-router.post('/class/verify', (req: Request, res: Response) => {
-  const { code } = req.body;
+// Verify entered class code from student join screen — now checks Supabase
+router.post('/class/verify', async (req: Request, res: Response) => {
+  const { code, name } = req.body;
   if (!code) {
     res.status(400).json({ error: 'Code is required' });
     return;
   }
-  const isCorrect = code.trim().toUpperCase() === state.activeClassCode.toUpperCase();
-  res.json({ success: isCorrect, activeClassCode: state.activeClassCode });
+
+  const normalizedCode = code.trim().toUpperCase();
+  const result = await validateClassCode(normalizedCode);
+
+  if (result.success && name) {
+    // ไม่ await ให้บล็อก response — ยิงบันทึก enrollment ไปพร้อมกัน
+    enrollStudent(normalizedCode, name).catch(() => {});
+  }
+
+  res.json({ success: result.success, activeClassCode: normalizedCode });
 });
 
 export default router;

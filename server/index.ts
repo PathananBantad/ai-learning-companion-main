@@ -7,7 +7,6 @@ import classRouter from './routes/class';
 import quizRouter from './routes/quiz';
 import analyticsRouter from './routes/analytics';
 import chatRouter from './routes/chat';
-import classRoutes from './routes/class.routes';
 
 dotenv.config();
 

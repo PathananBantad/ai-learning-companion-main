@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
+import { supabase } from '../lib/supabase';
 
 const router = Router();
 
@@ -209,8 +210,8 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 });
 
 // Submit student quiz answers
-router.post('/quiz/submit', (req: Request, res: Response) => {
-  const { answers } = req.body;
+router.post('/quiz/submit', async (req: Request, res: Response) => {
+  const { answers, name } = req.body;
   if (!answers) {
     res.status(400).json({ error: 'Missing answers' });
     return;
@@ -260,7 +261,7 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
   state.simulatedAnalytics.studentSubmissionsCount = state.simulatedSubmissionsCount;
   // update rolling average
   state.simulatedAnalytics.averageScore = Math.round(
-    ((state.simulatedAnalytics.averageScore * 10) + score) / 11
+      ((state.simulatedAnalytics.averageScore * 10) + score) / 11
   );
 
   // Dynamically insert active student's performance record for the instructor to review
@@ -279,8 +280,8 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
     weaknesses: weaknesses.length > 0 ? weaknesses : ['None'],
     commonMisconceptions: misconceptionsTriggered.length > 0 ? misconceptionsTriggered : ['None'],
     aiFeedbackSummary: score >= 85
-      ? 'Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees.'
-      : 'Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.',
+        ? 'Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees.'
+        : 'Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.',
     recommendedTopics: recommendations.length > 0 ? recommendations : ['Advanced GraphQL paradigms'],
     lastActivity: 'Completed diagnostic quiz just now'
   };
@@ -300,6 +301,25 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
     misconceptionsTriggered,
     recommendations
   };
+
+  // Persist the result to Supabase so scores survive server restarts
+  const { error: insertError } = await supabase.from('quiz_results').insert({
+    name: name || 'Anonymous Student',
+    class_code: state.activeClassCode,
+    score,
+    total_questions: state.quizQuestions.length,
+    ai_feedback: {
+      strengths: attemptResult.strengths,
+      weaknesses: attemptResult.weaknesses,
+      misconceptionsTriggered,
+      recommendations
+    }
+  });
+
+  if (insertError) {
+    console.error('Error saving quiz result to Supabase:', insertError.message);
+    // ไม่ block การตอบกลับ student แม้บันทึกลง DB ไม่สำเร็จ
+  }
 
   res.json(attemptResult);
 });
