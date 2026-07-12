@@ -27,7 +27,11 @@ export async function generateFeedback(
       const response = await ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: prompt,
-        config: { responseMimeType: 'application/json' }
+        config:{
+          responseMimeType:'application/json',
+          temperature:0.4,
+          topP:0.9
+        }
       });
 
       const text = response.text?.trim();

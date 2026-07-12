@@ -108,14 +108,20 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       state.quizQuestions = parsed.quizQuestions || [];
 
       // Persist the generated lesson to Supabase so it survives server restarts
-      const { error: lessonInsertError } = await supabase.from('lessons').insert({
-        topic: state.currentLesson.topic,
-        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-        misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions)
-      });
+      const { data: lessonData, error: lessonInsertError } = await supabase
+          .from("lessons")
+          .insert({
+            topic: state.currentLesson.topic,
+            learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+            key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+            misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
+          })
+          .select();
+
+      console.log("Lesson insert result:", lessonData);
+
       if (lessonInsertError) {
-        console.error('Error saving lesson to Supabase:', lessonInsertError.message);
+        console.error("Lesson insert error:", lessonInsertError);
       }
 
       // Reset class diagnostics to fit the new topic
@@ -201,14 +207,20 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
   ];
 
   // Persist the fallback lesson to Supabase too, so it survives server restarts
-  const { error: fallbackLessonInsertError } = await supabase.from('lessons').insert({
-    topic: state.currentLesson.topic,
-    learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-    key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-    misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions)
-  });
+  const { data: fallbackLessonData, error: fallbackLessonInsertError } = await supabase
+      .from("lessons")
+      .insert({
+        topic: state.currentLesson.topic,
+        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+        misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
+      })
+      .select();
+
+  console.log("Fallback lesson insert result:", fallbackLessonData);
+
   if (fallbackLessonInsertError) {
-    console.error('Error saving fallback lesson to Supabase:', fallbackLessonInsertError.message);
+    console.error("Fallback lesson insert error:", fallbackLessonInsertError);
   }
 
   state.simulatedSubmissionsCount = 0;
@@ -325,24 +337,6 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
     recommendations
   };
 
-  // Persist the result to Supabase so scores survive server restarts
-  const { error: insertError } = await supabase.from('quiz_results').insert({
-    name: name || 'Anonymous Student',
-    class_code: state.activeClassCode,
-    score,
-    total_questions: state.quizQuestions.length,
-    ai_feedback: {
-      strengths: attemptResult.strengths,
-      weaknesses: attemptResult.weaknesses,
-      misconceptionsTriggered,
-      recommendations
-    }
-  });
-
-  if (insertError) {
-    console.error('Error saving quiz result to Supabase:', insertError.message);
-    // ไม่ block การตอบกลับ student แม้บันทึกลง DB ไม่สำเร็จ
-  }
   try {
     await saveQuizResult({
       name: req.body.name,

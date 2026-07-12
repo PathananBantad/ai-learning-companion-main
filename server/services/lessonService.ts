@@ -23,34 +23,67 @@ export async function generateLesson({
 
   if (ai) {
     const generationPrompt = `
-      You are a world-class university syllabus and curriculum designer.
-      Create a comprehensive, highly educational Knowledge Base for the topic: "${targetTopic}".
-      ${manualPrompt ? `Additional instructor guidelines: "${manualPrompt}"` : ''}
+You are an experienced university professor, instructional designer, and curriculum expert.
 
-      IMPORTANT: Write ALL content (topic, learningOutcomes, keyConcepts, commonMisconceptions, summary) in Thai language (ภาษาไทย). Keep JSON keys in English exactly as specified below.
+Generate a complete university-level lesson.
 
-      Respond STRICTLY with a valid JSON object matching this schema. Do not output markdown backticks or any text other than the raw JSON object itself:
-      {
-        "topic": "Cleaned up topic name",
-        "learningOutcomes": ["Outcome 1", "Outcome 2", "Outcome 3", "Outcome 4"],
-        "keyConcepts": [
-          { "title": "Concept 1 Title", "description": "Highly accurate 2-sentence description of the concept" },
-          { "title": "Concept 2 Title", "description": "Highly accurate 2-sentence description of the concept" },
-          { "title": "Concept 3 Title", "description": "Highly accurate 2-sentence description of the concept" }
-        ],
-        "commonMisconceptions": [
-          { "title": "Misconception 1 Title", "explanation": "Detailed explanation correcting the misconception" },
-          { "title": "Misconception 2 Title", "explanation": "Detailed explanation correcting the misconception" }
-        ],
-        "summary": "A warm, high-level educational summary of this topic for university students (3 sentences)."
-      }
-    `;
+Topic:
+"${targetTopic}"
+
+${manualPrompt ? `Instructor Notes:\n${manualPrompt}` : ""}
+
+${activeFiles.length > 0
+        ? `Reference Files:\n${activeFiles.join("\n")}`
+        : ""}
+
+Requirements:
+
+1. Follow Bloom's Taxonomy.
+2. Learning outcomes must use measurable action verbs.
+3. Explain concepts from beginner → intermediate → advanced.
+4. Keep explanations technically correct.
+5. Do not introduce concepts outside the topic.
+6. Include common misconceptions and explain why students misunderstand them.
+7. Write concise but educational summaries.
+
+Return ONLY valid JSON.
+
+Schema:
+
+{
+  "topic": "...",
+  "learningOutcomes":[
+    "...",
+    "...",
+    "...",
+    "..."
+  ],
+  "keyConcepts":[
+    {
+      "title":"...",
+      "description":"..."
+    }
+  ],
+  "commonMisconceptions":[
+    {
+      "title":"...",
+      "explanation":"..."
+    }
+  ],
+  "summary":"..."
+}
+`;
 
     try {
       const response = await ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: generationPrompt,
-        config: { responseMimeType: 'application/json' }
+        config:{
+          responseMimeType:'application/json',
+          temperature:0.5,
+          topP:0.9,
+          topK:40
+        }
       });
 
       const textResponse = response.text?.trim() || '';
