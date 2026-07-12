@@ -2,7 +2,7 @@
 // Step 1 of the sequential pipeline: generate the Lesson (Knowledge Base) only.
 // Quiz generation happens afterwards in quizService.ts, using this Lesson as input.
 
-import { getGeminiClient } from '../lib/gemini';
+import { getGeminiClient, GEMINI_MODEL } from '../lib/gemini';
 import { Lesson } from '../data/lesson';
 
 interface GenerateLessonParams {
@@ -48,7 +48,7 @@ export async function generateLesson({
 
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: GEMINI_MODEL,
         contents: generationPrompt,
         config: { responseMimeType: 'application/json' }
       });

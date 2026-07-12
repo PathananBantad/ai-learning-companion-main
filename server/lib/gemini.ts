@@ -1,6 +1,8 @@
 import { GoogleGenAI } from '@google/genai';
 
-// Lazy initialization of Gemini client to prevent crashing if GEMINI_API_KEY is missing on startup
+// Central place to change the Gemini model version for the whole app
+export const GEMINI_MODEL = 'gemini-3.5-flash';
+
 let geminiClient: GoogleGenAI | null = null;
 
 export function getGeminiClient(): GoogleGenAI | null {
@@ -10,9 +12,7 @@ export function getGeminiClient(): GoogleGenAI | null {
       geminiClient = new GoogleGenAI({
         apiKey: key,
         httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build'
-          }
+          headers: { 'User-Agent': 'aistudio-build' }
         }
       });
     }
