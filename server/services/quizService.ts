@@ -3,7 +3,7 @@
 // Lesson (not from the raw topic string). This is what makes the pipeline "sequential":
 // quiz content is grounded in lesson.keyConcepts / lesson.commonMisconceptions.
 
-import { getGeminiClient } from '../lib/gemini';
+import { getGeminiClient, GEMINI_MODEL } from '../lib/gemini';
 import { Lesson, QuizQuestion } from '../data/lesson';
 
 export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuestion[]> {
@@ -56,7 +56,7 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
 
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: GEMINI_MODEL,
         contents: generationPrompt,
         config: { responseMimeType: 'application/json' }
       });
