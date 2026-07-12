@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
-import { supabase } from '../lib/supabase';
-import { saveQuizResult } from "../services/quizResultService";
+import { supabase } from '../lib/supabase';import {
+  saveQuizResult,
+  getQuizResults,
+} from "../services/quizResultService";
 
 const router = Router();
 
@@ -246,7 +248,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
 // Submit student quiz answers
 router.post('/quiz/submit', async (req: Request, res: Response) => {
-  const { answers, name } = req.body;
+  const { answers, name, classCode } = req.body;
   if (!answers) {
     res.status(400).json({ error: 'Missing answers' });
     return;
@@ -338,17 +340,42 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   };
 
   try {
-    await saveQuizResult({
-      name: req.body.name,
-      classCode: req.body.classCode,
+    console.log("Before saveQuizResult");
+
+    const saved = await saveQuizResult({
+      name,
+      classCode,
       score,
       totalQuestions: state.quizQuestions.length,
       aiFeedback: attemptResult,
     });
+
+    console.log("Saved successfully:");
+    console.log(saved);
+
   } catch (err) {
-    console.error("Save quiz result failed", err);
+    console.error("Save quiz result failed:");
+    console.error(err);
   }
   res.json(attemptResult);
 });
 
+router.get("/quiz-results", async (_req, res) => {
+  try {
+    const results = await getQuizResults();
+
+    res.json({
+      success: true,
+      count: results.length,
+      data: results,
+    });
+  } catch (err: any) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
 export default router;

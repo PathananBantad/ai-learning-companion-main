@@ -22,6 +22,16 @@ export async function saveQuizResult({
                                          totalQuestions,
                                          aiFeedback,
                                      }: SaveQuizResultParams) {
+
+    console.log("===== saveQuizResult =====");
+    console.log({
+        name,
+        classCode,
+        score,
+        totalQuestions,
+        aiFeedback,
+    });
+
     const { data, error } = await supabase
         .from("quiz_results")
         .insert([
@@ -36,8 +46,31 @@ export async function saveQuizResult({
         .select()
         .single();
 
+    console.log("===== Supabase Insert Result =====");
+    console.log({
+        data,
+        error,
+    });
+
     if (error) {
-        console.error("Error saving quiz result:", error.message);
+        console.error("Error saving quiz result:", error);
+        throw error;
+    }
+
+    console.log("Quiz result saved successfully.");
+
+    return data;
+}
+
+// ดึงผล Quiz ทั้งหมดจากฐานข้อมูล
+export async function getQuizResults() {
+    const { data, error } = await supabase
+        .from("quiz_results")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching quiz results:", error);
         throw error;
     }
 
