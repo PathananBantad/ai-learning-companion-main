@@ -1,43 +1,48 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
+import { getAnalytics } from "../services/analyticsService";
 
 const router = Router();
 
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {
-  const refresh = req.query.refresh === 'true';
-  const ai = getGeminiClient();
+  try {
+    const analytics = await getAnalytics();
 
-  // Only query Gemini if a manual refresh was requested or we don't have an insight yet
-  if (ai && (refresh || !state.simulatedAnalytics.aiInsight)) {
-    try {
-      const prompt = `
-        You are an AI Learning Companion instructor assistant.
-        Analyze these current class statistics:
-        - Average score: ${state.simulatedAnalytics.averageScore}%
-        - Topic achievement scores: ${JSON.stringify(state.simulatedAnalytics.outcomeAchievement)}
-        - Common misconceptions recorded: ${JSON.stringify(state.simulatedAnalytics.commonMisconceptions)}
-        - Most incorrect topic: ${state.simulatedAnalytics.mostIncorrectTopic}
+    const refresh = req.query.refresh === "true";
+    const ai = getGeminiClient();
 
-        Generate a highly specific, brief, professional teaching recommendation (max 3 sentences) for the instructor's dashboard.
-        Highlight what the students struggle with and give an actionable intervention they can use in the next lecture.
-      `;
+    if (ai && (refresh || !analytics.aiInsight)) {
+      try {
+        const prompt = `
+You are an AI Learning Companion instructor assistant.
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: prompt
-      });
+Average score: ${analytics.averageScore}%
+Student submissions: ${analytics.studentSubmissionsCount}
 
-      if (response.text) {
-        state.simulatedAnalytics.aiInsight = response.text.trim();
+Give the instructor a short recommendation in no more than 3 sentences.
+`;
+
+        const response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+        });
+
+        analytics.aiInsight = response.text?.trim() ?? "";
+      } catch (err: any) {
+        console.error(err);
       }
-    } catch (err: any) {
-      console.error('Error generating AI analytics insights:', err.message || err);
-      // Fallback or persist previous recommendation
     }
+
+    res.json(analytics);
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      error: "Failed to load analytics",
+    });
   }
-  res.json(state.simulatedAnalytics);
 });
 
 // Generate individual student AI Insight

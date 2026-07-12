@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
+import { saveQuizResult } from "../services/quizResultService";
 
 const router = Router();
 
@@ -106,6 +107,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
       state.quizQuestions = parsed.quizQuestions || [];
 
+      // Persist the generated lesson to Supabase so it survives server restarts
+      const { error: lessonInsertError } = await supabase.from('lessons').insert({
+        topic: state.currentLesson.topic,
+        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+        misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions)
+      });
+      if (lessonInsertError) {
+        console.error('Error saving lesson to Supabase:', lessonInsertError.message);
+      }
+
       // Reset class diagnostics to fit the new topic
       state.simulatedSubmissionsCount = 0;
       state.simulatedAnalytics = {
@@ -187,6 +199,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       conceptMatched: `Over-complicating ${targetTopic}`
     }
   ];
+
+  // Persist the fallback lesson to Supabase too, so it survives server restarts
+  const { error: fallbackLessonInsertError } = await supabase.from('lessons').insert({
+    topic: state.currentLesson.topic,
+    learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+    key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+    misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions)
+  });
+  if (fallbackLessonInsertError) {
+    console.error('Error saving fallback lesson to Supabase:', fallbackLessonInsertError.message);
+  }
 
   state.simulatedSubmissionsCount = 0;
   state.simulatedAnalytics = {
@@ -320,7 +343,17 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
     console.error('Error saving quiz result to Supabase:', insertError.message);
     // ไม่ block การตอบกลับ student แม้บันทึกลง DB ไม่สำเร็จ
   }
-
+  try {
+    await saveQuizResult({
+      name: req.body.name,
+      classCode: req.body.classCode,
+      score,
+      totalQuestions: state.quizQuestions.length,
+      aiFeedback: attemptResult,
+    });
+  } catch (err) {
+    console.error("Save quiz result failed", err);
+  }
   res.json(attemptResult);
 });
 
