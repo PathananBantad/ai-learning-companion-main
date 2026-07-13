@@ -31,6 +31,14 @@ export default function App() {
   });
   const [isGeneratingClassCode, setIsGeneratingClassCode] = useState(false);
 
+  // Student Identity States
+  const [studentName, setStudentName] = useState<string>(() => {
+    return localStorage.getItem('aegis_student_name') || '';
+  });
+  const [studentId, setStudentId] = useState<string>(() => {
+    return localStorage.getItem('aegis_student_id') || '';
+  });
+
   // Backend States
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -296,9 +304,14 @@ export default function App() {
   if (role === 'student' && studentJoinedCode !== classCode) {
     return (
       <JoinClass 
-        onJoinSuccess={(code) => {
+        onJoinSuccess={(code, studentInfo) => {
           setStudentJoinedCode(code);
           localStorage.setItem('aegis_joined_class_code', code);
+
+          setStudentName(studentInfo.studentName);
+          setStudentId(studentInfo.studentId);
+          localStorage.setItem('aegis_student_name', studentInfo.studentName);
+          localStorage.setItem('aegis_student_id', studentInfo.studentId);
         }}
         onBackToLanding={() => setRole('landing')}
       />

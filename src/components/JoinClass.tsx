@@ -3,12 +3,14 @@ import { motion } from 'motion/react';
 import { BookOpen, Sparkles, ArrowRight, ArrowLeft, Key, HelpCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface JoinClassProps {
-  onJoinSuccess: (classCode: string) => void;
+  onJoinSuccess: (classCode: string, studentInfo: { studentId: string; studentName: string }) => void;
   onBackToLanding: () => void;
 }
 
 export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassProps) {
   const [code, setCode] = useState('');
+  const [studentName, setStudentName] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [classInfo, setClassInfo] = useState<{ topic?: string } | null>(null);
@@ -16,6 +18,14 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
   // Quick verify handler
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentName.trim()) {
+      setErrorMsg('กรุณากรอกชื่อ-นามสกุลของคุณ');
+      return;
+    }
+    if (!studentId.trim()) {
+      setErrorMsg('กรุณากรอกรหัสนักศึกษา');
+      return;
+    }
     if (!code.trim()) {
       setErrorMsg('กรุณากรอกรหัสเข้าชั้นเรียน');
       return;
@@ -28,7 +38,11 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
       const res = await fetch('/api/class/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code.trim() })
+        body: JSON.stringify({
+          code: code.trim(),
+          studentId: studentId.trim(),
+          studentName: studentName.trim()
+        })
       });
 
       if (!res.ok) {
@@ -37,7 +51,10 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
 
       const data = await res.json();
       if (data.success) {
-        onJoinSuccess(code.trim().toUpperCase());
+        onJoinSuccess(code.trim().toUpperCase(), {
+          studentId: studentId.trim(),
+          studentName: studentName.trim()
+        });
       } else {
         setErrorMsg('รหัสชั้นเรียนไม่ถูกต้อง กรุณาตรวจสอบกับอาจารย์ผู้สอน');
       }
@@ -103,6 +120,41 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
           {/* Verification Form */}
           <form onSubmit={handleVerify} className="space-y-4">
             <div>
+              <label htmlFor="student-name-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+                ชื่อ-นามสกุล
+              </label>
+              <input
+                id="student-name-input"
+                type="text"
+                placeholder="เช่น สมชาย ใจดี"
+                value={studentName}
+                onChange={(e) => {
+                  setStudentName(e.target.value);
+                  setErrorMsg(null);
+                }}
+                autoFocus
+                className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="student-id-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+                รหัสนักศึกษา
+              </label>
+              <input
+                id="student-id-input"
+                type="text"
+                placeholder="เช่น 6512345678"
+                value={studentId}
+                onChange={(e) => {
+                  setStudentId(e.target.value);
+                  setErrorMsg(null);
+                }}
+                className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 transition"
+              />
+            </div>
+
+            <div>
               <label htmlFor="class-code-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
                 รหัสชั้นเรียน
               </label>
@@ -116,7 +168,6 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
                     setCode(e.target.value);
                     setErrorMsg(null);
                   }}
-                  autoFocus
                   className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-center font-mono font-bold text-lg text-slate-800 placeholder:font-sans placeholder:text-sm placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-brand-blue/50 uppercase tracking-widest transition"
                 />
               </div>
