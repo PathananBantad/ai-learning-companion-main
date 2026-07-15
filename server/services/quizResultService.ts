@@ -9,6 +9,7 @@ export interface QuizFeedback {
 
 interface SaveQuizResultParams {
     name: string;
+    studentId: string;
     classCode: string;
     score: number;
     totalQuestions: number;
@@ -17,6 +18,7 @@ interface SaveQuizResultParams {
 
 export async function saveQuizResult({
                                          name,
+                                         studentId,
                                          classCode,
                                          score,
                                          totalQuestions,
@@ -26,6 +28,7 @@ export async function saveQuizResult({
     console.log("===== saveQuizResult =====");
     console.log({
         name,
+        studentId,
         classCode,
         score,
         totalQuestions,
@@ -37,6 +40,7 @@ export async function saveQuizResult({
         .insert([
             {
                 name,
+                student_id: studentId,
                 class_code: classCode,
                 score,
                 total_questions: totalQuestions,

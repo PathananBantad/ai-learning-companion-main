@@ -248,7 +248,25 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
 // Submit student quiz answers
 router.post('/quiz/submit', async (req: Request, res: Response) => {
-  const { answers, name, classCode } = req.body;
+  const {
+    answers,
+    name,
+    studentId,
+    classCode
+  } = req.body;
+
+  if (!name) {
+    return res.status(400).json({
+      error: "Name is required"
+    });
+  }
+
+  if (!studentId) {
+    return res.status(400).json({
+      error: "Student ID is required"
+    });
+  }
+
   if (!answers) {
     res.status(400).json({ error: 'Missing answers' });
     return;
@@ -344,12 +362,12 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
 
     const saved = await saveQuizResult({
       name,
+      studentId,
       classCode,
       score,
       totalQuestions: state.quizQuestions.length,
       aiFeedback: attemptResult,
     });
-
     console.log("Saved successfully:");
     console.log(saved);
 
