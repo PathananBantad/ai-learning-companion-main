@@ -20,117 +20,6 @@ interface TeacherDashboardProps {
   onRefreshInsight?: () => void;
 }
 
-// Full, rich fallback dataset of students with all details
-const defaultStudents: StudentAnalytics[] = [
-  {
-    id: "STU-8921",
-    name: "Sarah Jenkins",
-    quizScore: 95,
-    learningProgress: 90,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 100 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 95 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 90 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 95 }
-    ],
-    strengths: ["คำสั่ง HTTP", "การจัดการเซสชันแบบไร้สถานะ"],
-    weaknesses: ["ไม่มี"],
-    commonMisconceptions: ["ไม่มี"],
-    aiFeedbackSummary: "แสดงความเชี่ยวชาญในทุกด้านอย่างยอดเยี่ยม เข้าใจข้อจำกัดการออกแบบ REST และหลักการ idempotency ได้อย่างครบถ้วน",
-    recommendedTopics: ["สถาปัตยกรรม GraphQL แบบ federated ขั้นสูง"],
-    lastActivity: "ทำแบบทดสอบวินิจฉัยเสร็จเมื่อ 03/07 08:12 น."
-  },
-  {
-    id: "STU-4412",
-    name: "Alex Mercer",
-    quizScore: 75,
-    learningProgress: 70,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 90 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 80 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 50 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 80 }
-    ],
-    strengths: ["คำสั่ง REST", "รหัสสถานะ (Status codes)"],
-    weaknesses: ["ความหมายของ Idempotency ใน PUT/POST"],
-    commonMisconceptions: ["เข้าใจผิดว่า POST ปลอดภัยและเป็น idempotent"],
-    aiFeedbackSummary: "พื้นฐานโดยรวมยอดเยี่ยม แต่ยังมีปัญหาเรื่องข้อจำกัดของ idempotency ต้องทำความเข้าใจเพิ่มเติมว่าทำไมการส่ง POST payload ซ้ำจึงทำให้ข้อมูลในฐานข้อมูลซ้ำซ้อนได้",
-    recommendedTopics: ["การดำเนินการแบบ Idempotent เทียบกับ Safe"],
-    lastActivity: "เรียนกับ AI Tutor เรื่อง Idempotency เมื่อ 03/07 07:45 น."
-  },
-  {
-    id: "STU-3109",
-    name: "Elena Rostova",
-    quizScore: 85,
-    learningProgress: 82,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 95 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 85 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 80 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 80 }
-    ],
-    strengths: ["การใช้งาน CRUD", "Idempotency"],
-    weaknesses: ["ความไร้สถานะของ JWT"],
-    commonMisconceptions: ["เข้าใจว่าสถานะเซสชันต้องเก็บไว้ในฐานข้อมูลเท่านั้น"],
-    aiFeedbackSummary: "เข้าใจข้อจำกัดของ REST ได้ดี แต่ยังเข้าใจคลาดเคลื่อนเล็กน้อยเกี่ยวกับผลกระทบของการขยายระบบแบบไร้สถานะเมื่อใช้ JWT เทียบกับ session cookie แบบมีสถานะ",
-    recommendedTopics: ["การยืนยันตัวตนแบบไร้สถานะด้วย JWT", "กลยุทธ์การยกเลิกความถูกต้องของโทเคน"],
-    lastActivity: "ส่งแบบทดสอบที่ 1 เมื่อ 02/07 16:30 น."
-  },
-  {
-    id: "STU-7201",
-    name: "Marcus Vance",
-    quizScore: 60,
-    learningProgress: 55,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 70 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 60 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 50 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 60 }
-    ],
-    strengths: ["การกำหนดเส้นทาง GET/POST พื้นฐาน"],
-    weaknesses: ["สถาปัตยกรรม HTTP แบบไร้สถานะ", "Idempotency ของ PUT เทียบกับ PATCH"],
-    commonMisconceptions: ["เข้าใจผิดว่า HTTP POST เข้ารหัสข้อมูลในฐานข้อมูลโดยอัตโนมัติ"],
-    aiFeedbackSummary: "ต้องทบทวนหลักการพื้นฐานของระบบไร้สถานะ มีปัญหาเรื่องแนวคิดการส่งข้อมูลอย่างปลอดภัย และสับสนระหว่าง payload ดิบกับความปลอดภัยระดับชั้นการขนส่ง",
-    recommendedTopics: ["ความไร้สถานะเทียบกับการคงสถานะ", "ชั้นการขนส่งแบบ TLS/HTTPS"],
-    lastActivity: "ทำแบบฝึกหัดการ์ดคำศัพท์เสร็จเมื่อ 02/07 11:20 น."
-  },
-  {
-    id: "STU-1102",
-    name: "Chloe Zhao",
-    quizScore: 90,
-    learningProgress: 88,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 100 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 90 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 80 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 90 }
-    ],
-    strengths: ["ความปลอดภัยเว็บ", "คำสั่ง HTTP และการตอบกลับ"],
-    weaknesses: ["กรณีขอบเขตพิเศษของ PUT เทียบกับ PATCH"],
-    commonMisconceptions: ["ไม่มี"],
-    aiFeedbackSummary: "เข้าใจพื้นฐานเครือข่ายและรูปแบบความปลอดภัยได้อย่างยอดเยี่ยม มีความสับสนเล็กน้อยเกี่ยวกับมาตรฐาน idempotency ของคำสั่ง PATCH",
-    recommendedTopics: ["ข้อกำหนด RFC 5789 สำหรับ PATCH"],
-    lastActivity: "ส่งแบบทดสอบวินิจฉัยเมื่อ 03/07 08:29 น."
-  },
-  {
-    id: "STU-5541",
-    name: "Devon Lane",
-    quizScore: 45,
-    learningProgress: 40,
-    learningOutcomeAchievement: [
-      { name: "คำสั่ง HTTP หลักและ CRUD", score: 60 },
-      { name: "HTTP แบบไร้สถานะและเซสชัน", score: 40 },
-      { name: "แนวคิดเรื่อง Idempotency", score: 30 },
-      { name: "ความปลอดภัยเว็บ (POST/HTTPS)", score: 50 }
-    ],
-    strengths: ["แนวคิด CRUD พื้นฐาน"],
-    weaknesses: ["ความปลอดภัยของเซสชันและคุกกี้", "นิยามของ Idempotency", "POST เทียบกับ PUT"],
-    commonMisconceptions: ["เข้าใจผิดว่า POST ปลอดภัยโดยอัตโนมัติ", "สับสนระหว่าง PUT กับการอ่านข้อมูลแบบปลอดภัย"],
-    aiFeedbackSummary: "ยังมีปัญหากับนิยามพื้นฐานของโมเดลเว็บแบบ HTTP เกิดความเข้าใจผิดสำคัญหลายจุดเกี่ยวกับการกำหนดเส้นทาง POST พื้นฐานและกฎการเข้ารหัส ต้องการคำแนะนำเฉพาะจากผู้สอน",
-    recommendedTopics: ["บทนำสู่สถาปัตยกรรมเว็บ", "วิธีการ HTTP และการรับประกันความปลอดภัย"],
-    lastActivity: "พยายามทำแบบทดสอบ 2 ครั้งเมื่อ 01/07 14:02 น."
-  }
-];
 
 export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKeySet, onRefreshInsight }: TeacherDashboardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'students'>('overview');
@@ -150,10 +39,15 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
   // Color palette constants for charts
   const COLORS = ['#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ef4444'];
 
-  // format data for the Pie Chart (Misconceptions triggered)
-  const pieData = analytics.commonMisconceptions.map((item, idx) => ({
+  const commonMisconceptions = analytics?.commonMisconceptions ?? [];
+  const outcomeAchievement = analytics?.outcomeAchievement ?? [];
+  const weeklyTrend = analytics?.weeklyTrend ?? [];
+  const students = analytics?.students ?? [];
+
+// format data for the Pie Chart (Misconceptions triggered)
+  const pieData = commonMisconceptions.map((item, idx) => ({
     name: item.topic,
-    value: item.count || (18 - idx * 6), // provide default counts if zero
+    value: item.count || (18 - idx * 6),
   }));
 
   return (
@@ -233,8 +127,8 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-800">
-              {analytics.outcomeAchievement.length > 0 
-                ? Math.round(analytics.outcomeAchievement.reduce((acc, c) => acc + c.score, 0) / analytics.outcomeAchievement.length)
+              {outcomeAchievement.length > 0
+                ? Math.round(outcomeAchievement.reduce((acc, c) => acc + c.score, 0) / analytics.outcomeAchievement.length)
                 : 0
               }%
             </div>
@@ -268,7 +162,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-800">
-              {analytics.commonMisconceptions.reduce((acc, val) => acc + (val.count || 0), 0)}
+              {commonMisconceptions.reduce((acc, val) => acc + (val.count || 0), 0)}
             </div>
             <span className="text-[10px] text-slate-400 font-semibold mt-1 block">นักศึกษาที่ถูกระบุเป็นกลุ่มเป้าหมาย</span>
           </div>
@@ -350,7 +244,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                     cursor={{ fill: '#f8fafc' }}
                   />
                   <Bar dataKey="score" fill="#3b82f6" radius={[6, 6, 0, 0]}>
-                    {analytics.outcomeAchievement.map((entry, index) => (
+                    {outcomeAchievement.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#a855f7'} />
                     ))}
                   </Bar>
@@ -417,7 +311,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
         
         <div className="w-full h-64 text-xs font-semibold">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={analytics.weeklyTrend} margin={{ left: -20, right: 10 }}>
+            <LineChart data={weeklyTrend} margin={{ left: -20, right: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="day" tick={{ fill: '#64748b' }} tickLine={false} />
               <YAxis tick={{ fill: '#64748b' }} tickLine={false} />
@@ -492,13 +386,11 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
             </thead>
             <tbody className="divide-y divide-slate-50 text-xs">
               {(() => {
-                const studentList = (analytics.students && analytics.students.length > 0) 
-                  ? analytics.students 
-                  : defaultStudents;
+                const studentList = students || [];
 
                 const filtered = studentList.filter(student => 
                   student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                  student.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  student.student_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   student.strengths.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
                   student.weaknesses.some(w => w.toLowerCase().includes(searchQuery.toLowerCase()))
                 );
@@ -521,11 +413,11 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                       : 'text-rose-600 bg-rose-50 border-rose-100';
 
                   return (
-                    <tr key={student.id} className="hover:bg-slate-50/50 transition">
+                    <tr key={student.student_id} className="hover:bg-slate-50/50 transition">
                       {/* ID / Name */}
                       <td className="py-4 px-4">
                         <div className="font-semibold text-slate-800">{student.name}</div>
-                        <div className="font-mono text-[10px] text-slate-400 mt-0.5">{student.id}</div>
+                        <div className="font-mono text-[10px] text-slate-400 mt-0.5">{student.student_id}</div>
                       </td>
                       {/* Quiz Score */}
                       <td className="py-4 px-4 text-center">
@@ -624,7 +516,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   </div>
                   <div>
                     <h4 className="font-display font-extrabold text-slate-800 text-base">{selectedStudent.name}</h4>
-                    <span className="font-mono text-xs text-slate-400 block mt-0.5">รหัสนักศึกษา: {selectedStudent.id}</span>
+                    <span className="font-mono text-xs text-slate-400 block mt-0.5">รหัสนักศึกษา: {selectedStudent.student_id}</span>
                   </div>
                 </div>
                 

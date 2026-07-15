@@ -510,12 +510,18 @@ export default function App() {
                   />
                 )}
                 {teacherView === 'analytics' && (
-                  <TeacherDashboard 
-                    analytics={analytics!} 
-                    isGeneratingInsight={isGeneratingInsight}
-                    apiKeySet={apiKeySet}
-                    onRefreshInsight={() => syncAnalytics(true)}
-                  />
+                    analytics ? (
+                        <TeacherDashboard
+                            analytics={analytics}
+                            isGeneratingInsight={isGeneratingInsight}
+                            apiKeySet={apiKeySet}
+                            onRefreshInsight={() => syncAnalytics(true)}
+                        />
+                    ) : (
+                        <div className="text-center py-10">
+                          Loading analytics...
+                        </div>
+                    )
                 )}
               </div>
             )}

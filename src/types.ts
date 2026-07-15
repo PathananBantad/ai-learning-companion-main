@@ -1,5 +1,5 @@
 export interface LessonData {
-  id: string;
+  student_id: string;
   topic: string;
   learningOutcomes: string[];
   keyConcepts: { title: string; description: string }[];
@@ -30,10 +30,10 @@ export interface QuizAttempt {
 }
 
 export interface StudentAnalytics {
-  id: string;
+  student_id: string;
   name: string;
   quizScore: number;
-  learningProgress: number; // percentage (e.g. 0 to 100)
+  learningProgress: number;
   learningOutcomeAchievement: { name: string; score: number }[];
   strengths: string[];
   weaknesses: string[];
@@ -56,7 +56,6 @@ export interface AnalyticsData {
 }
 
 export interface ChatMessage {
-  id: string;
   sender: 'student' | 'ai';
   text: string;
   timestamp: string;
