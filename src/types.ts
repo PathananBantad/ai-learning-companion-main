@@ -56,6 +56,7 @@ export interface AnalyticsData {
 }
 
 export interface ChatMessage {
+  id: string;
   sender: 'student' | 'ai';
   text: string;
   timestamp: string;

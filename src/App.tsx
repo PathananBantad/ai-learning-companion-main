@@ -241,7 +241,12 @@ export default function App() {
       const res = await fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
+        body: JSON.stringify({
+          answers,
+          name: studentName,
+          studentId: studentId,
+          classCode: studentJoinedCode
+        })
       });
 
       if (!res.ok) throw new Error('Failed to evaluate assessment answers.');

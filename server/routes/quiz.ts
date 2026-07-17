@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase';import {
   saveQuizResult,
   getQuizResults,
 } from "../services/quizResultService";
+import { GEMINI_MODEL } from '../lib/gemini';
+import { generateFeedback } from '../services/feedbackService';
 
 const router = Router();
 
@@ -83,7 +85,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: GEMINI_MODEL,
         contents: generationPrompt,
         config: {
           responseMimeType: 'application/json'
@@ -304,6 +306,14 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
+  // Generate personalized AI feedback
+  const aiFeedback = await generateFeedback(
+    score,
+    strengths,
+    weaknesses,
+    misconceptionsTriggered
+  );
+
   // Provide default feedback/recommendations
   if (score === 100) {
     recommendations.push('Excellent job! You have fully mastered this lesson. Try to assist peers on the course discussion board.');
@@ -349,13 +359,14 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   state.simulatedAnalytics.students.unshift(dynamicStudent);
 
   const attemptResult = {
-    answers,
-    score,
-    strengths: strengths.length > 0 ? strengths : ['General Web Basics'],
-    weaknesses: weaknesses.length > 0 ? weaknesses : [],
-    misconceptionsTriggered,
-    recommendations
-  };
+  answers,
+  score,
+  strengths: strengths.length > 0 ? strengths : ['General Web Basics'],
+  weaknesses: weaknesses.length > 0 ? weaknesses : [],
+  misconceptionsTriggered,
+  recommendations,
+  aiFeedback
+};
 
   try {
     console.log("Before saveQuizResult");

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
+import { GEMINI_MODEL } from '../lib/gemini';
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.post('/chat', async (req: Request, res: Response) => {
       `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: GEMINI_MODEL,
         contents: chatContext
       });
 

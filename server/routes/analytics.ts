@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
 import { getAnalytics } from "../services/analyticsService";
+import { GEMINI_MODEL } from '../lib/gemini';
 
 const router = Router();
 
@@ -25,7 +26,7 @@ Give the instructor a short recommendation in no more than 3 sentences.
 `;
 
         const response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: GEMINI_MODEL,
           contents: prompt,
         });
 
@@ -82,7 +83,7 @@ router.post('/student-insight', async (req: Request, res: Response) => {
       `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
+        model: GEMINI_MODEL,
         contents: prompt,
         config: {
           responseMimeType: 'application/json'
