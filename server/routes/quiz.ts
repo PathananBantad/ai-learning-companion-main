@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
-import { supabase } from '../lib/supabase';import {
+import { supabase } from '../lib/supabase'; import {
   saveQuizResult,
   getQuizResults,
 } from "../services/quizResultService";
@@ -113,14 +113,14 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
       // Persist the generated lesson to Supabase so it survives server restarts
       const { data: lessonData, error: lessonInsertError } = await supabase
-          .from("lessons")
-          .insert({
-            topic: state.currentLesson.topic,
-            learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-            key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-            misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
-          })
-          .select();
+        .from("lessons")
+        .insert({
+          topic: state.currentLesson.topic,
+          learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+          key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+          misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
+        })
+        .select();
 
       console.log("Lesson insert result:", lessonData);
 
@@ -160,8 +160,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       return;
     } catch (err) {
       console.error('Error generating lesson via Gemini:', err);
-      res.status(500).json({ error: 'Failed to generate knowledge base via Gemini. Using fallback configuration.' });
-      return;
+      // Let it fall through to the manual fallback below instead of crashing
     }
   }
 
@@ -212,14 +211,14 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
   // Persist the fallback lesson to Supabase too, so it survives server restarts
   const { data: fallbackLessonData, error: fallbackLessonInsertError } = await supabase
-      .from("lessons")
-      .insert({
-        topic: state.currentLesson.topic,
-        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-        misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
-      })
-      .select();
+    .from("lessons")
+    .insert({
+      topic: state.currentLesson.topic,
+      learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+      key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+      misconceptions: JSON.stringify(state.currentLesson.commonMisconceptions),
+    })
+    .select();
 
   console.log("Fallback lesson insert result:", fallbackLessonData);
 
@@ -326,7 +325,7 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   state.simulatedAnalytics.studentSubmissionsCount = state.simulatedSubmissionsCount;
   // update rolling average
   state.simulatedAnalytics.averageScore = Math.round(
-      ((state.simulatedAnalytics.averageScore * 10) + score) / 11
+    ((state.simulatedAnalytics.averageScore * 10) + score) / 11
   );
 
   // Dynamically insert active student's performance record for the instructor to review
@@ -345,8 +344,8 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
     weaknesses: weaknesses.length > 0 ? weaknesses : ['None'],
     commonMisconceptions: misconceptionsTriggered.length > 0 ? misconceptionsTriggered : ['None'],
     aiFeedbackSummary: score >= 85
-        ? 'Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees.'
-        : 'Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.',
+      ? 'Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees.'
+      : 'Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.',
     recommendedTopics: recommendations.length > 0 ? recommendations : ['Advanced GraphQL paradigms'],
     lastActivity: 'Completed diagnostic quiz just now'
   };
@@ -359,14 +358,14 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   state.simulatedAnalytics.students.unshift(dynamicStudent);
 
   const attemptResult = {
-  answers,
-  score,
-  strengths: strengths.length > 0 ? strengths : ['General Web Basics'],
-  weaknesses: weaknesses.length > 0 ? weaknesses : [],
-  misconceptionsTriggered,
-  recommendations,
-  aiFeedback
-};
+    answers,
+    score,
+    strengths: strengths.length > 0 ? strengths : ['General Web Basics'],
+    weaknesses: weaknesses.length > 0 ? weaknesses : [],
+    misconceptionsTriggered,
+    recommendations,
+    aiFeedback
+  };
 
   try {
     console.log("Before saveQuizResult");

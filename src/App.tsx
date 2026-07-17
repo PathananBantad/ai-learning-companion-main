@@ -305,8 +305,8 @@ export default function App() {
     return <LandingPage onSelectRole={handleSelectRole} />;
   }
 
-  // Intercept students who have not successfully entered the active class code
-  if (role === 'student' && studentJoinedCode !== classCode) {
+  // Intercept students who have not successfully entered the active class code or are missing identity
+  if (role === 'student' && (studentJoinedCode !== classCode || !studentName || !studentId)) {
     return (
       <JoinClass
         onJoinSuccess={(code, studentInfo) => {
@@ -362,8 +362,8 @@ export default function App() {
                 <button
                   onClick={() => setStudentView('dashboard')}
                   className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'dashboard'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Dashboard
@@ -371,8 +371,8 @@ export default function App() {
                 <button
                   onClick={() => setStudentView('chat')}
                   className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'chat'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Chat Assistant
@@ -380,8 +380,8 @@ export default function App() {
                 <button
                   onClick={() => setStudentView('quiz')}
                   className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'quiz'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Quiz Page
@@ -389,8 +389,8 @@ export default function App() {
                 <button
                   onClick={() => setStudentView('feedback')}
                   className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'feedback'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Personalized Feedback
@@ -401,8 +401,8 @@ export default function App() {
                 <button
                   onClick={() => setTeacherView('setup')}
                   className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'setup'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Weekly Lesson Setup
@@ -410,8 +410,8 @@ export default function App() {
                 <button
                   onClick={() => { setTeacherView('analytics'); syncAnalytics(); }}
                   className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'analytics'
-                      ? 'bg-slate-900 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   Course Analytics

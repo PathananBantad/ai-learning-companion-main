@@ -1,9 +1,10 @@
 import { supabase } from "../lib/supabase";
 
-export async function getAnalytics() {
+export async function getAnalytics(classCode: string) {
     const { data, error } = await supabase
         .from("quiz_results")
-        .select("*");
+        .select("*")
+        .eq("class_code", classCode);
 
     if (error) {
         throw error;

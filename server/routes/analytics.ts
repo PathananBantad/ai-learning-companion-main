@@ -9,7 +9,7 @@ const router = Router();
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    const analytics = await getAnalytics();
+    const analytics = await getAnalytics(state.activeClassCode);
 
     const refresh = req.query.refresh === "true";
     const ai = getGeminiClient();
