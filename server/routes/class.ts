@@ -37,11 +37,18 @@ router.post('/class/verify', async (req: Request, res: Response) => {
   }
 
   const normalizedCode = code.trim().toUpperCase();
-  const result = await validateClassCode(normalizedCode);
+  let result = await validateClassCode(normalizedCode);
+
+  // Fallback: If DB check fails but the code matches the active session state
+  if (!result.success && normalizedCode === state.activeClassCode) {
+    result = { success: true, data: { class_code: normalizedCode } };
+    // Ensure the class exists in the DB for future queries
+    await createClass(normalizedCode, state.currentLesson?.topic).catch(() => { });
+  }
 
   if (result.success && name) {
     // ไม่ await ให้บล็อก response — ยิงบันทึก enrollment ไปพร้อมกัน
-    enrollStudent(normalizedCode, name).catch(() => {});
+    enrollStudent(normalizedCode, name).catch(() => { });
   }
 
   res.json({ success: result.success, activeClassCode: normalizedCode });

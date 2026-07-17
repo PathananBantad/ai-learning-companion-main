@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  Award, CheckCircle, AlertTriangle, Compass, Check, ArrowRight, 
-  HelpCircle, Sparkles, BookOpen, RotateCcw, MessageSquare, AlertCircle 
+import {
+  Award, CheckCircle, AlertTriangle, Compass, Check, ArrowRight,
+  HelpCircle, Sparkles, BookOpen, RotateCcw, MessageSquare, AlertCircle
 } from 'lucide-react';
 import { QuizAttempt, QuizQuestion } from '../types';
 
@@ -14,7 +14,7 @@ interface PersonalizedFeedbackProps {
 }
 
 export default function PersonalizedFeedback({ quizAttempt, questions, onNavigate, onRetakeQuiz }: PersonalizedFeedbackProps) {
-  
+
   if (!quizAttempt) {
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm text-center py-16 space-y-5" id="feedback-page">
@@ -33,7 +33,10 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
     );
   }
 
-  const { score, strengths, weaknesses, misconceptionsTriggered, recommendations } = quizAttempt;
+  const { score, strengths, weaknesses, misconceptionsTriggered, recommendations, aiFeedback } = quizAttempt;
+
+  // Use AI recommendations if available, otherwise fallback to standard recommendations
+  const displayRecommendations = aiFeedback?.recommendations?.length ? aiFeedback.recommendations : recommendations;
 
   // Grade classification
   let gradeLetter = 'F';
@@ -60,14 +63,14 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
 
   return (
     <div className="space-y-8 animate-fade-in" id="feedback-page">
-      
+
       {/* Upper Grid: Score Card & Overall Grade feedback */}
       <div className="grid md:grid-cols-12 gap-8">
-        
+
         {/* Score & Grade Display */}
         <div className="md:col-span-5 bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400">คะแนนการประเมิน</span>
-          
+
           <div className="relative flex items-center justify-center">
             {/* grade circle */}
             <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center font-display ${gradeColor}`}>
@@ -88,8 +91,8 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
             <span className="text-xs font-bold uppercase tracking-widest text-slate-400">ความก้าวหน้าทางการเรียน</span>
             <h3 className="font-display font-bold text-xl text-slate-900">ความก้าวหน้าของบทเรียน</h3>
             <p className="text-slate-500 text-xs leading-relaxed">
-            ระบบวิเคราะห์ผลการเรียนจากแบบทดสอบ
-            เพื่อแนะนำแนวทางการเรียนรู้ที่เหมาะสมสำหรับคุณ
+              ระบบวิเคราะห์ผลการเรียนจากแบบทดสอบ
+              เพื่อแนะนำแนวทางการเรียนรู้ที่เหมาะสมสำหรับคุณ
             </p>
           </div>
 
@@ -113,9 +116,9 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
                 </span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-brand-purple h-full transition-all duration-500" 
-                  style={{ width: misconceptionsTriggered.length === 0 ? '100%' : '50%' }} 
+                <div
+                  className="bg-brand-purple h-full transition-all duration-500"
+                  style={{ width: misconceptionsTriggered.length === 0 ? '100%' : '50%' }}
                 />
               </div>
             </div>
@@ -144,7 +147,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
 
       {/* Strengths & Weaknesses Split Grid */}
       <div className="grid md:grid-cols-2 gap-8">
-        
+
         {/* Strengths Card */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
           <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -152,7 +155,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
             จุดแข็งของคุณ
           </h3>
           <p className="text-slate-500 text-xs">หัวข้อที่คุณมีความเข้าใจเป็นอย่างดี</p>
-          
+
           <div className="space-y-3">
             {strengths.map((str, idx) => (
               <div key={idx} className="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100/50 flex items-start gap-3">
@@ -203,7 +206,7 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
             ตรวจพบความเข้าใจที่คลาดเคลื่อน
           </h4>
           <p className="text-xs text-red-800 leading-relaxed">
-          ระบบตรวจพบว่าคุณมีความเข้าใจที่อาจคลาดเคลื่อนในหัวข้อต่อไปนี้
+            ระบบตรวจพบว่าคุณมีความเข้าใจที่อาจคลาดเคลื่อนในหัวข้อต่อไปนี้
           </p>
           <div className="space-y-2">
             {misconceptionsTriggered.map((mis, idx) => (
@@ -222,9 +225,15 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
           <Sparkles className="w-5 h-5 text-brand-purple shrink-0" />
           คำแนะนำจาก AI
         </h3>
-        
+
+        {aiFeedback?.encouragement && (
+          <p className="text-brand-purple text-xs font-semibold bg-brand-purple/5 p-3 rounded-xl border border-brand-purple/10">
+            "{aiFeedback.encouragement}"
+          </p>
+        )}
+
         <div className="space-y-4">
-          {recommendations.map((rec, idx) => (
+          {displayRecommendations.map((rec, idx) => (
             <div key={idx} className="flex gap-4 items-start">
               <div className="w-6 h-6 rounded-full bg-brand-purple/10 text-brand-purple flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                 {idx + 1}

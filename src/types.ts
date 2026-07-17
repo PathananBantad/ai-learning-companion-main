@@ -27,6 +27,14 @@ export interface QuizAttempt {
   weaknesses: string[];
   misconceptionsTriggered: string[];
   recommendations: string[];
+  aiFeedback?: {
+    level: string;
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string[];
+    encouragement: string;
+  };
 }
 
 export interface StudentAnalytics {
