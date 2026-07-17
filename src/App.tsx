@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  Sparkles, GraduationCap, BookOpen, MessageSquare, HelpCircle, 
-  Award, BarChart2, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle 
+import {
+  Sparkles, GraduationCap, BookOpen, MessageSquare, HelpCircle,
+  Award, BarChart2, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle
 } from 'lucide-react';
 
 // Import subcomponents
@@ -61,7 +61,7 @@ export default function App() {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Parallel fetch for lesson and class code
       const [lessonRes, classRes] = await Promise.all([
         fetch('/api/lesson'),
@@ -154,7 +154,7 @@ export default function App() {
       setLesson(data.lesson);
       setQuestions(data.questions);
       setQuizAttempt(null); // Reset student quiz on lesson update
-      
+
       // Clear previous chats and push initial prompt
       setChatHistory([
         {
@@ -241,14 +241,19 @@ export default function App() {
       const res = await fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
+        body: JSON.stringify({
+          answers,
+          name: studentName,
+          studentId: studentId,
+          classCode: studentJoinedCode
+        })
       });
 
       if (!res.ok) throw new Error('Failed to evaluate assessment answers.');
       const data = await res.json();
 
       setQuizAttempt(data);
-      
+
       setRecentActivity(prev => [
         `Completed Practice Quiz (Score: ${data.score}%)`,
         ...prev.slice(0, 4)
@@ -303,7 +308,7 @@ export default function App() {
   // Intercept students who have not successfully entered the active class code
   if (role === 'student' && studentJoinedCode !== classCode) {
     return (
-      <JoinClass 
+      <JoinClass
         onJoinSuccess={(code, studentInfo) => {
           setStudentJoinedCode(code);
           localStorage.setItem('aegis_joined_class_code', code);
@@ -320,14 +325,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between" id="full-app-root">
-      
+
       {/* Top Navigation */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          
+
           {/* Logo & Course */}
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setRole('landing')}
               className="flex items-center gap-2 group text-left"
             >
@@ -351,46 +356,42 @@ export default function App() {
 
           {/* Dynamic Action Buttons based on Role */}
           <div className="flex items-center gap-2">
-            
+
             {role === 'student' ? (
               <>
                 <button
                   onClick={() => setStudentView('dashboard')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'dashboard' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'dashboard'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => setStudentView('chat')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'chat' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'chat'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Chat Assistant
                 </button>
                 <button
                   onClick={() => setStudentView('quiz')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'quiz' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'quiz'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Quiz Page
                 </button>
                 <button
                   onClick={() => setStudentView('feedback')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'feedback' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'feedback'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Personalized Feedback
                 </button>
@@ -399,21 +400,19 @@ export default function App() {
               <>
                 <button
                   onClick={() => setTeacherView('setup')}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === 'setup' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'setup'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Weekly Lesson Setup
                 </button>
                 <button
                   onClick={() => { setTeacherView('analytics'); syncAnalytics(); }}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === 'analytics' 
-                      ? 'bg-slate-900 text-white shadow-md' 
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'analytics'
+                      ? 'bg-slate-900 text-white shadow-md'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Course Analytics
                 </button>
@@ -438,7 +437,7 @@ export default function App() {
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto w-full px-6 py-8 flex-grow">
-        
+
         {isLoading ? (
           <div className="h-96 flex flex-col items-center justify-center gap-4 text-center">
             <RefreshCw className="w-10 h-10 animate-spin text-brand-blue" />
@@ -449,7 +448,7 @@ export default function App() {
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
             <h3 className="font-display font-bold text-lg">Server Connection Interrupted</h3>
             <p className="text-xs leading-relaxed">{error}</p>
-            <button 
+            <button
               onClick={syncSyllabus}
               className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition"
             >
@@ -462,31 +461,31 @@ export default function App() {
             {role === 'student' && (
               <div className="space-y-6">
                 {studentView === 'dashboard' && (
-                  <StudentDashboard 
-                    lesson={lesson!} 
-                    quizAttempt={quizAttempt} 
+                  <StudentDashboard
+                    lesson={lesson!}
+                    quizAttempt={quizAttempt}
                     onNavigate={setStudentView}
                     recentActivity={recentActivity}
                   />
                 )}
                 {studentView === 'chat' && (
-                  <AIChat 
-                    lesson={lesson!} 
-                    chatHistory={chatHistory} 
+                  <AIChat
+                    lesson={lesson!}
+                    chatHistory={chatHistory}
                     onSendMessage={handleSendMessage}
                     isResponding={isRespondingChat}
                   />
                 )}
                 {studentView === 'quiz' && (
-                  <QuizPage 
-                    questions={questions} 
+                  <QuizPage
+                    questions={questions}
                     onSubmitQuiz={handleSubmitQuiz}
                     isSubmitting={isSubmittingQuiz}
                   />
                 )}
                 {studentView === 'feedback' && (
-                  <PersonalizedFeedback 
-                    quizAttempt={quizAttempt} 
+                  <PersonalizedFeedback
+                    quizAttempt={quizAttempt}
                     questions={questions}
                     onNavigate={setStudentView}
                     onRetakeQuiz={handleRetakeQuiz}
@@ -499,8 +498,8 @@ export default function App() {
             {role === 'teacher' && (
               <div className="space-y-6">
                 {teacherView === 'setup' && (
-                  <TeacherPortal 
-                    lesson={lesson!} 
+                  <TeacherPortal
+                    lesson={lesson!}
                     onGenerateKnowledgeBase={handleGenerateKnowledgeBase}
                     isGenerating={isGeneratingLesson}
                     apiKeySet={apiKeySet}
@@ -510,18 +509,18 @@ export default function App() {
                   />
                 )}
                 {teacherView === 'analytics' && (
-                    analytics ? (
-                        <TeacherDashboard
-                            analytics={analytics}
-                            isGeneratingInsight={isGeneratingInsight}
-                            apiKeySet={apiKeySet}
-                            onRefreshInsight={() => syncAnalytics(true)}
-                        />
-                    ) : (
-                        <div className="text-center py-10">
-                          Loading analytics...
-                        </div>
-                    )
+                  analytics ? (
+                    <TeacherDashboard
+                      analytics={analytics}
+                      isGeneratingInsight={isGeneratingInsight}
+                      apiKeySet={apiKeySet}
+                      onRefreshInsight={() => syncAnalytics(true)}
+                    />
+                  ) : (
+                    <div className="text-center py-10">
+                      Loading analytics...
+                    </div>
+                  )
                 )}
               </div>
             )}
