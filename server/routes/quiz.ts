@@ -376,7 +376,8 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
       classCode,
       score,
       totalQuestions: state.quizQuestions.length,
-      aiFeedback: attemptResult,
+      aiFeedback,
+      misconceptionsTriggered,
     });
     console.log("Saved successfully:");
     console.log(saved);

@@ -63,14 +63,12 @@ export async function getAnalytics(classCode: string) {
     const misconceptionMap = new Map<string, number>();
 
     quizResults.forEach((row: any) => {
-        (row.ai_feedback?.misconceptionsTriggered ?? []).forEach(
-            (topic: string) => {
-                misconceptionMap.set(
-                    topic,
-                    (misconceptionMap.get(topic) ?? 0) + 1
-                );
-            }
-        );
+        (row.misconceptions_triggered ?? []).forEach((topic: string) => {
+            misconceptionMap.set(
+                topic,
+                (misconceptionMap.get(topic) ?? 0) + 1
+            );
+        });
     });
 
     const commonMisconceptions = [...misconceptionMap.entries()].map(
@@ -105,7 +103,6 @@ export async function getAnalytics(classCode: string) {
     >();
 
     quizResults.forEach((row: any) => {
-        // ใช้วันที่จริง เช่น 2026-07-15
         const day = new Date(row.created_at).toISOString().split("T")[0];
 
         if (!weeklyMap.has(day)) {
@@ -146,10 +143,10 @@ export async function getAnalytics(classCode: string) {
         weaknesses: item.ai_feedback?.weaknesses ?? [],
 
         commonMisconceptions:
-            item.ai_feedback?.misconceptionsTriggered ?? [],
+            item.misconceptions_triggered ?? [],
 
         aiFeedbackSummary:
-            item.ai_feedback?.recommendations?.join(" ") ?? "",
+            item.ai_feedback?.summary ?? "",
 
         recommendedTopics:
             item.ai_feedback?.recommendations ?? [],

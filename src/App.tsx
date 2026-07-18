@@ -25,7 +25,7 @@ export default function App() {
   const [teacherView, setTeacherView] = useState<'setup' | 'analytics'>('setup');
 
   // Class Code System States
-  const [classCode, setClassCode] = useState<string>('AEGIS101');
+  const [classCode, setClassCode] = useState<string>('');
   const [studentJoinedCode, setStudentJoinedCode] = useState<string | null>(() => {
     return localStorage.getItem('aegis_joined_class_code');
   });
@@ -333,9 +333,10 @@ export default function App() {
           {/* Logo & Course */}
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setRole('landing')}
-              className="flex items-center gap-2 group text-left"
+                onClick={() => setRole('landing')}
+                className="flex items-center gap-2 group text-left"
             >
+
               <div className="bg-brand-blue/10 text-brand-blue p-2 rounded-xl group-hover:bg-brand-blue group-hover:text-white transition">
                 <Sparkles className="w-5 h-5" />
               </div>
@@ -422,7 +423,18 @@ export default function App() {
             {/* Switch role / logout button */}
             <div className="w-px h-6 bg-slate-200 mx-2 hidden sm:block" />
             <button
-              onClick={() => setRole('landing')}
+                onClick={() => {
+
+                  localStorage.removeItem('aegis_joined_class_code');
+                  localStorage.removeItem('aegis_student_name');
+                  localStorage.removeItem('aegis_student_id');
+
+                  setStudentJoinedCode(null);
+                  setStudentName('');
+                  setStudentId('');
+
+                  setRole('landing');
+                }}
               className="text-xs font-bold text-slate-500 hover:text-slate-800 transition py-2 px-3 border border-slate-200 hover:border-slate-300 rounded-xl flex items-center gap-1.5 shadow-sm"
               title="Return to Welcome Screen"
             >

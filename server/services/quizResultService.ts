@@ -1,10 +1,12 @@
 import { supabase } from "../lib/supabase";
 
 export interface QuizFeedback {
+    level: string;
+    summary: string;
     strengths: string[];
     weaknesses: string[];
-    misconceptionsTriggered: string[];
     recommendations: string[];
+    encouragement: string;
 }
 
 interface SaveQuizResultParams {
@@ -14,6 +16,7 @@ interface SaveQuizResultParams {
     score: number;
     totalQuestions: number;
     aiFeedback: QuizFeedback;
+    misconceptionsTriggered: string[];
 }
 
 export async function saveQuizResult({
@@ -23,6 +26,7 @@ export async function saveQuizResult({
                                          score,
                                          totalQuestions,
                                          aiFeedback,
+                                         misconceptionsTriggered,
                                      }: SaveQuizResultParams) {
 
     console.log("===== saveQuizResult =====");
@@ -45,6 +49,7 @@ export async function saveQuizResult({
                 score,
                 total_questions: totalQuestions,
                 ai_feedback: aiFeedback,
+                misconceptions_triggered: misconceptionsTriggered,
             },
         ])
         .select()
