@@ -3,7 +3,8 @@ import { state } from '../data/lesson';
 import {
   createClass,
   validateClassCode,
-  getLatestClassCode
+  getLatestClassCode,
+  getAllClasses
 } from '../services/class.service';
 import { saveProfile } from "../services/profileService";
 
@@ -36,8 +37,8 @@ router.post('/class/generate', async (req: Request, res: Response) => {
   }
 
   await createClass(
-      state.activeClassCode,
-      state.currentLesson?.topic
+    state.activeClassCode,
+    state.currentLesson?.topic
   );
 
   res.json({
@@ -70,23 +71,22 @@ router.post('/class/verify', async (req: Request, res: Response) => {
     };
 
     await createClass(
-        normalizedCode,
-        state.currentLesson?.topic
-    ).catch(() => {});
+      normalizedCode,
+      state.currentLesson?.topic
+    ).catch(() => { });
   }
 
   if (result.success) {
-
-    // Sync memory
-    state.activeClassCode = normalizedCode;
+    // Do not sync memory here, as it changes the active class globally for the instructor dashboard
+    // state.activeClassCode = normalizedCode;
 
     // บันทึกข้อมูลนักศึกษาลง profiles
     if (name && studentId) {
       try {
         await saveProfile(
-            name,
-            studentId,
-            "student"
+          name,
+          studentId,
+          "student"
         );
       } catch (err) {
         console.error("Save profile failed:", err);
@@ -99,6 +99,12 @@ router.post('/class/verify', async (req: Request, res: Response) => {
     activeClassCode: normalizedCode
   });
 
+});
+
+// Get all classes
+router.get('/classes', async (req: Request, res: Response) => {
+  const classes = await getAllClasses();
+  res.json({ classes });
 });
 
 export default router;

@@ -47,6 +47,10 @@ export default function App() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
 
+  // Teacher History States
+  const [pastClasses, setPastClasses] = useState<{ class_code: string, class_name: string, created_at: string }[]>([]);
+  const [viewedClassCode, setViewedClassCode] = useState<string>('');
+
   // Telemetry & Loaders
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingLesson, setIsGeneratingLesson] = useState(false);
@@ -94,17 +98,34 @@ export default function App() {
     }
   };
 
-  const syncAnalytics = async (refresh: boolean = false) => {
+  const syncAnalytics = async (refresh: boolean = false, targetClassCode?: string) => {
     try {
       setIsGeneratingInsight(true);
-      const res = await fetch(`/api/analytics${refresh ? '?refresh=true' : ''}`);
+      const queryParams = new URLSearchParams();
+      if (refresh) queryParams.append('refresh', 'true');
+      if (targetClassCode) queryParams.append('classCode', targetClassCode);
+
+      const res = await fetch(`/api/analytics?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to retrieve class analytics.');
       const data = await res.json();
       setAnalytics(data);
+      if (targetClassCode) setViewedClassCode(targetClassCode);
     } catch (err) {
       console.error(err);
     } finally {
       setIsGeneratingInsight(false);
+    }
+  };
+
+  const fetchPastClasses = async () => {
+    try {
+      const res = await fetch('/api/classes');
+      if (res.ok) {
+        const data = await res.json();
+        setPastClasses(data.classes);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -127,7 +148,6 @@ export default function App() {
     }
   }, [lesson, chatHistory]);
 
-  // Role click triggers
   const handleSelectRole = (selectedRole: 'student' | 'teacher') => {
     setRole(selectedRole);
     if (selectedRole === 'student') {
@@ -135,6 +155,7 @@ export default function App() {
     } else {
       setTeacherView('setup');
       syncAnalytics();
+      fetchPastClasses();
     }
   };
 
@@ -305,8 +326,8 @@ export default function App() {
     return <LandingPage onSelectRole={handleSelectRole} />;
   }
 
-  // Intercept students who have not successfully entered the active class code or are missing identity
-  if (role === 'student' && (studentJoinedCode !== classCode || !studentName || !studentId)) {
+  // Intercept students who have not successfully entered a class code or are missing identity
+  if (role === 'student' && (!studentJoinedCode || !studentName || !studentId)) {
     return (
       <JoinClass
         onJoinSuccess={(code, studentInfo) => {
@@ -333,8 +354,8 @@ export default function App() {
           {/* Logo & Course */}
           <div className="flex items-center gap-4">
             <button
-                onClick={() => setRole('landing')}
-                className="flex items-center gap-2 group text-left"
+              onClick={() => setRole('landing')}
+              className="flex items-center gap-2 group text-left"
             >
 
               <div className="bg-brand-blue/10 text-brand-blue p-2 rounded-xl group-hover:bg-brand-blue group-hover:text-white transition">
@@ -423,18 +444,18 @@ export default function App() {
             {/* Switch role / logout button */}
             <div className="w-px h-6 bg-slate-200 mx-2 hidden sm:block" />
             <button
-                onClick={() => {
+              onClick={() => {
 
-                  localStorage.removeItem('aegis_joined_class_code');
-                  localStorage.removeItem('aegis_student_name');
-                  localStorage.removeItem('aegis_student_id');
+                localStorage.removeItem('aegis_joined_class_code');
+                localStorage.removeItem('aegis_student_name');
+                localStorage.removeItem('aegis_student_id');
 
-                  setStudentJoinedCode(null);
-                  setStudentName('');
-                  setStudentId('');
+                setStudentJoinedCode(null);
+                setStudentName('');
+                setStudentId('');
 
-                  setRole('landing');
-                }}
+                setRole('landing');
+              }}
               className="text-xs font-bold text-slate-500 hover:text-slate-800 transition py-2 px-3 border border-slate-200 hover:border-slate-300 rounded-xl flex items-center gap-1.5 shadow-sm"
               title="Return to Welcome Screen"
             >
@@ -526,7 +547,10 @@ export default function App() {
                       analytics={analytics}
                       isGeneratingInsight={isGeneratingInsight}
                       apiKeySet={apiKeySet}
-                      onRefreshInsight={() => syncAnalytics(true)}
+                      onRefreshInsight={() => syncAnalytics(true, viewedClassCode)}
+                      pastClasses={pastClasses}
+                      viewedClassCode={viewedClassCode || classCode}
+                      onSelectClass={(code) => syncAnalytics(false, code)}
                     />
                   ) : (
                     <div className="text-center py-10">

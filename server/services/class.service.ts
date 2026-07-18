@@ -67,3 +67,17 @@ export const getLatestClassCode = async () => {
 
     return data.class_code;
 };
+
+export const getAllClasses = async () => {
+    const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error getting all classes:', error?.message);
+        return [];
+    }
+
+    return data;
+};
