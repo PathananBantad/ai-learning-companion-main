@@ -3,9 +3,9 @@ import { state } from '../data/lesson';
 import {
   createClass,
   validateClassCode,
-  enrollStudent,
   getLatestClassCode
 } from '../services/class.service';
+import { saveProfile } from "../services/profileService";
 
 const router = Router();
 
@@ -47,18 +47,20 @@ router.post('/class/generate', async (req: Request, res: Response) => {
 
 // Verify entered class code
 router.post('/class/verify', async (req: Request, res: Response) => {
-  const { code, name } = req.body;
+
+  const { code, name, studentId } = req.body;
 
   if (!code) {
-    res.status(400).json({ error: 'Code is required' });
-    return;
+    return res.status(400).json({
+      error: 'Code is required'
+    });
   }
 
   const normalizedCode = code.trim().toUpperCase();
 
   let result = await validateClassCode(normalizedCode);
 
-  // Fallback: If DB check fails but the code matches the active session state
+  // Fallback
   if (!result.success && normalizedCode === state.activeClassCode) {
     result = {
       success: true,
@@ -74,21 +76,29 @@ router.post('/class/verify', async (req: Request, res: Response) => {
   }
 
   if (result.success) {
-    // Sync memory กับฐานข้อมูล
+
+    // Sync memory
     state.activeClassCode = normalizedCode;
 
-    if (name) {
-      enrollStudent(normalizedCode, name).catch(() => {});
+    // บันทึกข้อมูลนักศึกษาลง profiles
+    if (name && studentId) {
+      try {
+        await saveProfile(
+            name,
+            studentId,
+            "student"
+        );
+      } catch (err) {
+        console.error("Save profile failed:", err);
+      }
     }
   }
-
-  // ===== DEBUG LOG =====
-  console.log('Verify result:', result);
 
   res.json({
     success: result.success,
     activeClassCode: normalizedCode
   });
+
 });
 
 export default router;

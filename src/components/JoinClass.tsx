@@ -41,7 +41,7 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
         body: JSON.stringify({
           code: code.trim(),
           studentId: studentId.trim(),
-          studentName: studentName.trim()
+          name: studentName.trim()
         })
       });
 
