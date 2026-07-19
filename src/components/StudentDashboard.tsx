@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   Sparkles, GraduationCap, CheckCircle, ArrowRight, MessageSquare, 
-  HelpCircle, BookOpen, Clock, RefreshCw 
+  HelpCircle, BookOpen, Clock, RefreshCw, PenSquare, EyeOff, Send
 } from 'lucide-react';
 import { LessonData, QuizAttempt } from '../types';
 
@@ -11,12 +11,30 @@ interface StudentDashboardProps {
   quizAttempt: QuizAttempt | null;
   onNavigate: (view: 'dashboard' | 'chat' | 'quiz' | 'feedback') => void;
   recentActivity: string[];
+  onSubmitCourseFeedback: (comment: string, isAnonymous: boolean) => Promise<boolean>;
+  isSubmittingFeedback: boolean;
 }
 
-export default function StudentDashboard({ lesson, quizAttempt, onNavigate, recentActivity }: StudentDashboardProps) {
+export default function StudentDashboard({ lesson, quizAttempt, onNavigate, recentActivity, onSubmitCourseFeedback, isSubmittingFeedback }: StudentDashboardProps) {
   // Compute progress based on whether quiz is taken and activities completed
   const quizScore = quizAttempt ? quizAttempt.score : 0;
   const progressPercent = quizAttempt ? 100 : 35;
+
+  // Course comment form state
+  const [commentText, setCommentText] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+
+  const handleSubmitComment = async () => {
+    if (!commentText.trim()) return;
+    const success = await onSubmitCourseFeedback(commentText.trim(), isAnonymous);
+    if (success) {
+      setCommentText('');
+      setIsAnonymous(false);
+      setFeedbackSent(true);
+      setTimeout(() => setFeedbackSent(false), 3000);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fade-in" id="student-dashboard">
@@ -213,6 +231,56 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      {/* Course Comment Box */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4" id="course-comment-box">
+        <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-2">
+          <PenSquare className="w-4 h-4 text-slate-400" />
+          แสดงความคิดเห็นเกี่ยวกับรายวิชา
+        </h3>
+        <p className="text-slate-500 text-xs -mt-2">ความคิดเห็นของคุณจะถูกส่งให้ผู้สอนเห็นเพื่อนำไปปรับปรุงการเรียนการสอน</p>
+
+        <textarea
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          placeholder="เช่น อยากให้อธิบายหัวข้อนี้ช้าลงอีกนิด หรือ ชอบตัวอย่างในคาบเรียนนี้มาก..."
+          rows={3}
+          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm transition resize-none"
+        />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue/50"
+            />
+            <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+            <span>โพสต์แบบไม่ระบุตัวตน (นิรนาม)</span>
+          </label>
+
+          <div className="flex items-center gap-3">
+            {feedbackSent && (
+              <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5" /> ส่งความคิดเห็นแล้ว
+              </span>
+            )}
+            <button
+              onClick={handleSubmitComment}
+              disabled={!commentText.trim() || isSubmittingFeedback}
+              className="bg-brand-blue hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+            >
+              {isSubmittingFeedback ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5" />
+              )}
+              <span>ส่งความคิดเห็น</span>
+            </button>
+          </div>
         </div>
       </div>
 

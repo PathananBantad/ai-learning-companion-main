@@ -69,3 +69,13 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
 }
+
+export interface CourseFeedback {
+  id: string;
+  class_code: string;
+  student_name: string | null;
+  student_id: string | null;
+  is_anonymous: boolean;
+  comment: string;
+  created_at: string;
+}

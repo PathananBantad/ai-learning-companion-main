@@ -14,15 +14,16 @@ import QuizPage from './components/QuizPage';
 import PersonalizedFeedback from './components/PersonalizedFeedback';
 import TeacherDashboard from './components/TeacherDashboard';
 import JoinClass from './components/JoinClass';
+import StudentComments from './components/StudentComments';
 
 // Import Types
-import { LessonData, QuizQuestion, QuizAttempt, AnalyticsData, ChatMessage } from './types';
+import { LessonData, QuizQuestion, QuizAttempt, AnalyticsData, ChatMessage, CourseFeedback } from './types';
 
 export default function App() {
   // Navigation State
   const [role, setRole] = useState<'landing' | 'student' | 'teacher'>('landing');
   const [studentView, setStudentView] = useState<'dashboard' | 'chat' | 'quiz' | 'feedback'>('dashboard');
-  const [teacherView, setTeacherView] = useState<'setup' | 'analytics'>('setup');
+  const [teacherView, setTeacherView] = useState<'setup' | 'analytics' | 'comments'>('setup');
 
   // Class Code System States
   const [classCode, setClassCode] = useState<string>('');
@@ -46,6 +47,11 @@ export default function App() {
   const [quizAttempt, setQuizAttempt] = useState<QuizAttempt | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
+
+  // Course Comments / Feedback States
+  const [courseFeedbackList, setCourseFeedbackList] = useState<CourseFeedback[]>([]);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
   // Teacher History States
   const [pastClasses, setPastClasses] = useState<{ class_code: string, class_name: string, created_at: string }[]>([]);
@@ -126,6 +132,23 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchCourseFeedback = async (targetClassCode?: string) => {
+    try {
+      setIsLoadingFeedback(true);
+      const queryParams = new URLSearchParams();
+      if (targetClassCode) queryParams.append('classCode', targetClassCode);
+
+      const res = await fetch(`/api/course-feedback?${queryParams.toString()}`);
+      if (!res.ok) throw new Error('Failed to retrieve student comments.');
+      const data = await res.json();
+      setCourseFeedbackList(data.feedback || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingFeedback(false);
     }
   };
 
@@ -290,6 +313,39 @@ export default function App() {
     }
   };
 
+  // POST: Student submits a course comment (optionally anonymous)
+  const handleSubmitCourseFeedback = async (comment: string, isAnonymous: boolean): Promise<boolean> => {
+    try {
+      setIsSubmittingFeedback(true);
+      const res = await fetch('/api/course-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          classCode: studentJoinedCode,
+          comment,
+          isAnonymous,
+          studentName: studentName,
+          studentId: studentId
+        })
+      });
+
+      if (!res.ok) throw new Error('Failed to submit course comment.');
+
+      setRecentActivity(prev => [
+        'Submitted a course comment',
+        ...prev.slice(0, 4)
+      ]);
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการส่งความคิดเห็น กรุณาลองใหม่อีกครั้ง');
+      return false;
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   const handleRetakeQuiz = () => {
     setQuizAttempt(null);
     setStudentView('quiz');
@@ -438,6 +494,15 @@ export default function App() {
                 >
                   Course Analytics
                 </button>
+                <button
+                  onClick={() => { setTeacherView('comments'); fetchCourseFeedback(viewedClassCode || classCode); }}
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'comments'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                >
+                  Student Comments
+                </button>
               </>
             )}
 
@@ -499,6 +564,8 @@ export default function App() {
                     quizAttempt={quizAttempt}
                     onNavigate={setStudentView}
                     recentActivity={recentActivity}
+                    onSubmitCourseFeedback={handleSubmitCourseFeedback}
+                    isSubmittingFeedback={isSubmittingFeedback}
                   />
                 )}
                 {studentView === 'chat' && (
@@ -557,6 +624,16 @@ export default function App() {
                       Loading analytics...
                     </div>
                   )
+                )}
+                {teacherView === 'comments' && (
+                  <StudentComments
+                    feedbackList={courseFeedbackList}
+                    isLoading={isLoadingFeedback}
+                    onRefresh={() => fetchCourseFeedback(viewedClassCode || classCode)}
+                    pastClasses={pastClasses}
+                    viewedClassCode={viewedClassCode || classCode}
+                    onSelectClass={(code) => { setViewedClassCode(code); fetchCourseFeedback(code); }}
+                  />
                 )}
               </div>
             )}
