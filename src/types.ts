@@ -4,7 +4,7 @@ export interface LessonData {
   learningOutcomes: string[];
   keyConcepts: { title: string; description: string }[];
   commonMisconceptions: { title: string; explanation: string }[];
-  knowledgeBaseStatus: 'idle' | 'uploading' | 'ready';
+  knowledgeBaseStatus: "idle" | "uploading" | "ready";
   uploadedFiles: string[];
   summary: string;
 }
@@ -57,7 +57,7 @@ export interface AnalyticsData {
 
 export interface ChatMessage {
   id: string;
-  sender: 'student' | 'ai';
+  sender: "student" | "ai";
   text: string;
   timestamp: string;
 }
