@@ -1,10 +1,24 @@
+import { RetrievalResult } from "../services/retrieval.service";
+import { LessonData } from "../../src/types";
+/*
 interface LessonContext {
   topic: string;
   keyConcepts: { title: string; description: string }[];
   commonMisconceptions: { title: string; explanation: string }[];
 }
+*/
+export function buildTutorPrompt(
+  lesson: LessonData,
+  question: string,
+  contexts: RetrievalResult[],
+) {
+  const retrievedContext = contexts
+    .map(
+      (c) => `Source: ${c.source}
+${c.content}`,
+    )
+    .join("\n\n");
 
-export function buildTutorPrompt(lesson: LessonContext, question: string) {
   return `
 You are an AI Learning Companion for university students.
 
@@ -29,6 +43,9 @@ Common Misconceptions:
 ${lesson.commonMisconceptions
   .map((m) => `- ${m.title}: ${m.explanation}`)
   .join("\n")}
+
+Retrieved Context
+${retrievedContext}
 
 Student Question:
 ${question}

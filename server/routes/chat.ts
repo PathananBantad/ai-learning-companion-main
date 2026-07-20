@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { state } from "../data/lesson";
 import { getGeminiClient } from "../lib/gemini";
 import { buildTutorPrompt } from "../prompts/tutorPrompt";
+import { retrieveContext } from "../services/retrieval.service";
 
 const router = Router();
 
@@ -18,9 +19,12 @@ router.post("/chat", async (req: Request, res: Response) => {
   const ai = getGeminiClient();
   if (ai) {
     try {
+      const contexts = await retrieveContext(latestUserMessage);
+
       const chatContext = buildTutorPrompt(
         state.currentLesson,
         latestUserMessage,
+        contexts,
       );
 
       const response = await ai.models.generateContent({
@@ -35,12 +39,10 @@ router.post("/chat", async (req: Request, res: Response) => {
       return;
     } catch (err) {
       console.error("Error generating AI chat response:", err);
-      res
-        .status(500)
-        .json({
-          error:
-            "Failed to connect to AI server. Simulating fallback offline tutoring response.",
-        });
+      res.status(500).json({
+        error:
+          "Failed to connect to AI server. Simulating fallback offline tutoring response.",
+      });
       return;
     }
   }
