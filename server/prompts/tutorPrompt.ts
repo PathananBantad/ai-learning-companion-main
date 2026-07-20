@@ -11,6 +11,7 @@ export function buildTutorPrompt(
   lesson: LessonData,
   question: string,
   contexts: RetrievalResult[],
+  history: string,
 ) {
   const retrievedContext = contexts
     .map(
@@ -46,6 +47,9 @@ ${lesson.commonMisconceptions
 
 Retrieved Context
 ${retrievedContext}
+
+Conversation History
+${history}
 
 Student Question:
 ${question}

@@ -1,10 +1,11 @@
 import { Router, Request, Response } from "express";
 import { generateTutorResponse } from "../services/chat.service";
+import { ChatMessage } from "../types/chat";
 
 const router = Router();
 
 router.post("/chat", async (req: Request, res: Response) => {
-  const { messages } = req.body;
+  const { messages }: { messages: ChatMessage[] } = req.body;
 
   if (!messages || messages.length === 0) {
     return res.status(400).json({
@@ -12,10 +13,8 @@ router.post("/chat", async (req: Request, res: Response) => {
     });
   }
 
-  const latestUserMessage = messages[messages.length - 1].text;
-
   try {
-    const result = await generateTutorResponse(latestUserMessage);
+    const result = await generateTutorResponse(messages);
     return res.json(result);
   } catch (err) {
     console.error(err);
