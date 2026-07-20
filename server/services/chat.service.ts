@@ -3,14 +3,16 @@ import { getGeminiClient, GEMINI_MODEL } from "../lib/gemini";
 import { buildTutorPrompt } from "../prompts/tutorPrompt";
 import { retrieveContext } from "./retrieval.service";
 import { ChatMessage } from "../types/chat";
+import { detectIntent } from "./intent.service";
 
 export async function generateTutorResponse(messages: ChatMessage[]) {
-  const latestQuestion = messages[messages.length - 1].text;
+  const latestQuestion = messages[messages.length - 1]?.text ?? "";
+  const intent = detectIntent(latestQuestion);
 
   const contexts = await retrieveContext(latestQuestion);
 
   const conversationHistory = messages
-    .map((m) => `${m.role.toUpperCase()}: ${m.text}`)
+    .map((m) => `${(m.role ?? "user").toUpperCase()}: ${m.text}`)
     .join("\n");
 
   const prompt = buildTutorPrompt(
@@ -18,6 +20,7 @@ export async function generateTutorResponse(messages: ChatMessage[]) {
     latestQuestion,
     contexts,
     conversationHistory,
+    intent,
   );
 
   const ai = getGeminiClient();
