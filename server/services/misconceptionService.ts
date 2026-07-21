@@ -1,33 +1,81 @@
-// server/services/misconceptionService.ts
-//
-// Pure function: given the quiz questions (with their misconceptionMap, produced by
-// quizService.ts at generation time) and the student's raw answers, figure out which
-// misconceptions were actually triggered.
+import { getGeminiClient, GEMINI_MODEL } from "../lib/gemini";
+import { LessonData } from "../../src/types";
 
-import { QuizQuestion } from '../data/lesson';
+export interface MisconceptionResult {
+  detected: boolean;
+  concept?: string;
+  explanation?: string;
+  severity?: "low" | "medium" | "high";
+}
 
-export function detectMisconceptions(
-  quizQuestions: QuizQuestion[],
-  answers: Record<string, number>
-): string[] {
-  const misconceptions: string[] = [];
+export async function detectMisconception(
+  studentAnswer: string,
+  lesson: LessonData,
+): Promise<MisconceptionResult> {
+  const ai = getGeminiClient();
 
-  quizQuestions.forEach((question) => {
-    const studentAnswer = answers[question.id];
+  if (!ai) {
+    return {
+      detected: false,
+    };
+  }
 
-    if (studentAnswer === undefined) return;
-    if (studentAnswer === question.correctIndex) return;
+  const prompt = `
+You are an educational assessment AI.
 
-    const mapped = question.misconceptionMap?.[String(studentAnswer)];
+Your job is to detect conceptual misunderstanding.
 
-    if (mapped) {
-      misconceptions.push(mapped);
-    } else {
-      misconceptions.push(
-        `ยังไม่เข้าใจแนวคิดเรื่อง "${question.conceptMatched}" อย่างถ่องแท้`
-      );
-    }
+Analyze the student's statement:
+
+"${studentAnswer}"
+
+
+Lesson Topic:
+${lesson.topic}
+
+
+Key Concepts:
+${lesson.keyConcepts.map((c) => `- ${c.title}: ${c.description}`).join("\n")}
+
+
+Known Misconceptions:
+${lesson.commonMisconceptions
+  .map((m) => `- ${m.title}: ${m.explanation}`)
+  .join("\n")}
+
+
+Determine whether the student has a misconception.
+
+Return ONLY JSON:
+
+{
+  "detected": true,
+  "concept": "concept name",
+  "explanation": "why this is incorrect",
+  "severity": "low"
+}
+
+If there is no misconception:
+
+{
+  "detected": false
+}
+`;
+
+  const response = await ai.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: prompt,
   });
 
-  return Array.from(new Set(misconceptions));
+  try {
+    const text = response.text ?? "{}";
+
+    const cleaned = text.replace("```json", "").replace("```", "").trim();
+
+    return JSON.parse(cleaned);
+  } catch {
+    return {
+      detected: false,
+    };
+  }
 }
