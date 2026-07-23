@@ -38,6 +38,38 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
   // Use AI recommendations if available, otherwise fallback to standard recommendations
   const displayRecommendations = aiFeedback?.recommendations?.length ? aiFeedback.recommendations : recommendations;
 
+  // Each wrong answer has a misconception and a review tip from the quiz generator.
+  // Use that per-option data so this card explains exactly what needs improvement.
+  const improvementDetails = questions
+    .filter((question) => {
+      const selectedAnswer = quizAttempt.answers[question.id];
+      return selectedAnswer !== undefined && selectedAnswer !== question.correctIndex;
+    })
+    .map((question) => {
+      const selectedAnswer = quizAttempt.answers[question.id];
+      const selectedOption = question.options[selectedAnswer];
+      const correctOption = question.options[question.correctIndex];
+
+      return {
+        id: question.id,
+        concept: question.conceptMatched,
+        misconception: question.misconceptionMap?.[String(selectedAnswer)]
+          ?? `คุณเลือก “${selectedOption}” แต่คำตอบที่ถูกต้องคือ “${correctOption}” — ${question.explanation}`,
+        recommendation: question.recommendationMap?.[String(selectedAnswer)]
+          ?? `ทบทวนแนวคิดเรื่อง ${question.conceptMatched} โดยเปรียบเทียบคำตอบที่เลือกกับคำตอบที่ถูกต้อง แล้วลองอธิบายเหตุผลด้วยคำของตนเองอีกครั้ง`
+      };
+    });
+
+  // Supports attempts created before per-option feedback was added.
+  const displayedImprovements = improvementDetails.length > 0
+    ? improvementDetails
+    : weaknesses.map((concept, index) => ({
+      id: `weakness-${index}`,
+      concept,
+      misconception: `ผลการทำแบบทดสอบแสดงว่ายังมีจุดที่ต้องทำความเข้าใจเพิ่มในหัวข้อ ${concept}`,
+      recommendation: `ทบทวนคำอธิบายและตัวอย่างของ ${concept} แล้วลองทำแบบทดสอบอีกครั้ง`
+    }));
+
   // Grade classification
   let gradeLetter = 'F';
   let gradeColor = 'text-red-500 bg-red-50 border-red-200';
@@ -178,18 +210,15 @@ export default function PersonalizedFeedback({ quizAttempt, questions, onNavigat
           <p className="text-slate-500 text-xs">หัวข้อที่ควรทบทวนเพิ่มเติม</p>
 
           <div className="space-y-3">
-            {weaknesses.length === 0 ? (
+            {displayedImprovements.length === 0 ? (
               <div className="p-4 bg-emerald-50 text-emerald-800 text-xs rounded-xl font-medium">
                 ยอดเยี่ยม! ไม่พบจุดอ่อนในการทำแบบทดสอบ
               </div>
             ) : (
-              weaknesses.map((weak, idx) => (
-                <div key={idx} className="bg-amber-50/50 p-3.5 rounded-xl border border-amber-100 flex items-start gap-3">
-                  <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-xs font-bold text-amber-900">{weak}</h4>
-                    <p className="text-amber-800/80 text-[11px] mt-0.5">แนะนำให้ทบทวนหัวข้อนี้กับผู้ช่วย AI</p>
-                  </div>
+              displayedImprovements.map((item) => (
+                <div key={item.id} className="bg-amber-50/50 p-3.5 rounded-xl border border-amber-100 flex items-center gap-3">
+                  <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0" />
+                  <h4 className="text-xs font-bold text-amber-900">{item.concept}</h4>
                 </div>
               ))
             )}

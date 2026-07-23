@@ -1,12 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
-import { supabase } from '../lib/supabase'; import {
+import { supabase } from '../lib/supabase';
+import {
   saveQuizResult,
   getQuizResults,
 } from "../services/quizResultService";
 import { GEMINI_MODEL } from '../lib/gemini';
 import { generateFeedback } from '../services/feedbackService';
+import { detectMisconceptions } from '../services/misconceptionService';
+import { generateRecommendations } from '../services/recommendationService';
 
 const router = Router();
 
@@ -33,6 +36,12 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
         Create a comprehensive, highly educational Knowledge Base and lesson plan for the topic: "${targetTopic}".
         ${manualPrompt ? `Additional instructor guidelines: "${manualPrompt}"` : ''}
 
+        For EVERY quiz question, you MUST also include "misconceptionMap" and "recommendationMap".
+        - The keys are the index (as a string) of each WRONG option — i.e. every index except correctIndex.
+        - Each value in "misconceptionMap" must describe the SPECIFIC wrong belief a student would hold if they picked that exact wrong option. Do not write a generic statement like "does not understand the concept" — describe what the student likely believes instead. Write in Thai.
+        - Each value in "recommendationMap" must give a specific, actionable review tip tied to that specific wrong option. Write in Thai.
+        - Do not reuse the same misconception or recommendation text across different wrong options in the same question — each wrong option represents a distinct misunderstanding.
+
         Respond STRICTLY with a valid JSON object matching this schema. Do not output markdown backticks like \`\`\`json or any text other than the raw JSON object itself:
         {
           "topic": "Cleaned up topic name",
@@ -54,7 +63,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 0,
               "explanation": "Clear educational explanation of why Option A is correct",
-              "conceptMatched": "Concept 1 Title"
+              "conceptMatched": "Concept 1 Title",
+              "misconceptionMap": {
+                "1": "The specific wrong belief a student holds if they pick Option B (in Thai)",
+                "2": "The specific wrong belief a student holds if they pick Option C (in Thai)",
+                "3": "The specific wrong belief a student holds if they pick Option D (in Thai)"
+              },
+              "recommendationMap": {
+                "1": "What to review if the student picked Option B (in Thai)",
+                "2": "What to review if the student picked Option C (in Thai)",
+                "3": "What to review if the student picked Option D (in Thai)"
+              }
             },
             {
               "id": "q2",
@@ -62,7 +81,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 1,
               "explanation": "Clear educational explanation of why Option B is correct",
-              "conceptMatched": "Concept 2 Title"
+              "conceptMatched": "Concept 2 Title",
+              "misconceptionMap": {
+                "0": "The specific wrong belief a student holds if they pick Option A (in Thai)",
+                "2": "The specific wrong belief a student holds if they pick Option C (in Thai)",
+                "3": "The specific wrong belief a student holds if they pick Option D (in Thai)"
+              },
+              "recommendationMap": {
+                "0": "What to review if the student picked Option A (in Thai)",
+                "2": "What to review if the student picked Option C (in Thai)",
+                "3": "What to review if the student picked Option D (in Thai)"
+              }
             },
             {
               "id": "q3",
@@ -70,7 +99,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 2,
               "explanation": "Clear educational explanation of why Option C is correct",
-              "conceptMatched": "Concept 3 Title"
+              "conceptMatched": "Concept 3 Title",
+              "misconceptionMap": {
+                "0": "The specific wrong belief a student holds if they pick Option A (in Thai)",
+                "1": "The specific wrong belief a student holds if they pick Option B (in Thai)",
+                "3": "The specific wrong belief a student holds if they pick Option D (in Thai)"
+              },
+              "recommendationMap": {
+                "0": "What to review if the student picked Option A (in Thai)",
+                "1": "What to review if the student picked Option B (in Thai)",
+                "3": "What to review if the student picked Option D (in Thai)"
+              }
             },
             {
               "id": "q4",
@@ -78,7 +117,17 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 3,
               "explanation": "Clear educational explanation correcting the misconception",
-              "conceptMatched": "Concept 1 Title"
+              "conceptMatched": "Concept 1 Title",
+              "misconceptionMap": {
+                "0": "The specific wrong belief a student holds if they pick Option A (in Thai)",
+                "1": "The specific wrong belief a student holds if they pick Option B (in Thai)",
+                "2": "The specific wrong belief a student holds if they pick Option C (in Thai)"
+              },
+              "recommendationMap": {
+                "0": "What to review if the student picked Option A (in Thai)",
+                "1": "What to review if the student picked Option B (in Thai)",
+                "2": "What to review if the student picked Option C (in Thai)"
+              }
             }
           ]
         }
@@ -276,8 +325,6 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   let correctCount = 0;
   const strengths: string[] = [];
   const weaknesses: string[] = [];
-  const misconceptionsTriggered: string[] = [];
-  const recommendations: string[] = [];
 
   state.quizQuestions.forEach((q) => {
     const studentAnswer = answers[q.id];
@@ -292,33 +339,22 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
       if (!weaknesses.includes(q.conceptMatched)) {
         weaknesses.push(q.conceptMatched);
       }
-      if (q.id === 'q2' && studentAnswer === 0) {
-        misconceptionsTriggered.push('Hiding query params equals encryption');
-        recommendations.push('Review how HTTPS/TLS TLS handshake actually secures raw HTTP body streams.');
-      }
-      if (q.id === 'q3') {
-        misconceptionsTriggered.push('Confusing safe operations with idempotent operations');
-        recommendations.push('Recall that an action is idempotent if repeating it yields the same server state, even if it alters it once (like PUT).');
-      }
     }
   });
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
-  // Generate personalized AI feedback
+  // เรียกใช้ service ของ AI#2 แทน logic hardcode เดิม
+  const misconceptionsTriggered = detectMisconceptions(state.quizQuestions, answers);
+  const recommendations = generateRecommendations(state.quizQuestions, answers, score);
+
+  // Generate personalized AI feedback (ต้องอยู่หลัง misconceptionsTriggered เพราะใช้ค่านี้)
   const aiFeedback = await generateFeedback(
     score,
     strengths,
     weaknesses,
     misconceptionsTriggered
   );
-
-  // Provide default feedback/recommendations
-  if (score === 100) {
-    recommendations.push('Excellent job! You have fully mastered this lesson. Try to assist peers on the course discussion board.');
-  } else {
-    recommendations.push('Use the AI chat assistant to ask for "Give me an example" regarding your incorrect concepts.');
-  }
 
   // Keep active simulated analytics updated with the new result
   state.simulatedSubmissionsCount++;

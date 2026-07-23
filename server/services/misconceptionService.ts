@@ -18,15 +18,9 @@ export function detectMisconceptions(
     if (studentAnswer === undefined) return;
     if (studentAnswer === question.correctIndex) return;
 
-    const mapped = question.misconceptionMap?.[String(studentAnswer)];
-
-    if (mapped) {
-      misconceptions.push(mapped);
-    } else {
-      misconceptions.push(
-        `ยังไม่เข้าใจแนวคิดเรื่อง "${question.conceptMatched}" อย่างถ่องแท้`
-      );
-    }
+    // การ์ด "หัวข้อที่ควรพัฒนา" อยากโชว์แค่ชื่อหัวข้อ ไม่โชว์จุดสับสนละเอียด
+    // จึงเก็บแค่ conceptMatched (ชื่อหัวข้อ) พอ ไม่ต้อง fallback เป็นประโยคอธิบาย
+    misconceptions.push(question.conceptMatched);
   });
 
   return Array.from(new Set(misconceptions));
