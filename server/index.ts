@@ -7,7 +7,7 @@ import classRouter from './routes/class';
 import quizRouter from './routes/quiz';
 import analyticsRouter from './routes/analytics';
 import chatRouter from './routes/chat';
-import classRoutes from './routes/class.routes';
+import courseFeedbackRouter from './routes/courseFeedback';
 
 dotenv.config();
 
@@ -22,6 +22,7 @@ async function startServer() {
   app.use('/api', quizRouter);
   app.use('/api', analyticsRouter);
   app.use('/api', chatRouter);
+  app.use('/api', courseFeedbackRouter);
 
   // Serve static client files in production, use Vite middleware in development
   if (process.env.NODE_ENV !== 'production') {

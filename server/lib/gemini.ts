@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 // Central place to change the Gemini model version for the whole app
-export const GEMINI_MODEL = 'gemini-3.5-flash';
+export const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 
 let geminiClient: GoogleGenAI | null = null;
 

@@ -1,5 +1,5 @@
 export interface LessonData {
-  id: string;
+  student_id: string;
   topic: string;
   learningOutcomes: string[];
   keyConcepts: { title: string; description: string }[];
@@ -27,13 +27,21 @@ export interface QuizAttempt {
   weaknesses: string[];
   misconceptionsTriggered: string[];
   recommendations: string[];
+  aiFeedback?: {
+    level: string;
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string[];
+    encouragement: string;
+  };
 }
 
 export interface StudentAnalytics {
-  id: string;
+  student_id: string;
   name: string;
   quizScore: number;
-  learningProgress: number; // percentage (e.g. 0 to 100)
+  learningProgress: number;
   learningOutcomeAchievement: { name: string; score: number }[];
   strengths: string[];
   weaknesses: string[];
@@ -60,4 +68,14 @@ export interface ChatMessage {
   sender: "student" | "ai";
   text: string;
   timestamp: string;
+}
+
+export interface CourseFeedback {
+  id: string;
+  class_code: string;
+  student_name: string | null;
+  student_id: string | null;
+  is_anonymous: boolean;
+  comment: string;
+  created_at: string;
 }

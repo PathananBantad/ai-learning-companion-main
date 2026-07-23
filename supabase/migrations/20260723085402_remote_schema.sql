@@ -1,0 +1,16 @@
+DROP POLICY "Allow public insert" ON public.course_feedback;
+DROP POLICY "Allow public read" ON public.course_feedback;
+ALTER TABLE public.course_feedback ALTER COLUMN class_code SET NOT NULL;
+ALTER TABLE public.course_feedback ALTER COLUMN created_at DROP NOT NULL;
+ALTER TABLE public.course_feedback ALTER COLUMN id SET DEFAULT extensions.uuid_generate_v4();
+ALTER TABLE public.course_feedback ALTER COLUMN is_anonymous DROP NOT NULL;
+CREATE TABLE public.conversation_logs (id uuid DEFAULT gen_random_uuid() NOT NULL, session_id bigint NOT NULL, role text NOT NULL, message text NOT NULL, intent text, misconception_detected boolean DEFAULT false, misconception_concept text, created_at timestamp with time zone DEFAULT now());
+ALTER TABLE public.conversation_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversation_logs ADD CONSTRAINT conversation_logs_pkey PRIMARY KEY (id);
+ALTER TABLE public.conversation_logs ADD CONSTRAINT conversation_logs_role_check CHECK (role = ANY (ARRAY['user'::text, 'assistant'::text]));
+ALTER TABLE public.conversation_logs ADD CONSTRAINT conversation_logs_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.student_sessions(id) ON DELETE CASCADE;
+GRANT ALL ON public.conversation_logs TO anon;
+GRANT ALL ON public.conversation_logs TO authenticated;
+GRANT ALL ON public.conversation_logs TO service_role;
+CREATE POLICY "Allow insert conversation logs" ON public.conversation_logs FOR INSERT WITH CHECK (true);
+ALTER TABLE public.quiz_results ADD COLUMN misconceptions_triggered jsonb DEFAULT '[]'::jsonb;

@@ -1,5 +1,5 @@
 import { getGeminiClient, GEMINI_MODEL } from "../lib/gemini";
-import { LessonData } from "../../src/types";
+import { Lesson, QuizQuestion } from "../data/lesson";
 
 export interface MisconceptionResult {
   detected: boolean;
@@ -8,9 +8,13 @@ export interface MisconceptionResult {
   severity?: "low" | "medium" | "high";
 }
 
+// ============================================================
+// AI Tutor Chat
+// ใช้ตรวจ misconception จากข้อความที่นักศึกษาพิมพ์ถาม
+// ============================================================
 export async function detectMisconception(
   studentAnswer: string,
-  lesson: LessonData,
+  lesson: Lesson,
 ): Promise<MisconceptionResult> {
   const ai = getGeminiClient();
 
@@ -29,20 +33,16 @@ Analyze the student's statement:
 
 "${studentAnswer}"
 
-
 Lesson Topic:
 ${lesson.topic}
 
-
 Key Concepts:
 ${lesson.keyConcepts.map((c) => `- ${c.title}: ${c.description}`).join("\n")}
-
 
 Known Misconceptions:
 ${lesson.commonMisconceptions
   .map((m) => `- ${m.title}: ${m.explanation}`)
   .join("\n")}
-
 
 Determine whether the student has a misconception.
 
@@ -78,4 +78,39 @@ If there is no misconception:
       detected: false,
     };
   }
+}
+
+// ============================================================
+// Quiz
+// ใช้ตรวจ misconception จากคำตอบของนักศึกษา
+// โดยดูจาก misconceptionMap ของแต่ละข้อ
+// ============================================================
+export function detectQuizMisconceptions(
+  questions: QuizQuestion[],
+  answers: Record<string, number>,
+): string[] {
+  const misconceptions: string[] = [];
+
+  questions.forEach((question) => {
+    const selectedAnswer = answers[question.id];
+
+    // ยังไม่ได้ตอบ
+    if (selectedAnswer === undefined) {
+      return;
+    }
+
+    // ตอบถูก ไม่เกิด misconception
+    if (selectedAnswer === question.correctIndex) {
+      return;
+    }
+
+    // ดึง misconception ที่ตรงกับตัวเลือกที่นักศึกษาเลือก
+    const misconception = question.misconceptionMap?.[String(selectedAnswer)];
+
+    if (misconception && !misconceptions.includes(misconception)) {
+      misconceptions.push(misconception);
+    }
+  });
+
+  return misconceptions;
 }

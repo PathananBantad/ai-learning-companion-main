@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { 
-  Sparkles, GraduationCap, BookOpen, MessageSquare, HelpCircle, 
-  Award, BarChart2, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle 
+import {
+  Sparkles, GraduationCap, BookOpen, MessageSquare, HelpCircle,
+  Award, BarChart2, LogOut, ArrowLeft, RefreshCw, AlertCircle, CheckCircle
 } from 'lucide-react';
 
 // Import subcomponents
@@ -14,22 +14,31 @@ import QuizPage from './components/QuizPage';
 import PersonalizedFeedback from './components/PersonalizedFeedback';
 import TeacherDashboard from './components/TeacherDashboard';
 import JoinClass from './components/JoinClass';
+import StudentComments from './components/StudentComments';
 
 // Import Types
-import { LessonData, QuizQuestion, QuizAttempt, AnalyticsData, ChatMessage } from './types';
+import { LessonData, QuizQuestion, QuizAttempt, AnalyticsData, ChatMessage, CourseFeedback } from './types';
 
 export default function App() {
   // Navigation State
   const [role, setRole] = useState<'landing' | 'student' | 'teacher'>('landing');
   const [studentView, setStudentView] = useState<'dashboard' | 'chat' | 'quiz' | 'feedback'>('dashboard');
-  const [teacherView, setTeacherView] = useState<'setup' | 'analytics'>('setup');
+  const [teacherView, setTeacherView] = useState<'setup' | 'analytics' | 'comments'>('setup');
 
   // Class Code System States
-  const [classCode, setClassCode] = useState<string>('AEGIS101');
+  const [classCode, setClassCode] = useState<string>('');
   const [studentJoinedCode, setStudentJoinedCode] = useState<string | null>(() => {
     return localStorage.getItem('aegis_joined_class_code');
   });
   const [isGeneratingClassCode, setIsGeneratingClassCode] = useState(false);
+
+  // Student Identity States
+  const [studentName, setStudentName] = useState<string>(() => {
+    return localStorage.getItem('aegis_student_name') || '';
+  });
+  const [studentId, setStudentId] = useState<string>(() => {
+    return localStorage.getItem('aegis_student_id') || '';
+  });
 
   // Backend States
   const [lesson, setLesson] = useState<LessonData | null>(null);
@@ -38,6 +47,15 @@ export default function App() {
   const [quizAttempt, setQuizAttempt] = useState<QuizAttempt | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
+
+  // Course Comments / Feedback States
+  const [courseFeedbackList, setCourseFeedbackList] = useState<CourseFeedback[]>([]);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  // Teacher History States
+  const [pastClasses, setPastClasses] = useState<{ class_code: string, class_name: string, created_at: string }[]>([]);
+  const [viewedClassCode, setViewedClassCode] = useState<string>('');
 
   // Telemetry & Loaders
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +71,7 @@ export default function App() {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Parallel fetch for lesson and class code
       const [lessonRes, classRes] = await Promise.all([
         fetch('/api/lesson'),
@@ -86,17 +104,94 @@ export default function App() {
     }
   };
 
-  const syncAnalytics = async (refresh: boolean = false) => {
+  const syncAnalytics = async (refresh: boolean = false, targetClassCode?: string) => {
     try {
       setIsGeneratingInsight(true);
-      const res = await fetch(`/api/analytics${refresh ? '?refresh=true' : ''}`);
+      const queryParams = new URLSearchParams();
+      if (refresh) queryParams.append('refresh', 'true');
+      if (targetClassCode) queryParams.append('classCode', targetClassCode);
+
+      const res = await fetch(`/api/analytics?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to retrieve class analytics.');
       const data = await res.json();
       setAnalytics(data);
+      if (targetClassCode) setViewedClassCode(targetClassCode);
     } catch (err) {
       console.error(err);
     } finally {
       setIsGeneratingInsight(false);
+    }
+  };
+
+  // Use a ref to keep track of the last student submission count without causing re-renders
+  const studentCountRef = useRef(analytics?.studentSubmissionsCount || 0);
+
+  // Keep the ref up to date when analytics changes
+  useEffect(() => {
+    if (analytics) {
+      studentCountRef.current = analytics.studentSubmissionsCount;
+    }
+  }, [analytics]);
+
+  // Add auto-refresh polling for Teacher Dashboard Analytics using lightweight check
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    // Only poll if we are in teacher role and viewing analytics
+    if (role === 'teacher' && teacherView === 'analytics') {
+      intervalId = setInterval(async () => {
+        try {
+          const currentClassCode = viewedClassCode || classCode;
+          if (!currentClassCode) return;
+
+          // Lightweight check: just count the rows in the database
+          const res = await fetch(`/api/analytics/check-updates?classCode=${currentClassCode}&lastCount=${studentCountRef.current}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.hasUpdates) {
+              console.log("New submissions detected. Refreshing analytics...");
+              syncAnalytics(false, currentClassCode);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to check for analytics updates", err);
+        }
+      }, 5000); // 5 seconds polling to detect new students
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [role, teacherView, viewedClassCode, classCode]);
+
+  const fetchPastClasses = async () => {
+    try {
+      const res = await fetch('/api/classes');
+      if (res.ok) {
+        const data = await res.json();
+        setPastClasses(data.classes);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchCourseFeedback = async (targetClassCode?: string) => {
+    try {
+      setIsLoadingFeedback(true);
+      const queryParams = new URLSearchParams();
+      if (targetClassCode) queryParams.append('classCode', targetClassCode);
+
+      const res = await fetch(`/api/course-feedback?${queryParams.toString()}`);
+      if (!res.ok) throw new Error('Failed to retrieve student comments.');
+      const data = await res.json();
+      setCourseFeedbackList(data.feedback || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingFeedback(false);
     }
   };
 
@@ -119,7 +214,6 @@ export default function App() {
     }
   }, [lesson, chatHistory]);
 
-  // Role click triggers
   const handleSelectRole = (selectedRole: 'student' | 'teacher') => {
     setRole(selectedRole);
     if (selectedRole === 'student') {
@@ -127,6 +221,7 @@ export default function App() {
     } else {
       setTeacherView('setup');
       syncAnalytics();
+      fetchPastClasses();
     }
   };
 
@@ -146,7 +241,7 @@ export default function App() {
       setLesson(data.lesson);
       setQuestions(data.questions);
       setQuizAttempt(null); // Reset student quiz on lesson update
-      
+
       // Clear previous chats and push initial prompt
       setChatHistory([
         {
@@ -233,14 +328,19 @@ export default function App() {
       const res = await fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
+        body: JSON.stringify({
+          answers,
+          name: studentName,
+          studentId: studentId,
+          classCode: studentJoinedCode
+        })
       });
 
       if (!res.ok) throw new Error('Failed to evaluate assessment answers.');
       const data = await res.json();
 
       setQuizAttempt(data);
-      
+
       setRecentActivity(prev => [
         `Completed Practice Quiz (Score: ${data.score}%)`,
         ...prev.slice(0, 4)
@@ -253,6 +353,39 @@ export default function App() {
       alert('Error submitting quiz.');
     } finally {
       setIsSubmittingQuiz(false);
+    }
+  };
+
+  // POST: Student submits a course comment (optionally anonymous)
+  const handleSubmitCourseFeedback = async (comment: string, isAnonymous: boolean): Promise<boolean> => {
+    try {
+      setIsSubmittingFeedback(true);
+      const res = await fetch('/api/course-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          classCode: studentJoinedCode,
+          comment,
+          isAnonymous,
+          studentName: studentName,
+          studentId: studentId
+        })
+      });
+
+      if (!res.ok) throw new Error('Failed to submit course comment.');
+
+      setRecentActivity(prev => [
+        'Submitted a course comment',
+        ...prev.slice(0, 4)
+      ]);
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการส่งความคิดเห็น กรุณาลองใหม่อีกครั้ง');
+      return false;
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -292,13 +425,18 @@ export default function App() {
     return <LandingPage onSelectRole={handleSelectRole} />;
   }
 
-  // Intercept students who have not successfully entered the active class code
-  if (role === 'student' && studentJoinedCode !== classCode) {
+  // Intercept students who have not successfully entered a class code or are missing identity
+  if (role === 'student' && (!studentJoinedCode || !studentName || !studentId)) {
     return (
-      <JoinClass 
-        onJoinSuccess={(code) => {
+      <JoinClass
+        onJoinSuccess={(code, studentInfo) => {
           setStudentJoinedCode(code);
           localStorage.setItem('aegis_joined_class_code', code);
+
+          setStudentName(studentInfo.studentName);
+          setStudentId(studentInfo.studentId);
+          localStorage.setItem('aegis_student_name', studentInfo.studentName);
+          localStorage.setItem('aegis_student_id', studentInfo.studentId);
         }}
         onBackToLanding={() => setRole('landing')}
       />
@@ -307,17 +445,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between" id="full-app-root">
-      
+
       {/* Top Navigation */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          
+
           {/* Logo & Course */}
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setRole('landing')}
               className="flex items-center gap-2 group text-left"
             >
+
               <div className="bg-brand-blue/10 text-brand-blue p-2 rounded-xl group-hover:bg-brand-blue group-hover:text-white transition">
                 <Sparkles className="w-5 h-5" />
               </div>
@@ -338,46 +477,42 @@ export default function App() {
 
           {/* Dynamic Action Buttons based on Role */}
           <div className="flex items-center gap-2">
-            
+
             {role === 'student' ? (
               <>
                 <button
                   onClick={() => setStudentView('dashboard')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'dashboard' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'dashboard'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => setStudentView('chat')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'chat' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'chat'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Chat Assistant
                 </button>
                 <button
                   onClick={() => setStudentView('quiz')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'quiz' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'quiz'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Quiz Page
                 </button>
                 <button
                   onClick={() => setStudentView('feedback')}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === 'feedback' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === 'feedback'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Personalized Feedback
                 </button>
@@ -386,23 +521,30 @@ export default function App() {
               <>
                 <button
                   onClick={() => setTeacherView('setup')}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === 'setup' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'setup'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Weekly Lesson Setup
                 </button>
                 <button
                   onClick={() => { setTeacherView('analytics'); syncAnalytics(); }}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === 'analytics' 
-                      ? 'bg-slate-900 text-white shadow-md' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'analytics'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   Course Analytics
+                </button>
+                <button
+                  onClick={() => { setTeacherView('comments'); fetchCourseFeedback(viewedClassCode || classCode); }}
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === 'comments'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                >
+                  Student Comments
                 </button>
               </>
             )}
@@ -410,7 +552,18 @@ export default function App() {
             {/* Switch role / logout button */}
             <div className="w-px h-6 bg-slate-200 mx-2 hidden sm:block" />
             <button
-              onClick={() => setRole('landing')}
+              onClick={() => {
+
+                localStorage.removeItem('aegis_joined_class_code');
+                localStorage.removeItem('aegis_student_name');
+                localStorage.removeItem('aegis_student_id');
+
+                setStudentJoinedCode(null);
+                setStudentName('');
+                setStudentId('');
+
+                setRole('landing');
+              }}
               className="text-xs font-bold text-slate-500 hover:text-slate-800 transition py-2 px-3 border border-slate-200 hover:border-slate-300 rounded-xl flex items-center gap-1.5 shadow-sm"
               title="Return to Welcome Screen"
             >
@@ -425,7 +578,7 @@ export default function App() {
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto w-full px-6 py-8 flex-grow">
-        
+
         {isLoading ? (
           <div className="h-96 flex flex-col items-center justify-center gap-4 text-center">
             <RefreshCw className="w-10 h-10 animate-spin text-brand-blue" />
@@ -436,7 +589,7 @@ export default function App() {
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
             <h3 className="font-display font-bold text-lg">Server Connection Interrupted</h3>
             <p className="text-xs leading-relaxed">{error}</p>
-            <button 
+            <button
               onClick={syncSyllabus}
               className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition"
             >
@@ -449,31 +602,33 @@ export default function App() {
             {role === 'student' && (
               <div className="space-y-6">
                 {studentView === 'dashboard' && (
-                  <StudentDashboard 
-                    lesson={lesson!} 
-                    quizAttempt={quizAttempt} 
+                  <StudentDashboard
+                    lesson={lesson!}
+                    quizAttempt={quizAttempt}
                     onNavigate={setStudentView}
                     recentActivity={recentActivity}
+                    onSubmitCourseFeedback={handleSubmitCourseFeedback}
+                    isSubmittingFeedback={isSubmittingFeedback}
                   />
                 )}
                 {studentView === 'chat' && (
-                  <AIChat 
-                    lesson={lesson!} 
-                    chatHistory={chatHistory} 
+                  <AIChat
+                    lesson={lesson!}
+                    chatHistory={chatHistory}
                     onSendMessage={handleSendMessage}
                     isResponding={isRespondingChat}
                   />
                 )}
                 {studentView === 'quiz' && (
-                  <QuizPage 
-                    questions={questions} 
+                  <QuizPage
+                    questions={questions}
                     onSubmitQuiz={handleSubmitQuiz}
                     isSubmitting={isSubmittingQuiz}
                   />
                 )}
                 {studentView === 'feedback' && (
-                  <PersonalizedFeedback 
-                    quizAttempt={quizAttempt} 
+                  <PersonalizedFeedback
+                    quizAttempt={quizAttempt}
                     questions={questions}
                     onNavigate={setStudentView}
                     onRetakeQuiz={handleRetakeQuiz}
@@ -486,8 +641,8 @@ export default function App() {
             {role === 'teacher' && (
               <div className="space-y-6">
                 {teacherView === 'setup' && (
-                  <TeacherPortal 
-                    lesson={lesson!} 
+                  <TeacherPortal
+                    lesson={lesson!}
                     onGenerateKnowledgeBase={handleGenerateKnowledgeBase}
                     isGenerating={isGeneratingLesson}
                     apiKeySet={apiKeySet}
@@ -497,11 +652,30 @@ export default function App() {
                   />
                 )}
                 {teacherView === 'analytics' && (
-                  <TeacherDashboard 
-                    analytics={analytics!} 
-                    isGeneratingInsight={isGeneratingInsight}
-                    apiKeySet={apiKeySet}
-                    onRefreshInsight={() => syncAnalytics(true)}
+                  analytics ? (
+                    <TeacherDashboard
+                      analytics={analytics}
+                      isGeneratingInsight={isGeneratingInsight}
+                      apiKeySet={apiKeySet}
+                      onRefreshInsight={() => syncAnalytics(true, viewedClassCode)}
+                      pastClasses={pastClasses}
+                      viewedClassCode={viewedClassCode || classCode}
+                      onSelectClass={(code) => syncAnalytics(false, code)}
+                    />
+                  ) : (
+                    <div className="text-center py-10">
+                      Loading analytics...
+                    </div>
+                  )
+                )}
+                {teacherView === 'comments' && (
+                  <StudentComments
+                    feedbackList={courseFeedbackList}
+                    isLoading={isLoadingFeedback}
+                    onRefresh={() => fetchCourseFeedback(viewedClassCode || classCode)}
+                    pastClasses={pastClasses}
+                    viewedClassCode={viewedClassCode || classCode}
+                    onSelectClass={(code) => { setViewedClassCode(code); fetchCourseFeedback(code); }}
                   />
                 )}
               </div>

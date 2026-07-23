@@ -1,11 +1,11 @@
 import { RetrievalResult } from "../services/retrieval.service";
-import { LessonData } from "../../src/types";
+import { Lesson } from "../data/lesson";
 import { SOCRATIC_RULES } from "./socraticRules";
 import { getIntentInstruction } from "./intentRules";
 import { StudentIntent } from "../services/intent.service";
 
 export function buildTutorPrompt(
-  lesson: LessonData,
+  lesson: Lesson,
   question: string,
   contexts: RetrievalResult[],
   history: string,

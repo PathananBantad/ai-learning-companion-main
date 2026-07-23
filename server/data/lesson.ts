@@ -88,7 +88,17 @@ const defaultQuizQuestions: QuizQuestion[] = [
     options: ['POST', 'GET', 'PUT', 'DELETE'],
     correctIndex: 1,
     explanation: 'GET is designed to be a safe, read-only method. Since it should not modify any server data, executing it multiple times leaves the system in the same state (idempotent).',
-    conceptMatched: 'REST Architecture & CRUD'
+    conceptMatched: 'REST Architecture & CRUD',
+    misconceptionMap: {
+      '0': 'เข้าใจผิดว่า POST เป็น idempotent ทั้งที่ POST สร้าง resource ใหม่ทุกครั้งที่เรียก ผลลัพธ์จึงเปลี่ยนไปเรื่อยๆ ไม่ใช่ทั้ง safe และ idempotent',
+      '2': 'สับสนระหว่าง "idempotent" กับ "safe" — PUT เป็น idempotent จริง แต่ไม่ safe เพราะเปลี่ยนแปลงข้อมูลบน server',
+      '3': 'สับสนระหว่าง "idempotent" กับ "safe" เช่นเดียวกับ PUT — DELETE เป็น idempotent แต่ไม่ safe เพราะลบข้อมูลออกจาก server จริง'
+    },
+    recommendationMap: {
+      '0': 'ทบทวนว่า POST สร้าง resource ใหม่ทุกครั้งที่เรียก จึงไม่ใช่ทั้ง safe และ idempotent',
+      '2': 'ทบทวนความแตกต่างระหว่าง "safe" (ไม่เปลี่ยนแปลงข้อมูล) กับ "idempotent" (เรียกซ้ำแล้วผลลัพธ์เหมือนเดิม)',
+      '3': 'ทบทวนว่า DELETE แม้จะ idempotent แต่ไม่ safe เพราะลบข้อมูลออกจาก server จริง'
+    }
   },
   {
     id: 'q2',
@@ -101,7 +111,17 @@ const defaultQuizQuestions: QuizQuestion[] = [
     ],
     correctIndex: 1,
     explanation: 'Hiding parameters from the browser URL bar prevents them from appearing in browser history, but the actual payload travels in plain text in the HTTP request body. Full encryption via HTTPS is required for secure transit.',
-    conceptMatched: 'POST is Inherently Secure'
+    conceptMatched: 'POST is Inherently Secure',
+    misconceptionMap: {
+      '0': 'เข้าใจว่าความปลอดภัยของ POST เกี่ยวข้องกับขนาดข้อมูล ทั้งที่จริงคือเรื่องการเข้ารหัสระหว่างส่ง',
+      '2': 'เข้าใจว่า browser cache เกี่ยวข้องกับการรักษาความปลอดภัยของข้อมูล',
+      '3': 'เข้าใจผิดว่ามีการ hash ข้อมูลฝั่ง client อัตโนมัติ ทั้งที่ต้องพึ่ง HTTPS/TLS เท่านั้น'
+    },
+    recommendationMap: {
+      '0': 'ทบทวนว่าความปลอดภัยของ POST ไม่เกี่ยวกับขนาดข้อมูล แต่เกี่ยวกับการเข้ารหัสระหว่างส่งผ่าน HTTPS',
+      '2': 'ทบทวนว่า browser cache ไม่เกี่ยวข้องกับการรักษาความปลอดภัยของข้อมูลเลย',
+      '3': 'ทบทวนว่าไม่มีการ hash ข้อมูลฝั่ง client อัตโนมัติ ต้องพึ่ง HTTPS/TLS เท่านั้น'
+    }
   },
   {
     id: 'q3',
@@ -114,7 +134,17 @@ const defaultQuizQuestions: QuizQuestion[] = [
     ],
     correctIndex: 1,
     explanation: 'An HTTP method is idempotent if the side effects of making multiple identical requests are identical to the side effect of a single request. PUT and DELETE are idempotent; POST is not.',
-    conceptMatched: 'Idempotency'
+    conceptMatched: 'Idempotency',
+    misconceptionMap: {
+      '0': 'เข้าใจผิดว่า idempotent เกี่ยวข้องกับความเร็วในการประมวลผล ทั้งที่จริงเป็นเรื่องผลลัพธ์ของการเรียกซ้ำ ไม่เกี่ยวกับ performance',
+      '2': 'เข้าใจผิดว่า idempotent เกี่ยวข้องกับการป้องกันการดักจับข้อมูลผ่าน proxy ทั้งที่จริงเป็นเรื่อง state ของ server หลังเรียกใช้งาน',
+      '3': 'เข้าใจผิดว่า idempotent หมายถึงการการันตี status code ที่ได้รับ ทั้งที่จริงหมายถึงการการันตีว่า state ของ server เหมือนเดิมไม่ว่าจะเรียกกี่ครั้ง'
+    },
+    recommendationMap: {
+      '0': 'ทบทวนนิยามของ idempotent ว่าไม่เกี่ยวกับความเร็ว แต่เกี่ยวกับผลลัพธ์ที่เหมือนเดิมเมื่อเรียกซ้ำ',
+      '2': 'ทบทวนว่า idempotent ไม่เกี่ยวกับการเข้ารหัสหรือการป้องกัน proxy แต่เกี่ยวกับ state ของ server',
+      '3': 'ทบทวนว่า idempotent ไม่ได้การันตี status code ที่ตอบกลับ แต่การันตี state ของ server'
+    }
   },
   {
     id: 'q4',
@@ -127,7 +157,17 @@ const defaultQuizQuestions: QuizQuestion[] = [
     ],
     correctIndex: 1,
     explanation: 'Because HTTP is stateless, developers bypass this restriction by passing unique tokens or identifiers (JWTs, session IDs in cookies) with each independent HTTP request to authenticate who the sender is.',
-    conceptMatched: 'Stateless Protocol Means No State Allowed'
+    conceptMatched: 'Stateless Protocol Means No State Allowed',
+    misconceptionMap: {
+      '0': 'เข้าใจผิดว่าการจัดการ session ต้องอาศัยการเชื่อมต่อซ้ำบ่อยๆ ทั้งที่จริงใช้ token หรือ cookie แนบไปกับแต่ละ request แทน',
+      '2': 'เข้าใจผิดว่าการยืนยันตัวตนผู้ใช้ทำผ่านการล็อก IP address ทั้งที่ IP เปลี่ยนแปลงได้ง่ายและไม่น่าเชื่อถือสำหรับใช้ระบุตัวตน',
+      '3': 'เข้าใจผิดว่า state ถูกเก็บไว้ในส่วนของการแสดงผล (CSS) ทั้งที่ state จริงต้องเก็บผ่าน cookie, session ID หรือ JWT'
+    },
+    recommendationMap: {
+      '0': 'ทบทวนว่า HTTP stateless ไม่ได้แก้ด้วยการเชื่อมต่อซ้ำ แต่ใช้ token แนบไปกับทุก request แทน',
+      '2': 'ทบทวนว่าทำไมการล็อก IP ไม่ใช่วิธีจัดการ session ที่น่าเชื่อถือ (IP เปลี่ยนได้ ผู้ใช้หลายคนอาจใช้ IP เดียวกัน)',
+  '3': 'ทบทวนความแตกต่างระหว่าง state ของการแสดงผล (CSS) กับ state ของ application (session/token)'
+}
   }
 ];
 
