@@ -3,8 +3,33 @@ import { state } from '../data/lesson';
 import { getGeminiClient } from '../lib/gemini';
 import { getAnalytics } from "../services/analyticsService";
 import { GEMINI_MODEL } from '../lib/gemini';
+import { supabase } from '../lib/supabase';
 
 const router = Router();
+
+// Lightweight polling endpoint to check for new quiz submissions
+router.get('/analytics/check-updates', async (req: Request, res: Response) => {
+  try {
+    const classCode = (req.query.classCode as string) || state.activeClassCode;
+    const lastCount = parseInt(req.query.lastCount as string) || 0;
+
+    const { count, error } = await supabase
+      .from('quiz_results')
+      .select('*', { count: 'exact', head: true })
+      .eq('class_code', classCode);
+
+    if (error) throw error;
+
+    const currentCount = count || 0;
+    res.json({
+      hasUpdates: currentCount > lastCount,
+      count: currentCount
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to check updates' });
+  }
+});
 
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {

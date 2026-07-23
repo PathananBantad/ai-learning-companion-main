@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import {
   Sparkles, GraduationCap, BookOpen, MessageSquare, HelpCircle,
@@ -122,6 +122,49 @@ export default function App() {
       setIsGeneratingInsight(false);
     }
   };
+
+  // Use a ref to keep track of the last student submission count without causing re-renders
+  const studentCountRef = useRef(analytics?.studentSubmissionsCount || 0);
+
+  // Keep the ref up to date when analytics changes
+  useEffect(() => {
+    if (analytics) {
+      studentCountRef.current = analytics.studentSubmissionsCount;
+    }
+  }, [analytics]);
+
+  // Add auto-refresh polling for Teacher Dashboard Analytics using lightweight check
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    // Only poll if we are in teacher role and viewing analytics
+    if (role === 'teacher' && teacherView === 'analytics') {
+      intervalId = setInterval(async () => {
+        try {
+          const currentClassCode = viewedClassCode || classCode;
+          if (!currentClassCode) return;
+
+          // Lightweight check: just count the rows in the database
+          const res = await fetch(`/api/analytics/check-updates?classCode=${currentClassCode}&lastCount=${studentCountRef.current}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.hasUpdates) {
+              console.log("New submissions detected. Refreshing analytics...");
+              syncAnalytics(false, currentClassCode);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to check for analytics updates", err);
+        }
+      }, 5000); // 5 seconds polling to detect new students
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [role, teacherView, viewedClassCode, classCode]);
 
   const fetchPastClasses = async () => {
     try {
