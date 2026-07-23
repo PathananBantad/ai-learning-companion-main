@@ -5,7 +5,13 @@ import { ChatMessage } from "../types/chat";
 const router = Router();
 
 router.post("/chat", async (req: Request, res: Response) => {
-  const { messages }: { messages: ChatMessage[] } = req.body;
+  const {
+    messages,
+    sessionId,
+  }: {
+    messages: ChatMessage[];
+    sessionId?: number | null;
+  } = req.body;
 
   if (!messages || messages.length === 0) {
     return res.status(400).json({
@@ -14,10 +20,11 @@ router.post("/chat", async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await generateTutorResponse(messages);
+    const result = await generateTutorResponse(messages, sessionId);
+
     return res.json(result);
   } catch (err) {
-    console.error(err);
+    console.error("[CHAT ROUTE ERROR]", err);
 
     return res.status(500).json({
       error: "Failed to connect to AI server.",
