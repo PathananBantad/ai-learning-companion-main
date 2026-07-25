@@ -5,6 +5,7 @@ import {
   Lightbulb, RefreshCw, GraduationCap, ArrowRight, User 
 } from 'lucide-react';
 import { ChatMessage, LessonData } from '../types';
+import ChatMarkdown from './ChatMarkdown';
 
 interface AIChatProps {
   lesson: LessonData;
@@ -145,7 +146,7 @@ export default function AIChat({ lesson, chatHistory, onSendMessage, isRespondin
                       ? 'bg-slate-50 text-slate-800 border-slate-100 rounded-tl-none' 
                       : 'bg-brand-blue text-white border-brand-blue rounded-tr-none'
                   }`}>
-                    <div className="whitespace-pre-line font-medium">{msg.text}</div>
+                    <ChatMarkdown text={msg.text} />
                     <div className={`text-[9px] text-right ${isAi ? 'text-slate-400' : 'text-blue-100'}`}>
                       {msg.timestamp}
                     </div>
