@@ -1,6 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
-import { getGeminiClient } from '../lib/gemini';
+import { getAIClient , AI_MODEL } from '../lib/ai';
+import { detectMisconceptions } from '../services/misconceptionService';
+import { generateRecommendations } from '../services/recommendationService';
+import { generateFeedback } from '../services/feedbackService';
 
 const router = Router();
 
@@ -19,7 +22,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
   const targetTopic = topic || 'Modern Web Engineering';
   const activeFiles = uploadedFiles || [];
 
-  const ai = getGeminiClient();
+  const ai = getAIClient();
   if (ai) {
     try {
       const generationPrompt = `
@@ -78,15 +81,13 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
         }
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: generationPrompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: generationPrompt }],
+        response_format: { type: 'json_object' }
       });
 
-      const textResponse = response.text?.trim() || '';
+      const textResponse = response.choices[0].message?.content?.trim() || '';
       // Clean markdown wrapper just in case the model ignored standard directives
       const cleanJSON = textResponse.replace(/^```json\s*/, '').replace(/```$/, '').trim();
       const parsed = JSON.parse(cleanJSON);
@@ -209,7 +210,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 });
 
 // Submit student quiz answers
-router.post('/quiz/submit', (req: Request, res: Response) => {
+router.post('/quiz/submit', async (req: Request, res: Response) => {
   const { answers } = req.body;
   if (!answers) {
     res.status(400).json({ error: 'Missing answers' });
@@ -219,8 +220,6 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
   let correctCount = 0;
   const strengths: string[] = [];
   const weaknesses: string[] = [];
-  const misconceptionsTriggered: string[] = [];
-  const recommendations: string[] = [];
 
   state.quizQuestions.forEach((q) => {
     const studentAnswer = answers[q.id];
@@ -235,34 +234,31 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
       if (!weaknesses.includes(q.conceptMatched)) {
         weaknesses.push(q.conceptMatched);
       }
-      if (q.id === 'q2' && studentAnswer === 0) {
-        misconceptionsTriggered.push('Hiding query params equals encryption');
-        recommendations.push('Review how HTTPS/TLS TLS handshake actually secures raw HTTP body streams.');
-      }
-      if (q.id === 'q3') {
-        misconceptionsTriggered.push('Confusing safe operations with idempotent operations');
-        recommendations.push('Recall that an action is idempotent if repeating it yields the same server state, even if it alters it once (like PUT).');
-      }
+      
     }
   });
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
-  // Provide default feedback/recommendations
-  if (score === 100) {
-    recommendations.push('Excellent job! You have fully mastered this lesson. Try to assist peers on the course discussion board.');
-  } else {
-    recommendations.push('Use the AI chat assistant to ask for "Give me an example" regarding your incorrect concepts.');
-  }
+  const misconceptionsTriggered = detectMisconceptions(
+  state.quizQuestions,
+  answers
+);
 
-  // Keep active simulated analytics updated with the new result
-  state.simulatedSubmissionsCount++;
-  state.simulatedAnalytics.studentSubmissionsCount = state.simulatedSubmissionsCount;
-  // update rolling average
-  state.simulatedAnalytics.averageScore = Math.round(
-    ((state.simulatedAnalytics.averageScore * 10) + score) / 11
-  );
+const recommendations = generateRecommendations(
+  state.quizQuestions,
+  answers,
+  score
+);
 
+const aiFeedback = await generateFeedback(
+  score,
+  strengths,
+  weaknesses,
+  misconceptionsTriggered
+);
+
+ 
   // Dynamically insert active student's performance record for the instructor to review
   const dynamicStudent = {
     id: 'STU-ACTIVE',
@@ -293,13 +289,14 @@ router.post('/quiz/submit', (req: Request, res: Response) => {
   state.simulatedAnalytics.students.unshift(dynamicStudent);
 
   const attemptResult = {
-    answers,
-    score,
-    strengths: strengths.length > 0 ? strengths : ['General Web Basics'],
-    weaknesses: weaknesses.length > 0 ? weaknesses : [],
-    misconceptionsTriggered,
-    recommendations
-  };
+  answers,
+  score,
+  strengths,
+  weaknesses,
+  misconceptionsTriggered,
+  recommendations,
+  aiFeedback
+};
 
   res.json(attemptResult);
 });

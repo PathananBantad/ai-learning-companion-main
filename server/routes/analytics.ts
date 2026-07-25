@@ -1,15 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
-import { getGeminiClient } from '../lib/gemini';
+import { getAIClient , AI_MODEL } from '../lib/ai';
 
 const router = Router();
 
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {
   const refresh = req.query.refresh === 'true';
-  const ai = getGeminiClient();
+  const ai = getAIClient();
 
-  // Only query Gemini if a manual refresh was requested or we don't have an insight yet
+  // Only query AI if a manual refresh was requested or we don't have an insight yet
   if (ai && (refresh || !state.simulatedAnalytics.aiInsight)) {
     try {
       const prompt = `
@@ -24,14 +24,16 @@ router.get('/analytics', async (req: Request, res: Response) => {
         Highlight what the students struggle with and give an actionable intervention they can use in the next lecture.
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: prompt
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: prompt }]
       });
 
-      if (response.text) {
-        state.simulatedAnalytics.aiInsight = response.text.trim();
-      }
+      const content = response.choices[0].message.content;
+        if(content){
+        state.simulatedAnalytics.aiInsight = content.trim();
+        }
+      
     } catch (err: any) {
       console.error('Error generating AI analytics insights:', err.message || err);
       // Fallback or persist previous recommendation
@@ -48,7 +50,7 @@ router.post('/student-insight', async (req: Request, res: Response) => {
     return;
   }
 
-  const ai = getGeminiClient();
+  const ai = getAIClient();
   if (ai) {
     try {
       const prompt = `
@@ -76,22 +78,26 @@ router.post('/student-insight', async (req: Request, res: Response) => {
         Respond ONLY with a valid JSON object matching the keys above. Do not output any markdown code blocks (such as \`\`\`json) or external text.
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' }
       });
 
-      if (response.text) {
-        const cleanJSON = response.text.trim().replace(/^```json\s*/, '').replace(/```$/, '').trim();
-        const parsed = JSON.parse(cleanJSON);
-        res.json(parsed);
-        return;
+      if (response.choices && response.choices[0].message) {
+        const content = response.choices[0].message.content;
+        if(content){
+          const cleanJSON = content.trim().replace(/^```json\s*/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(cleanJSON);
+          
+          res.json(parsed);
+          return;
+        }
+        
+       
       }
     } catch (err: any) {
-      console.error('Error generating student AI insight with Gemini:', err.message || err);
+      console.error('Error generating student AI insight with AI:', err.message || err);
     }
   }
 

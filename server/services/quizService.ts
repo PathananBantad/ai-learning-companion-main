@@ -3,11 +3,11 @@
 // Lesson (not from the raw topic string). This is what makes the pipeline "sequential":
 // quiz content is grounded in lesson.keyConcepts / lesson.commonMisconceptions.
 
-import { getGeminiClient, GEMINI_MODEL } from '../lib/gemini';
+import { getAIClient, AI_MODEL } from '../lib/ai';
 import { Lesson, QuizQuestion } from '../data/lesson';
 
 export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuestion[]> {
-  const ai = getGeminiClient();
+  const ai = getAIClient();
 
   if (ai) {
     const conceptList = lesson.keyConcepts
@@ -55,13 +55,13 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
     `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: generationPrompt,
-        config: { responseMimeType: 'application/json' }
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: generationPrompt }],
+        response_format: { type: 'json_object' }
       });
 
-      const textResponse = response.text?.trim() || '';
+      const textResponse = response.choices[0].message?.content?.trim() || '';
       const cleanJSON = textResponse.replace(/^```json\s*/, '').replace(/```$/, '').trim();
       const parsed = JSON.parse(cleanJSON);
 
@@ -69,7 +69,7 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
         return parsed as QuizQuestion[];
       }
     } catch (err) {
-      console.error('Error generating quiz via Gemini:', err);
+      console.error('Error generating quiz via Qwen:', err);
     }
   }
 

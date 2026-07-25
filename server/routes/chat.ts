@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
-import { getGeminiClient } from '../lib/gemini';
+import { getAIClient , AI_MODEL } from '../lib/ai';
 
 const router = Router();
 
@@ -14,7 +14,7 @@ router.post('/chat', async (req: Request, res: Response) => {
 
   const latestUserMessage = messages[messages.length - 1].text;
 
-  const ai = getGeminiClient();
+  const ai = getAIClient();
   if (ai) {
     try {
       const chatContext = `
@@ -30,13 +30,13 @@ router.post('/chat', async (req: Request, res: Response) => {
         Strictly keep responses clean, structured, and informative. If they ask to be quizzed, give them a simple sample question.
       `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: chatContext
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: chatContext }]
       });
 
       res.json({
-        text: response.text || 'I am ready to help you with the lesson material.'
+        text: response.choices[0].message.content || 'I am ready to help you with the lesson material.'
       });
       return;
     } catch (err) {
