@@ -131,14 +131,18 @@ export default function App() {
   };
 
   // POST: Weekly Lesson Setup Generation
-  const handleGenerateKnowledgeBase = async (topic: string, files: string[], manualPrompt: string) => {
-    try {
-      setIsGeneratingLesson(true);
-      const res = await fetch('/api/lesson/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, uploadedFiles: files, manualPrompt })
-      });
+  const handleGenerateKnowledgeBase = async (topic: string, files: File[], manualPrompt: string) => {
+  try {
+    setIsGeneratingLesson(true);
+    const formData = new FormData();
+    formData.append('topic', topic);
+    formData.append('manualPrompt', manualPrompt);
+    files.forEach(f => formData.append('files', f));
+
+    const res = await fetch('/api/lesson/update', {
+      method: 'POST',
+      body: formData // ห้ามใส่ header Content-Type เอง ให้ browser ตั้ง boundary ให้อัตโนมัติ
+    });
 
       if (!res.ok) throw new Error('Failed to generate customized syllabus.');
       const data = await res.json();

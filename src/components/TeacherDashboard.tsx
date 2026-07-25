@@ -11,10 +11,9 @@ import {
   Activity, Brain, FileText, Target, Zap
 } from 'lucide-react';
 import { AnalyticsData, StudentAnalytics } from '../types';
-import StudentReportView from './StudentReportView';
 
 interface TeacherDashboardProps {
-  analytics: AnalyticsData;
+  analytics: AnalyticsData | null;
   isGeneratingInsight: boolean;
   apiKeySet: boolean;
   onRefreshInsight?: () => void;
@@ -137,16 +136,15 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentAnalytics | null>(null);
 
-  if (selectedStudent) {
+  if (!analytics) {
     return (
-      <StudentReportView 
-        student={selectedStudent} 
-        onBack={() => setSelectedStudent(null)} 
-      />
+      <div className="min-h-64 flex flex-col items-center justify-center gap-3 text-center">
+        <RefreshCw className="w-8 h-8 animate-spin text-brand-blue" />
+        <p className="text-sm font-semibold text-slate-500">กำลังโหลดข้อมูลวิเคราะห์ชั้นเรียน...</p>
+      </div>
     );
   }
 
-  
   // Color palette constants for charts
   const COLORS = ['#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ef4444'];
 

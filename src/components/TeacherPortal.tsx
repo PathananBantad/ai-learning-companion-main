@@ -66,14 +66,16 @@ export default function TeacherPortal({
     e.stopPropagation();
     setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-  setUploadedFiles(prev => [...prev, ...Array.from(e.dataTransfer.files)]);
-}
+    const files = Array.from(e.dataTransfer.files ?? []);
+    if (files.length > 0) {
+      setUploadedFiles(prev => [...prev, ...files]);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setUploadedFiles(prev => [...prev, ...Array.from(e.target.files)]);
+    const files = Array.from(e.target.files ?? []);
+    if (files.length > 0) {
+      setUploadedFiles(prev => [...prev, ...files]);
     }
   };
 
