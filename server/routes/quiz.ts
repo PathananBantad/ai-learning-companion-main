@@ -1,11 +1,18 @@
 import { Router, Request, Response } from 'express';
+import multer from 'multer';
 import { state } from '../data/lesson';
-import { getAIClient , AI_MODEL } from '../lib/ai';
+import { getAIClient, AI_MODEL } from '../lib/ai';
 import { detectMisconceptions } from '../services/misconceptionService';
 import { generateRecommendations } from '../services/recommendationService';
 import { generateFeedback } from '../services/feedbackService';
+import { extractFileContent, ExtractedFile } from '../lib/fileExtract';
 
 const router = Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
 
 // Get current lesson content
 router.get('/lesson', (req: Request, res: Response) => {
@@ -16,11 +23,21 @@ router.get('/lesson', (req: Request, res: Response) => {
 });
 
 // Generate Knowledge Base using AI or update lesson topic manually
-router.post('/lesson/update', async (req: Request, res: Response) => {
-  const { topic, uploadedFiles, manualPrompt } = req.body;
-
+router.post('/lesson/update', upload.array('files'), async (req: Request, res: Response) => {
+  const { topic, manualPrompt } = req.body;
   const targetTopic = topic || 'Modern Web Engineering';
-  const activeFiles = uploadedFiles || [];
+
+  const uploadedFileObjs = (req.files as Express.Multer.File[]) || [];
+  const extractedFiles: ExtractedFile[] = await Promise.all(
+    uploadedFileObjs.map(extractFileContent)
+  );
+  const activeFiles = extractedFiles.map(f => f.filename);
+
+  const materialBlock = extractedFiles.length > 0
+    ? extractedFiles
+        .map((f, i) => `--- เอกสารที่ ${i + 1}: ${f.filename} ---\n${f.content}`)
+        .join('\n\n')
+    : '';
 
   const ai = getAIClient();
   if (ai) {
@@ -29,6 +46,16 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
         You are a world-class university syllabus and curriculum designer.
         Create a comprehensive, highly educational Knowledge Base and lesson plan for the topic: "${targetTopic}".
         ${manualPrompt ? `Additional instructor guidelines: "${manualPrompt}"` : ''}
+
+        ${materialBlock
+          ? `Base the lesson and quiz STRICTLY on the following course material uploaded by the instructor. Do not invent concepts that are absent from these documents:\n\n${materialBlock}`
+          : 'No course material was uploaded — generate from general knowledge of the topic.'}
+
+        IMPORTANT: Write ALL content (topic, learningOutcomes, keyConcepts, commonMisconceptions,
+        summary, question, options, explanation, misconceptionMap, recommendationMap) in Thai
+        language (ภาษาไทย). Keep JSON keys in English exactly as specified below.
+
+        IMPORTANT: For every wrong answer option in each quiz question, add an entry to
 
         Respond STRICTLY with a valid JSON object matching this schema. Do not output markdown backticks like \`\`\`json or any text other than the raw JSON object itself:
         {
@@ -51,7 +78,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 0,
               "explanation": "Clear educational explanation of why Option A is correct",
-              "conceptMatched": "Concept 1 Title"
+              "conceptMatched": "Concept 1 Title",
+              "misconceptionMap": { "1": "What mistaken belief picking option 1 reveals", "2": "...", "3": "..." },
+              "recommendationMap": { "1": "What the student should review if they picked option 1", "2": "...", "3": "..." }
             },
             {
               "id": "q2",
@@ -59,7 +88,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 1,
               "explanation": "Clear educational explanation of why Option B is correct",
-              "conceptMatched": "Concept 2 Title"
+              "conceptMatched": "Concept 2 Title",
+              "misconceptionMap": { "0": "...", "2": "...", "3": "..." },
+              "recommendationMap": { "0": "...", "2": "...", "3": "..." }
             },
             {
               "id": "q3",
@@ -67,7 +98,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 2,
               "explanation": "Clear educational explanation of why Option C is correct",
-              "conceptMatched": "Concept 3 Title"
+              "conceptMatched": "Concept 3 Title",
+              "misconceptionMap": { "0": "...", "1": "...", "3": "..." },
+              "recommendationMap": { "0": "...", "1": "...", "3": "..." }
             },
             {
               "id": "q4",
@@ -75,7 +108,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
               "options": ["Option A", "Option B", "Option C", "Option D"],
               "correctIndex": 3,
               "explanation": "Clear educational explanation correcting the misconception",
-              "conceptMatched": "Concept 1 Title"
+              "conceptMatched": "Concept 1 Title",
+              "misconceptionMap": { "0": "...", "1": "...", "2": "..." },
+              "recommendationMap": { "0": "...", "1": "...", "2": "..." }
             }
           ]
         }
@@ -88,11 +123,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       });
 
       const textResponse = response.choices[0].message?.content?.trim() || '';
-      // Clean markdown wrapper just in case the model ignored standard directives
       const cleanJSON = textResponse.replace(/^```json\s*/, '').replace(/```$/, '').trim();
       const parsed = JSON.parse(cleanJSON);
 
-      // Update the current global states
       state.currentLesson = {
         id: 'lesson-' + Date.now(),
         topic: parsed.topic || targetTopic,
@@ -106,7 +139,6 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
 
       state.quizQuestions = parsed.quizQuestions || [];
 
-      // Reset class diagnostics to fit the new topic
       state.simulatedSubmissionsCount = 0;
       state.simulatedAnalytics = {
         averageScore: 0,
@@ -137,8 +169,8 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       res.json({ success: true, lesson: state.currentLesson, questions: state.quizQuestions });
       return;
     } catch (err) {
-      console.error('Error generating lesson via Gemini:', err);
-      res.status(500).json({ error: 'Failed to generate knowledge base via Gemini. Using fallback configuration.' });
+      console.error('Error generating lesson via Qwen:', err);
+      res.status(500).json({ error: 'Failed to generate knowledge base via Qwen. Using fallback configuration.' });
       return;
     }
   }
@@ -161,7 +193,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
     ],
     knowledgeBaseStatus: 'ready',
     uploadedFiles: activeFiles.length > 0 ? activeFiles : ['fallback_data.txt'],
-    summary: `You have successfully set up a fallback curriculum for ${targetTopic}. Add a real GEMINI_API_KEY to experience fully customized academic syllabus generations.`
+    summary: `You have successfully set up a fallback curriculum for ${targetTopic}. Add a real AI_API_KEY to experience fully customized academic syllabus generations.`
   };
 
   state.quizQuestions = [
@@ -171,7 +203,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       options: ['Unstructured experimentation', 'Rigorous theoretical foundations', 'Ignoring safety constraints', 'Continuous redeployment'],
       correctIndex: 1,
       explanation: 'A strong academic understanding demands prioritizing robust foundations and systematic testing.',
-      conceptMatched: `${targetTopic} core frameworks`
+      conceptMatched: `${targetTopic} core frameworks`,
+      misconceptionMap: { '0': 'สับสนว่าการทดลองแบบไม่มีโครงสร้างสำคัญกว่าพื้นฐานทฤษฎี' },
+      recommendationMap: { '0': `ทบทวนหัวข้อ "${targetTopic} core frameworks" อีกครั้ง` }
     },
     {
       id: 'fallback-q2',
@@ -184,7 +218,9 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       ],
       correctIndex: 2,
       explanation: 'Over-complicating setups introduces tech debt and increases cognitive load, making the framework harder to maintain.',
-      conceptMatched: `Over-complicating ${targetTopic}`
+      conceptMatched: `Over-complicating ${targetTopic}`,
+      misconceptionMap: { '1': 'สับสนว่าการทำให้เรียบง่ายเกินไปคือปัญหา ทั้งที่จริงคือการทำให้ซับซ้อนเกินไปต่างหาก' },
+      recommendationMap: { '1': `กลับไปอ่านหัวข้อ "ความเข้าใจผิดที่พบบ่อย" เรื่อง "Over-complicating ${targetTopic}" อีกครั้ง` }
     }
   ];
 
@@ -203,7 +239,7 @@ router.post('/lesson/update', async (req: Request, res: Response) => {
       { day: 'Thu', averageScore: 0, activeStudents: 0 },
       { day: 'Fri', averageScore: 0, activeStudents: 0 }
     ],
-    aiInsight: 'Knowledge Base loaded in offline mode. Setup GEMINI_API_KEY inside the Secrets panel to activate live university syllabus generation!'
+    aiInsight: 'Knowledge Base loaded in offline mode. Setup AI_API_KEY inside the Secrets panel to activate live university syllabus generation!'
   };
 
   res.json({ success: true, lesson: state.currentLesson, questions: state.quizQuestions, simulated: true });
@@ -234,32 +270,15 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
       if (!weaknesses.includes(q.conceptMatched)) {
         weaknesses.push(q.conceptMatched);
       }
-      
     }
   });
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
-  const misconceptionsTriggered = detectMisconceptions(
-  state.quizQuestions,
-  answers
-);
+  const misconceptionsTriggered = detectMisconceptions(state.quizQuestions, answers);
+  const recommendations = generateRecommendations(state.quizQuestions, answers, score);
+  const aiFeedback = await generateFeedback(score, strengths, weaknesses, misconceptionsTriggered);
 
-const recommendations = generateRecommendations(
-  state.quizQuestions,
-  answers,
-  score
-);
-
-const aiFeedback = await generateFeedback(
-  score,
-  strengths,
-  weaknesses,
-  misconceptionsTriggered
-);
-
- 
-  // Dynamically insert active student's performance record for the instructor to review
   const dynamicStudent = {
     id: 'STU-ACTIVE',
     name: 'Active Student (You)',
@@ -284,20 +303,10 @@ const aiFeedback = await generateFeedback(
   if (!state.simulatedAnalytics.students) {
     state.simulatedAnalytics.students = [];
   }
-  // Remove previous active student mock record to avoid duplicate rows
   state.simulatedAnalytics.students = state.simulatedAnalytics.students.filter((s: any) => s.id !== 'STU-ACTIVE');
   state.simulatedAnalytics.students.unshift(dynamicStudent);
 
-  const attemptResult = {
-  answers,
-  score,
-  strengths,
-  weaknesses,
-  misconceptionsTriggered,
-  recommendations,
-  aiFeedback
-};
-
+  const attemptResult = { answers, score, strengths, weaknesses, misconceptionsTriggered, recommendations, aiFeedback };
   res.json(attemptResult);
 });
 
