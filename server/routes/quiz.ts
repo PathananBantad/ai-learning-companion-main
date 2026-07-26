@@ -8,6 +8,7 @@ import { generateRecommendations } from "../services/recommendationService";
 import multer from 'multer';
 import { getAIClient, AI_MODEL } from '../lib/ai';
 import { extractFileContent, ExtractedFile } from '../lib/fileExtract';
+import { saveProfile } from "../services/profileService";
 
 const router = Router();
 
@@ -435,9 +436,11 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
   // sent by the frontend. If this fails, tell the frontend honestly instead
   // of pretending the submission succeeded.
   try {
+    const profile = await saveProfile(name, studentId, "student");
+
     await saveQuizResult({
       name,
-      studentId,
+      studentId: profile.id,
       classCode,
       score,
       totalQuestions: state.quizQuestions.length,

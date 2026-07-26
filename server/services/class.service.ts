@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 
 export const validateClassCode = async (code: string) => {
   console.log("Searching class:", code);

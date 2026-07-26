@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 
 export async function getAnalytics(classCode: string) {
     const { data, error } = await supabase
