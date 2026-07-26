@@ -33,8 +33,19 @@ router.get('/analytics/check-updates', async (req: Request, res: Response) => {
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    const requestedClassCode =
+    let requestedClassCode =
       (req.query.classCode as string) || state.activeClassCode;
+
+    if (requestedClassCode === 'AEGIS101') {
+      const { data: latestClass } = await supabase
+        .from('classes')
+        .select('class_code')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (latestClass && latestClass.length > 0) {
+        requestedClassCode = latestClass[0].class_code;
+      }
+    }
 
     const analytics = await getAnalytics(requestedClassCode);
 

@@ -120,7 +120,11 @@ export default function App() {
       if (!res.ok) throw new Error('Failed to retrieve class analytics.');
       const data = await res.json();
       setAnalytics(data);
-      if (targetClassCode) setViewedClassCode(targetClassCode);
+      if (targetClassCode) {
+        setViewedClassCode(targetClassCode);
+      } else if (data.classCode) {
+        setViewedClassCode(data.classCode);
+      }
     } catch (err) {
       console.error(err);
     } finally {

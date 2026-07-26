@@ -3,7 +3,10 @@ import { supabaseAdmin as supabase } from "../lib/supabase";
 export async function getAnalytics(classCode: string) {
     const { data, error } = await supabase
         .from("quiz_results")
-        .select("*")
+        .select(`
+            *,
+            profiles ( student_code )
+        `)
         .eq("class_code", classCode);
 
     if (error) {
@@ -128,7 +131,7 @@ export async function getAnalytics(classCode: string) {
     // Students
     // =========================
     const students = quizResults.map((item: any) => ({
-        student_id: item.student_id,
+        student_id: item.profiles?.student_code || item.student_id,
         name: item.name,
 
         quizScore: Number(item.score),
@@ -155,6 +158,7 @@ export async function getAnalytics(classCode: string) {
     }));
 
     return {
+        classCode,
         averageScore,
         studentSubmissionsCount: totalStudents,
 
