@@ -50,6 +50,15 @@ export interface StudentAnalytics {
   aiFeedbackSummary: string;
   recommendedTopics: string[];
   lastActivity: string;
+  attemptsCount?: number;
+  attempts?: {
+    score: number;
+    strengths: string[];
+    weaknesses: string[];
+    commonMisconceptions: string[];
+    lastActivity: string;
+    aiFeedbackSummary: string;
+  }[];
 }
 
 export interface AnalyticsData {

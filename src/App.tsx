@@ -453,6 +453,13 @@ export default function App() {
     return (
         <JoinClass
             onJoinSuccess={(code, studentInfo, newSessionId) => {
+              if (studentId !== studentInfo.studentId || studentJoinedCode !== code) {
+                setQuizAttempt(null);
+                setQuizSaveStatus('idle');
+                setChatHistory([]);
+                setRecentActivity([]);
+                setStudentView('dashboard');
+              }
               setStudentJoinedCode(code);
               localStorage.setItem('aegis_joined_class_code', code);
 
