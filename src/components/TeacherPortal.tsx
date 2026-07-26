@@ -107,8 +107,7 @@ export default function TeacherPortal({
             <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <span className="font-bold block mb-0.5">โหมดสาธิตแบบออฟไลน์</span>
-              ไม่พบคีย์ Gemini การสร้างเนื้อหาจะใช้หลักสูตรแบบคงที่ กรุณาเพิ่ม `GEMINI_API_KEY` ในแผงข้อมูลลับเพื่อเปิดใช้งานการสร้างเนื้อหาด้วย AI แบบสด
-            </div>
+              ไม่พบคีย์ AI การสร้างเนื้อหาจะใช้หลักสูตรแบบคงที่ กรุณาเพิ่ม `AI_API_KEY` ในแผงข้อมูลลับเพื่อเปิดใช้งานการสร้างเนื้อหาด้วย AI แบบสด     </div>
           </div>
         )}
       </div>
