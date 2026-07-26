@@ -4,7 +4,8 @@ import {
   createClass,
   validateClassCode,
   getLatestClassCode,
-  getAllClasses
+  getAllClasses,
+  createStudentSession
 } from '../services/class.service';
 import { saveProfile } from "../services/profileService";
 
@@ -37,8 +38,8 @@ router.post('/class/generate', async (req: Request, res: Response) => {
   }
 
   await createClass(
-    state.activeClassCode,
-    state.currentLesson?.topic
+      state.activeClassCode,
+      state.currentLesson?.topic
   );
 
   res.json({
@@ -63,40 +64,58 @@ router.post('/class/verify', async (req: Request, res: Response) => {
 
   // Fallback
   if (!result.success && normalizedCode === state.activeClassCode) {
+    const createdClass = await createClass(
+        normalizedCode,
+        state.currentLesson?.topic
+    ).catch(() => null);
+
     result = {
       success: true,
-      data: {
-        class_code: normalizedCode
-      }
+      data: createdClass ?? {
+        class_code: normalizedCode,
+      },
     };
-
-    await createClass(
-      normalizedCode,
-      state.currentLesson?.topic
-    ).catch(() => { });
   }
+
+  let sessionId: number | null = null;
 
   if (result.success) {
     // Do not sync memory here, as it changes the active class globally for the instructor dashboard
     // state.activeClassCode = normalizedCode;
 
+    const classId: string | undefined = (result.data as any)?.id;
+
     // บันทึกข้อมูลนักศึกษาลง profiles
     if (name && studentId) {
+      let profile: { id: string } | null = null;
+
       try {
-        await saveProfile(
-          name,
-          studentId,
-          "student"
+        profile = await saveProfile(
+            name,
+            studentId,
+            "student"
         );
       } catch (err) {
         console.error("Save profile failed:", err);
+      }
+
+      // สร้าง session ผูก Student (profiles.id) + Class (classes.id) เพื่อใช้บันทึก
+      // conversation_logs ตอนแชทกับ AI ภายหลัง
+      if (profile?.id && classId) {
+        sessionId = await createStudentSession(profile.id, classId);
+      } else {
+        console.error(
+            "[CLASS VERIFY] Skipped creating student session — missing profile.id or class.id",
+            { profileId: profile?.id, classId }
+        );
       }
     }
   }
 
   res.json({
     success: result.success,
-    activeClassCode: normalizedCode
+    activeClassCode: normalizedCode,
+    sessionId
   });
 
 });

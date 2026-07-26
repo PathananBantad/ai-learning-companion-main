@@ -1,129 +1,114 @@
-import { state } from "../data/lesson";
-import { buildTutorPrompt } from "../prompts/tutorPrompt";
-import { retrieveContext } from "./retrieval.service";
-import { ChatMessage } from "../types/chat";
-import { detectIntent } from "./intent.service";
-import { detectMisconception } from "./misconceptionService";
-import { saveConversationLog } from "./conversationLog.service";
-import { getAIClient, AI_MODEL } from "../lib/ai";
+import { supabase } from "../lib/supabase";
 
+export const validateClassCode = async (code: string) => {
+  console.log("Searching class:", code);
 
-export async function generateTutorResponse(
-  messages: ChatMessage[],
-  sessionId?: number | null,
-) {
-  const latestQuestion = messages[messages.length - 1]?.text ?? "";
+  const { data, error } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("class_code", code)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  console.log("[CHAT] Question:", latestQuestion);
+  console.log("Result:", data);
+  console.log("Error:", error);
 
-  // 1. Detect student intent
-  const intent = detectIntent(latestQuestion);
-  console.log("[CHAT] Intent:", intent);
-
-  // 2. Retrieve relevant context
-  const contexts = await retrieveContext(latestQuestion);
-  console.log("[CHAT] Retrieved contexts:", contexts.length);
-
-  // 3. Build conversation history
-  const conversationHistory = messages
-    .map((m) => `${(m.role ?? "user").toUpperCase()}: ${m.text}`)
-    .join("\n");
-
-  // 4. Build AI prompt
-  const prompt = buildTutorPrompt(
-    state.currentLesson,
-    latestQuestion,
-    contexts,
-    conversationHistory,
-    intent,
-  );
-
-
-  const ai = getAIClient();
-
-  if (!ai) {
-    console.error("[CHAT] AI client is not configured");
-
+  if (error || !data) {
     return {
-      text: "AI client is not configured.",
+      success: false,
+      message: "Class not found",
     };
   }
 
-  // 6. Generate AI response
-  console.log("[CHAT] Calling AI...");
+  return {
+    success: true,
+    data,
+  };
+};
 
-  const response = await ai.chat.completions.create({
-    model: AI_MODEL,
-    messages: [
-      {
-        role: "system",
-        content: `
-คุณคือ AI Tutor สำหรับช่วยนักเรียนเรียนบทเรียน
+export const createClass = async (classCode: string, className?: string) => {
+  const { data, error } = await supabase
+      .from("classes")
+      .insert({
+        class_code: classCode,
+        class_name: className || "Untitled Class",
+      })
+      .select()
+      .single();
 
-หน้าที่ของคุณ
-- ตอบเป็นภาษาไทยเสมอ
-- อธิบายเข้าใจง่าย เหมาะสำหรับนักศึกษา
-- ใช้ข้อมูลจากบทเรียนและข้อมูลที่ Retrieve มาเป็นหลัก
-- หากข้อมูลไม่มีในบทเรียน ให้บอกตรง ๆ ว่าไม่มีข้อมูล แทนการเดา
-- หากนักเรียนเข้าใจผิด ให้ช่วยอธิบายใหม่อย่างสุภาพ พร้อมยกตัวอย่าง
-- ใช้น้ำเสียงเป็นมิตร สนับสนุนการเรียนรู้
-- ตอบเป็นข้อความธรรมดา ไม่ต้องใช้ Markdown
-      `,
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
+  if (error) {
+    console.error("Error creating class in Supabase:", error.message);
+    return null;
+  }
+
+  return data;
+};
+
+// Create a row in student_sessions so we have a sessionId to attach to
+// conversation_logs (which requires a valid session_id foreign key).
+// NOTE: student_sessions.student_id and .class_id are uuid foreign keys
+// (to profiles.id and classes.id respectively) — the old text columns
+// `name` and `class_code` were dropped in 20260717092517_remote_schema.sql.
+export const createStudentSession = async (
+    profileId: string,
+    classId: string,
+): Promise<number | null> => {
+  const { data, error } = await supabase
+      .from("student_sessions")
+      .insert({
+        student_id: profileId,
+        class_id: classId,
+        activity_type: "chat",
+      })
+      .select("id")
+      .single();
+
+  if (error) {
+    console.error("Error creating student session:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
+};
+
+export const enrollStudent = async (classCode: string, name: string) => {
+  const { error } = await supabase.from("enrollments").insert({
+    class_code: classCode,
+    name,
   });
 
-  const aiText =
-    response.choices[0]?.message?.content ??
-    "พร้อมช่วยอธิบายบทเรียนให้คุณเสมอ";
+  if (error) {
+    console.error("Error enrolling student in Supabase:", error.message);
+  }
+};
 
-  console.log("[CHAT] AI response received");
+export const getLatestClassCode = async () => {
+  const { data, error } = await supabase
+      .from("classes")
+      .select("class_code")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  // 7. Detect misconception
-  let misconception = null;
-
-  if (intent === "explain" || intent === "general") {
-    try {
-      console.log("[MISCONCEPTION] Starting detection...");
-
-      misconception = await detectMisconception(
-        latestQuestion,
-        state.currentLesson,
-      );
-
-      console.log("[MISCONCEPTION] Result:", misconception);
-    } catch (error) {
-      console.error("[MISCONCEPTION] Detection failed:", error);
-    }
+  if (error || !data) {
+    console.error("Error getting latest class code:", error?.message);
+    return null;
   }
 
-  // 8. Save student message
-  try {
-    await saveConversationLog({
-      sessionId,
-      role: "assistant",
-      message: aiText,
-    });
+  return data.class_code;
+};
 
-    // 9. Save AI response
-    await saveConversationLog({
-      sessionId,
-      role: "assistant",
-      message: aiText,
-    });
+export const getAllClasses = async () => {
+  const { data, error } = await supabase
+      .from("classes")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    console.log("[CONVERSATION LOG] Saved successfully");
-  } catch (error) {
-    // Log failure should not break AI chat
-    console.error("[CONVERSATION LOG] Failed to save:", error);
+  if (error) {
+    console.error("Error getting all classes:", error?.message);
+    return [];
   }
 
-  return {
-    text: aiText,
-    misconception,
-  };
-}
+  return data;
+};

@@ -21,6 +21,7 @@ export interface QuizQuestion {
 }
 
 export interface QuizAttempt {
+  success?: boolean; // whether the result was actually saved to the database
   answers: { [key: string]: number }; // questionId -> selectedIndex
   score: number; // percentage
   strengths: string[];

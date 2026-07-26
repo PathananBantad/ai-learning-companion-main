@@ -1,4 +1,3 @@
-
 import { Router, Request, Response } from "express";
 import { state } from "../data/lesson";
 import { supabase } from "../lib/supabase";
@@ -34,14 +33,14 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
 
   const uploadedFileObjs = (req.files as Express.Multer.File[]) || [];
   const extractedFiles: ExtractedFile[] = await Promise.all(
-    uploadedFileObjs.map(extractFileContent)
+      uploadedFileObjs.map(extractFileContent)
   );
 
   const materialBlock = extractedFiles.length > 0
-    ? extractedFiles
-        .map((f, i) => `--- เอกสารที่ ${i + 1}: ${f.filename} ---\n${f.content}`)
-        .join('\n\n')
-    : '';
+      ? extractedFiles
+          .map((f, i) => `--- เอกสารที่ ${i + 1}: ${f.filename} ---\n${f.content}`)
+          .join('\n\n')
+      : '';
 
   const ai = getAIClient();
   if (ai) {
@@ -187,7 +186,7 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
         commonMisconceptions: parsed.commonMisconceptions || [],
         knowledgeBaseStatus: "ready",
         uploadedFiles:
-          activeFiles.length > 0 ? activeFiles : ["manually_configured.txt"],
+            activeFiles.length > 0 ? activeFiles : ["manually_configured.txt"],
         summary: parsed.summary || "Summary generated successfully.",
       };
 
@@ -196,18 +195,18 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
 //ใน feature/ai ลบไปแต่ตอนนี้ยังไม่ลบรอดูก่อน
       // Persist the generated lesson to Supabase so it survives server restarts
       const { data: lessonData, error: lessonInsertError } = await supabase
-        .from("lessons")
-        .insert({
-          topic: state.currentLesson.topic,
-          learning_outcomes: JSON.stringify(
-            state.currentLesson.learningOutcomes,
-          ),
-          key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-          misconceptions: JSON.stringify(
-            state.currentLesson.commonMisconceptions,
-          ),
-        })
-        .select();
+          .from("lessons")
+          .insert({
+            topic: state.currentLesson.topic,
+            learning_outcomes: JSON.stringify(
+                state.currentLesson.learningOutcomes,
+            ),
+            key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+            misconceptions: JSON.stringify(
+                state.currentLesson.commonMisconceptions,
+            ),
+          })
+          .select();
 
       console.log("Lesson insert result:", lessonData);
 
@@ -215,16 +214,16 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
         console.error("Lesson insert error:", lessonInsertError);
       }
 
-   
+
       state.simulatedSubmissionsCount = 0;
       state.simulatedAnalytics = {
         averageScore: 0,
         outcomeAchievement: state.currentLesson.learningOutcomes.map(
-          (outcome: string) => ({
-            name:
-              outcome.length > 30 ? outcome.substring(0, 30) + "..." : outcome,
-            score: 0,
-          }),
+            (outcome: string) => ({
+              name:
+                  outcome.length > 30 ? outcome.substring(0, 30) + "..." : outcome,
+              score: 0,
+            }),
         ),
         mostIncorrectTopic: state.currentLesson.keyConcepts[0]?.title || "None",
         mostAskedQuestions: [
@@ -234,11 +233,11 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
           },
         ],
         commonMisconceptions: state.currentLesson.commonMisconceptions.map(
-          (mis: any) => ({
-            topic: mis.title,
-            count: 0,
-            description: mis.explanation,
-          }),
+            (mis: any) => ({
+              topic: mis.title,
+              count: 0,
+              description: mis.explanation,
+            }),
         ),
         studentSubmissionsCount: 0,
         weeklyTrend: [
@@ -249,7 +248,7 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
           { day: "Fri", averageScore: 0, activeStudents: 0 },
         ],
         aiInsight:
-          "A brand new knowledge base was generated. Encourage students to participate in the mock quiz to populate analytical insights.",
+            "A brand new knowledge base was generated. Encourage students to participate in the mock quiz to populate analytical insights.",
       };
 
       res.json({
@@ -260,8 +259,8 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
       return;
     } catch (err) {
 
-      console.error('Error generating lesson via Qwen:', err);
-      res.status(500).json({ error: 'Failed to generate knowledge base via Qwen. Using fallback configuration.' });
+      console.error('Error generating lesson via AI:', err);
+      res.status(500).json({ error: 'Failed to generate knowledge base via AI. Using fallback configuration.' });
       return;
     }
   }
@@ -334,17 +333,17 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
 
   // Persist the fallback lesson to Supabase too, so it survives server restarts
   const { data: fallbackLessonData, error: fallbackLessonInsertError } =
-    await supabase
-      .from("lessons")
-      .insert({
-        topic: state.currentLesson.topic,
-        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-        misconceptions: JSON.stringify(
-          state.currentLesson.commonMisconceptions,
-        ),
-      })
-      .select();
+      await supabase
+          .from("lessons")
+          .insert({
+            topic: state.currentLesson.topic,
+            learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
+            key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+            misconceptions: JSON.stringify(
+                state.currentLesson.commonMisconceptions,
+            ),
+          })
+          .select();
 
   console.log("Fallback lesson insert result:", fallbackLessonData);
 
@@ -356,7 +355,7 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
   state.simulatedAnalytics = {
     averageScore: 0,
     outcomeAchievement: state.currentLesson.learningOutcomes.map(
-      (o: string) => ({ name: o.substring(0, 30), score: 0 }),
+        (o: string) => ({ name: o.substring(0, 30), score: 0 }),
     ),
     mostIncorrectTopic: "Over-complicating " + targetTopic,
     mostAskedQuestions: [
@@ -392,9 +391,17 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
 // Submit student quiz answers
 
 router.post('/quiz/submit', async (req: Request, res: Response) => {
-  const { answers } = req.body;
+  const { answers, name, studentId, classCode } = req.body;
+
   if (!answers) {
     res.status(400).json({ error: "Missing answers" });
+    return;
+  }
+
+  if (!name || !studentId || !classCode) {
+    res.status(400).json({
+      error: "Missing name, studentId, or classCode. Please rejoin the class.",
+    });
     return;
   }
 
@@ -420,48 +427,42 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
-
   const misconceptionsTriggered = detectQuizMisconceptions(state.quizQuestions, answers);
   const recommendations = generateRecommendations(state.quizQuestions, answers, score);
   const aiFeedback = await generateFeedback(score, strengths, weaknesses, misconceptionsTriggered);
 
-  const dynamicStudent = {
-    id: "STU-ACTIVE",
-    name: "Active Student (You)",
-    quizScore: score,
-    learningProgress: Math.min(100, Math.round(score * 1.15)),
-    learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: score >= 75 ? 100 : 75 },
-      { name: "Stateless HTTP & Sessions", score: score >= 50 ? 80 : 50 },
-      {
-        name: "Idempotency Concepts",
-        score: score >= 100 ? 100 : score >= 75 ? 75 : 40,
-      },
-      { name: "Web Security (POST/HTTPS)", score: score >= 75 ? 90 : 60 },
-    ],
-    strengths: strengths.length > 0 ? strengths : ["General Web Basics"],
-    weaknesses: weaknesses.length > 0 ? weaknesses : ["None"],
-    commonMisconceptions:
-      misconceptionsTriggered.length > 0 ? misconceptionsTriggered : ["None"],
-    aiFeedbackSummary:
-      score >= 85
-        ? "Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees."
-        : "Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.",
-    recommendedTopics:
-      recommendations.length > 0
-        ? recommendations
-        : ["Advanced GraphQL paradigms"],
-    lastActivity: "Completed diagnostic quiz just now",
-  };
-
-  if (!state.simulatedAnalytics.students) {
-    state.simulatedAnalytics.students = [];
+  // Persist the real result to Supabase using the name/studentId/classCode
+  // sent by the frontend. If this fails, tell the frontend honestly instead
+  // of pretending the submission succeeded.
+  try {
+    await saveQuizResult({
+      name,
+      studentId,
+      classCode,
+      score,
+      totalQuestions: state.quizQuestions.length,
+      aiFeedback,
+      misconceptionsTriggered,
+    });
+  } catch (err: any) {
+    console.error("[QUIZ SUBMIT] Failed to save quiz result:", err);
+    res.status(500).json({
+      success: false,
+      error: "บันทึกผลคะแนนไม่สำเร็จ กรุณาลองส่งอีกครั้ง",
+    });
+    return;
   }
 
-  state.simulatedAnalytics.students = state.simulatedAnalytics.students.filter((s: any) => s.id !== 'STU-ACTIVE');
-  state.simulatedAnalytics.students.unshift(dynamicStudent);
-
-  const attemptResult = { answers, score, strengths, weaknesses, misconceptionsTriggered, recommendations, aiFeedback };
+  const attemptResult = {
+    success: true,
+    answers,
+    score,
+    strengths,
+    weaknesses,
+    misconceptionsTriggered,
+    recommendations,
+    aiFeedback,
+  };
   res.json(attemptResult);
 });
 
