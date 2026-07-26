@@ -14,10 +14,10 @@ interface GenerateLessonParams {
 }
 
 export async function generateLesson({
-  topic,
-  uploadedFiles,
-  manualPrompt
-}: GenerateLessonParams): Promise<Lesson> {
+                                       topic,
+                                       uploadedFiles,
+                                       manualPrompt
+                                     }: GenerateLessonParams): Promise<Lesson> {
   const targetTopic = topic || 'Modern Web Engineering';
   const activeFiles = uploadedFiles || [];
 
@@ -99,12 +99,12 @@ Schema:
         summary: parsed.summary || 'สร้างสรุปเนื้อหาสำเร็จแล้ว'
       };
     } catch (err) {
-      console.error('Error generating lesson via Qwen:', err);
+      console.error('Error generating lesson via AI:', err);
       // fall through to offline fallback below
     }
   }
 
-  // Fallback (no API key, or Qwen call failed)
+  // Fallback (no API key, or AI call failed)
   return {
     id: 'lesson-' + Date.now(),
     topic: targetTopic,
@@ -122,6 +122,6 @@ Schema:
     ],
     knowledgeBaseStatus: 'ready',
     uploadedFiles: activeFiles.length > 0 ? activeFiles : ['fallback_data.txt'],
-    summary: `ตั้งค่าบทเรียนสำรองสำหรับ ${targetTopic} เรียบร้อยแล้ว กรุณาเพิ่ม GEMINI_API_KEY เพื่อใช้งานการสร้างเนื้อหาแบบเต็มรูปแบบ`
+    summary: `ตั้งค่าบทเรียนสำรองสำหรับ ${targetTopic} เรียบร้อยแล้ว กรุณาเพิ่ม AI_API_KEY เพื่อใช้งานการสร้างเนื้อหาแบบเต็มรูปแบบ`
   };
 }

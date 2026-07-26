@@ -197,7 +197,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-slate-800 text-sm">ข้อมูลเชิงลึกจากผู้ช่วยอาจารย์ (AI)</h3>
-                    <p className="text-[10px] text-slate-400 font-semibold">ที่ปรึกษาด้านวิชาการ Gemini</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">ที่ปรึกษาด้านวิชาการ AI</p>
                   </div>
                 </div>
 

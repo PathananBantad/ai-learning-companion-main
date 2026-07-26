@@ -6,10 +6,10 @@ export interface ExtractedFile {
   content: string;
 }
 
-const MAX_CHARS_PER_FILE = 6000; // กันโดน quota ของ Qwen key หมดเร็วเกินไป
+const MAX_CHARS_PER_FILE = 6000; // กันโดน quota ของ AI key หมดเร็วเกินไป
 
 export async function extractFileContent(
-  file: Express.Multer.File
+    file: Express.Multer.File
 ): Promise<ExtractedFile> {
   const ext = file.originalname.split('.').pop()?.toLowerCase();
   let text = '';

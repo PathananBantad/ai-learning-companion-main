@@ -11,12 +11,12 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
 
   if (ai) {
     const conceptList = lesson.keyConcepts
-      .map((c, i) => `${i + 1}. ${c.title}: ${c.description}`)
-      .join('\n');
+        .map((c, i) => `${i + 1}. ${c.title}: ${c.description}`)
+        .join('\n');
 
     const misconceptionList = lesson.commonMisconceptions
-      .map((m, i) => `${i + 1}. ${m.title}: ${m.explanation}`)
-      .join('\n');
+        .map((m, i) => `${i + 1}. ${m.title}: ${m.explanation}`)
+        .join('\n');
 
     const generationPrompt = `
       You are a university quiz designer. Create a 4-question multiple choice quiz
@@ -69,7 +69,7 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
         return parsed as QuizQuestion[];
       }
     } catch (err) {
-      console.error('Error generating quiz via Qwen:', err);
+      console.error('Error generating quiz via AI:', err);
     }
   }
 

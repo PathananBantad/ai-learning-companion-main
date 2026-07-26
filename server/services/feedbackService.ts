@@ -13,10 +13,10 @@ export interface FeedbackResult {
 }
 
 export async function generateFeedback(
-  score: number,
-  strengths: string[],
-  weaknesses: string[],
-  misconceptions: string[]
+    score: number,
+    strengths: string[],
+    weaknesses: string[],
+    misconceptions: string[]
 ): Promise<FeedbackResult> {
   const ai = getAIClient();
 
@@ -41,7 +41,7 @@ export async function generateFeedback(
     }
   }
 
-  // Fallback (ไม่มี key หรือ Gemini call ล้มเหลว) — สอดคล้องกับ lessonService.ts / quizService.ts
+  // Fallback (ไม่มี key หรือ AI call ล้มเหลว) — สอดคล้องกับ lessonService.ts / quizService.ts
   const level = score >= 90 ? 'ดีมาก' : score >= 70 ? 'ดี' : 'ควรปรับปรุง';
   return {
     level,
@@ -49,9 +49,9 @@ export async function generateFeedback(
     strengths: strengths.length > 0 ? strengths : ['ยังไม่มีข้อมูลจุดแข็งที่ชัดเจน'],
     weaknesses: weaknesses.length > 0 ? weaknesses : ['ยังไม่มีข้อมูลจุดที่ควรพัฒนา'],
     recommendations:
-      misconceptions.length > 0
-        ? misconceptions.map((m) => `ทบทวนเรื่อง: ${m}`)
-        : ['ลองทบทวนเนื้อหาบทเรียนอีกครั้ง'],
+        misconceptions.length > 0
+            ? misconceptions.map((m) => `ทบทวนเรื่อง: ${m}`)
+            : ['ลองทบทวนเนื้อหาบทเรียนอีกครั้ง'],
     encouragement: 'สู้ ๆ นะครับ การเรียนรู้เป็นกระบวนการที่ต้องใช้เวลา'
   };
 }
