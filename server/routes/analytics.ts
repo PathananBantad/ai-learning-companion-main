@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
-import { getGeminiClient } from '../lib/gemini';
 import { getAnalytics } from "../services/analyticsService";
-import { GEMINI_MODEL } from '../lib/gemini';
 import { supabase } from '../lib/supabase';
+import { getAIClient , AI_MODEL } from '../lib/ai';
 
 const router = Router();
 
@@ -34,11 +33,13 @@ router.get('/analytics/check-updates', async (req: Request, res: Response) => {
 // Get teacher analytics
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    const requestedClassCode = (req.query.classCode as string) || state.activeClassCode;
+    const requestedClassCode =
+      (req.query.classCode as string) || state.activeClassCode;
+
     const analytics = await getAnalytics(requestedClassCode);
 
-    const refresh = req.query.refresh === "true";
-    const ai = getGeminiClient();
+    const refresh = req.query.refresh === 'true';
+    const ai = getAIClient();
 
     if (ai && (refresh || !analytics.aiInsight)) {
       try {
@@ -51,14 +52,21 @@ Student submissions: ${analytics.studentSubmissionsCount}
 Give the instructor a short recommendation in no more than 3 sentences.
 `;
 
-        const response = await ai.models.generateContent({
-          model: GEMINI_MODEL,
-          contents: prompt,
+        const response = await ai.chat.completions.create({
+          model: AI_MODEL,
+          messages: [{ role: 'user', content: prompt }]
         });
 
-        analytics.aiInsight = response.text?.trim() ?? "";
+        const content = response.choices[0].message.content;
+
+        if (content) {
+          analytics.aiInsight = content.trim();
+        }
       } catch (err: any) {
-        console.error(err);
+        console.error(
+          'Error generating AI analytics insights:',
+          err.message || err
+        );
       }
     }
 
@@ -67,12 +75,12 @@ Give the instructor a short recommendation in no more than 3 sentences.
     console.error(err);
 
     res.status(500).json({
-      error: "Failed to load analytics",
+      error: 'Failed to load analytics',
     });
   }
 });
-
 // Generate individual student AI Insight
+
 router.post('/student-insight', async (req: Request, res: Response) => {
   const { student } = req.body;
   if (!student) {
@@ -80,7 +88,7 @@ router.post('/student-insight', async (req: Request, res: Response) => {
     return;
   }
 
-  const ai = getGeminiClient();
+  const ai = getAIClient();
   if (ai) {
     try {
       const prompt = `
@@ -108,22 +116,27 @@ router.post('/student-insight', async (req: Request, res: Response) => {
         Respond ONLY with a valid JSON object matching the keys above. Do not output any markdown code blocks (such as \`\`\`json) or external text.
       `;
 
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
+
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' }
       });
 
-      if (response.text) {
-        const cleanJSON = response.text.trim().replace(/^```json\s*/, '').replace(/```$/, '').trim();
-        const parsed = JSON.parse(cleanJSON);
-        res.json(parsed);
-        return;
+      if (response.choices && response.choices[0].message) {
+        const content = response.choices[0].message.content;
+        if(content){
+          const cleanJSON = content.trim().replace(/^```json\s*/, '').replace(/```$/, '').trim();
+          const parsed = JSON.parse(cleanJSON);
+          
+          res.json(parsed);
+          return;
+        }
+        
+       
       }
     } catch (err: any) {
-      console.error('Error generating student AI insight with Gemini:', err.message || err);
+      console.error('Error generating student AI insight with AI:', err.message || err);
     }
   }
 

@@ -2,8 +2,10 @@
 // Step 1 of the sequential pipeline: generate the Lesson (Knowledge Base) only.
 // Quiz generation happens afterwards in quizService.ts, using this Lesson as input.
 
-import { getGeminiClient, GEMINI_MODEL } from '../lib/gemini';
+
 import { Lesson } from '../data/lesson';
+import { getAIClient, AI_MODEL } from '../lib/ai';
+
 
 interface GenerateLessonParams {
   topic?: string;
@@ -19,7 +21,7 @@ export async function generateLesson({
   const targetTopic = topic || 'Modern Web Engineering';
   const activeFiles = uploadedFiles || [];
 
-  const ai = getGeminiClient();
+  const ai = getAIClient();
 
   if (ai) {
     const generationPrompt = `
@@ -75,18 +77,14 @@ Schema:
 `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: generationPrompt,
-        config:{
-          responseMimeType:'application/json',
-          temperature:0.5,
-          topP:0.9,
-          topK:40
-        }
+
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
+        messages: [{ role: 'user', content: generationPrompt }],
+        response_format: { type: 'json_object' }
       });
 
-      const textResponse = response.text?.trim() || '';
+      const textResponse = response.choices[0].message?.content?.trim() || '';
       const cleanJSON = textResponse.replace(/^```json\s*/, '').replace(/```$/, '').trim();
       const parsed = JSON.parse(cleanJSON);
 
@@ -101,12 +99,12 @@ Schema:
         summary: parsed.summary || 'สร้างสรุปเนื้อหาสำเร็จแล้ว'
       };
     } catch (err) {
-      console.error('Error generating lesson via Gemini:', err);
+      console.error('Error generating lesson via Qwen:', err);
       // fall through to offline fallback below
     }
   }
 
-  // Fallback (no API key, or Gemini call failed)
+  // Fallback (no API key, or Qwen call failed)
   return {
     id: 'lesson-' + Date.now(),
     topic: targetTopic,

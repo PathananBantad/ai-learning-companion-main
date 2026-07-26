@@ -1,11 +1,12 @@
 import { state } from "../data/lesson";
-import { getGeminiClient, GEMINI_MODEL } from "../lib/gemini";
 import { buildTutorPrompt } from "../prompts/tutorPrompt";
 import { retrieveContext } from "./retrieval.service";
 import { ChatMessage } from "../types/chat";
 import { detectIntent } from "./intent.service";
 import { detectMisconception } from "./misconceptionService";
 import { saveConversationLog } from "./conversationLog.service";
+import { getAIClient, AI_MODEL } from "../lib/ai";
+
 
 export async function generateTutorResponse(
   messages: ChatMessage[],
@@ -37,29 +38,50 @@ export async function generateTutorResponse(
     intent,
   );
 
-  // 5. Get Gemini client
-  const ai = getGeminiClient();
+
+  const ai = getAIClient();
 
   if (!ai) {
-    console.error("[CHAT] Gemini client is not configured");
+    console.error("[CHAT] AI client is not configured");
 
     return {
-      text: "Gemini client is not configured.",
+      text: "AI client is not configured.",
     };
   }
 
   // 6. Generate AI response
-  console.log("[CHAT] Calling Gemini...");
+  console.log("[CHAT] Calling AI...");
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: prompt,
+  const response = await ai.chat.completions.create({
+    model: AI_MODEL,
+    messages: [
+      {
+        role: "system",
+        content: `
+คุณคือ AI Tutor สำหรับช่วยนักเรียนเรียนบทเรียน
+
+หน้าที่ของคุณ
+- ตอบเป็นภาษาไทยเสมอ
+- อธิบายเข้าใจง่าย เหมาะสำหรับนักศึกษา
+- ใช้ข้อมูลจากบทเรียนและข้อมูลที่ Retrieve มาเป็นหลัก
+- หากข้อมูลไม่มีในบทเรียน ให้บอกตรง ๆ ว่าไม่มีข้อมูล แทนการเดา
+- หากนักเรียนเข้าใจผิด ให้ช่วยอธิบายใหม่อย่างสุภาพ พร้อมยกตัวอย่าง
+- ใช้น้ำเสียงเป็นมิตร สนับสนุนการเรียนรู้
+- ตอบเป็นข้อความธรรมดา ไม่ต้องใช้ Markdown
+      `,
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
   });
 
   const aiText =
-    response.text ?? "I am ready to help you with the lesson material.";
+    response.choices[0]?.message?.content ??
+    "พร้อมช่วยอธิบายบทเรียนให้คุณเสมอ";
 
-  console.log("[CHAT] Gemini response received");
+  console.log("[CHAT] AI response received");
 
   // 7. Detect misconception
   let misconception = null;
@@ -83,11 +105,8 @@ export async function generateTutorResponse(
   try {
     await saveConversationLog({
       sessionId,
-      role: "user",
-      message: latestQuestion,
-      intent,
-      misconceptionDetected: misconception?.detected ?? false,
-      misconceptionConcept: misconception?.concept ?? null,
+      role: "assistant",
+      message: aiText,
     });
 
     // 9. Save AI response

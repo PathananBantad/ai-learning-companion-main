@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  FileText, UploadCloud, BookOpen, AlertCircle, Sparkles, 
+import {
+  FileText, UploadCloud, BookOpen, AlertCircle, Sparkles,
   Plus, Trash2, CheckCircle, HelpCircle, ArrowRight, RefreshCw,
   Copy, Check, Shuffle, Key, Users
 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { LessonData } from '../types';
 
 interface TeacherPortalProps {
   lesson: LessonData;
-  onGenerateKnowledgeBase: (topic: string, files: string[], manualPrompt: string) => Promise<void>;
+  onGenerateKnowledgeBase: (topic: string, files: File[], manualPrompt: string) => Promise<void>;
   isGenerating: boolean;
   apiKeySet: boolean;
   classCode: string;
@@ -17,17 +17,17 @@ interface TeacherPortalProps {
   isGeneratingClassCode?: boolean;
 }
 
-export default function TeacherPortal({ 
-  lesson, 
-  onGenerateKnowledgeBase, 
-  isGenerating, 
+export default function TeacherPortal({
+  lesson,
+  onGenerateKnowledgeBase,
+  isGenerating,
   apiKeySet,
   classCode,
   onGenerateClassCode,
   isGeneratingClassCode = false
 }: TeacherPortalProps) {
   const [topicInput, setTopicInput] = useState(lesson.topic);
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>(lesson.uploadedFiles);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [manualPrompt, setManualPrompt] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -65,23 +65,17 @@ export default function TeacherPortal({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const newFiles: string[] = [];
-      for (let i = 0; i < e.dataTransfer.files.length; i++) {
-        newFiles.push(e.dataTransfer.files[i].name);
-      }
-      setUploadedFiles(prev => [...prev, ...newFiles]);
+
+    const files = Array.from(e.dataTransfer.files ?? []);
+    if (files.length > 0) {
+      setUploadedFiles(prev => [...prev, ...files]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const newFiles: string[] = [];
-      for (let i = 0; i < e.target.files.length; i++) {
-        newFiles.push(e.target.files[i].name);
-      }
-      setUploadedFiles(prev => [...prev, ...newFiles]);
+    const files = Array.from(e.target.files ?? []);
+    if (files.length > 0) {
+      setUploadedFiles(prev => [...prev, ...files]);
     }
   };
 
@@ -107,7 +101,7 @@ export default function TeacherPortal({
           <h1 className="font-display font-bold text-3xl text-slate-900 mt-1">ซิงค์หลักสูตรและฐานความรู้รายวิชา</h1>
           <p className="text-slate-500 text-sm mt-1">ตั้งค่าบทเรียนที่ใช้งานอยู่ นำเข้าไฟล์ PDF หลักสูตร และสร้างสื่อการเรียนสำหรับนักศึกษา</p>
         </div>
-        
+
         {!apiKeySet && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 max-w-sm flex items-start gap-2.5">
             <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
@@ -120,10 +114,10 @@ export default function TeacherPortal({
       </div>
 
       <div className="grid lg:grid-cols-12 gap-8">
-        
+
         {/* Left Side: Setup Controls */}
         <div className="lg:col-span-7 space-y-6">
-          
+
           {/* Card: Lesson Topic */}
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <h2 className="font-display font-bold text-lg text-slate-800 flex items-center gap-2">
@@ -158,16 +152,15 @@ export default function TeacherPortal({
               <span className="bg-brand-blue/10 text-brand-blue p-1.5 rounded-lg text-xs">02</span>
               อัปโหลดสื่อการสอน
             </h2>
-            
+
             {/* Drag Zone */}
             <div
               onDragEnter={handleDrag}
               onDragOver={handleDrag}
               onDragLeave={handleDrag}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition ${
-                dragActive ? 'border-brand-blue bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'
-              }`}
+              className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition ${dragActive ? 'border-brand-blue bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'
+                }`}
               onClick={() => document.getElementById('file-upload-input')?.click()}
             >
               <UploadCloud className="w-10 h-10 text-slate-400 mb-3" />
@@ -188,11 +181,11 @@ export default function TeacherPortal({
               <div className="space-y-2 pt-2">
                 <label className="block text-xs font-bold uppercase text-slate-400">เอกสารรายวิชาที่อัปโหลดแล้ว ({uploadedFiles.length})</label>
                 <div className="max-h-40 overflow-y-auto space-y-1.5 pr-2">
-                  {uploadedFiles.map((filename, idx) => (
+                  {uploadedFiles.map((file, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
                       <div className="flex items-center gap-2 text-slate-700 font-medium truncate">
                         <FileText className="w-4 h-4 text-brand-blue" />
-                        <span className="truncate">{filename}</span>
+                        <span className="truncate">{file.name}</span>
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
@@ -238,7 +231,7 @@ export default function TeacherPortal({
 
         {/* Right Side: Status Monitor & Preview */}
         <div className="lg:col-span-5 space-y-6">
-          
+
           {/* Card: Class Code and Active Session */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5">
             <div className="flex items-center justify-between">
@@ -262,7 +255,7 @@ export default function TeacherPortal({
                 <span className="font-mono font-extrabold text-2xl tracking-widest text-slate-900 bg-white px-4 py-1.5 rounded-xl border border-slate-200/80 shadow-xs">
                   {classCode}
                 </span>
-                
+
                 <button
                   onClick={handleCopyCode}
                   className="bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 p-2.5 rounded-xl transition shadow-xs active:scale-95"
@@ -325,9 +318,9 @@ export default function TeacherPortal({
           {/* Status Panel */}
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-6">
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-wider">สถานะฐานความรู้</h3>
-            
+
             <div className="space-y-4">
-              
+
               {/* Ready State */}
               <div className="flex items-start gap-4">
                 <div className={`p-2 rounded-xl ${lesson.knowledgeBaseStatus === 'ready' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
@@ -367,7 +360,7 @@ export default function TeacherPortal({
                     {isGenerating ? 'กำลังสร้างเนื้อหา' : 'สังเคราะห์หลักสูตรแล้ว'}
                   </div>
                   <p className="text-slate-500 text-xs mt-0.5">
-                    {isGenerating 
+                    {isGenerating
                       ? 'กำลังสร้างสรุปการเรียนและพารามิเตอร์แบบทดสอบใหม่...'
                       : 'พร้อมตอบคำถามของนักศึกษาและสร้างคำตอบติวเข้มแบบไดนามิก'
                     }
@@ -387,7 +380,7 @@ export default function TeacherPortal({
               <span className="bg-white/10 text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">การบรรยายที่กำลังใช้งาน</span>
               <h4 className="font-display font-bold text-xl leading-tight text-white">{lesson.topic}</h4>
               <p className="text-slate-300 text-xs leading-relaxed">{lesson.summary}</p>
-              
+
               <div className="border-t border-white/10 pt-3 flex items-center justify-between text-xs text-slate-400">
                 <span>ผลลัพธ์การเรียนรู้: {lesson.learningOutcomes.length}</span>
                 <span>แนวคิดที่จับคู่แล้ว: {lesson.keyConcepts.length}</span>
@@ -417,7 +410,7 @@ export default function TeacherPortal({
               <ul className="space-y-3">
                 {lesson.learningOutcomes.map((outcome, i) => (
                   <li key={i} className="text-slate-600 text-xs flex items-start gap-2.5 leading-relaxed font-medium">
-                    <span className="text-slate-400 shrink-0 mt-0.5 font-bold">{i+1}.</span>
+                    <span className="text-slate-400 shrink-0 mt-0.5 font-bold">{i + 1}.</span>
                     <span>{outcome}</span>
                   </li>
                 ))}

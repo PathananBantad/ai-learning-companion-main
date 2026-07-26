@@ -1,4 +1,4 @@
-import { getGeminiClient, GEMINI_MODEL } from "../lib/gemini";
+import { getAIClient, AI_MODEL } from "../lib/ai";
 import { Lesson, QuizQuestion } from "../data/lesson";
 
 export interface MisconceptionResult {
@@ -16,7 +16,7 @@ export async function detectMisconception(
   studentAnswer: string,
   lesson: Lesson,
 ): Promise<MisconceptionResult> {
-  const ai = getGeminiClient();
+  const ai = getAIClient();
 
   if (!ai) {
     return {
@@ -41,8 +41,8 @@ ${lesson.keyConcepts.map((c) => `- ${c.title}: ${c.description}`).join("\n")}
 
 Known Misconceptions:
 ${lesson.commonMisconceptions
-  .map((m) => `- ${m.title}: ${m.explanation}`)
-  .join("\n")}
+      .map((m) => `- ${m.title}: ${m.explanation}`)
+      .join("\n")}
 
 Determine whether the student has a misconception.
 
@@ -62,13 +62,23 @@ If there is no misconception:
 }
 `;
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: prompt,
+  const response = await ai.chat.completions.create({
+    model: AI_MODEL,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an educational assessment AI. Return ONLY valid JSON.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
   });
 
   try {
-    const text = response.text ?? "{}";
+    const text = response.choices[0]?.message?.content ?? "{}";
 
     const cleaned = text.replace("```json", "").replace("```", "").trim();
 
