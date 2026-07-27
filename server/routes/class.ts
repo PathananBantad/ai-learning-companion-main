@@ -1,34 +1,34 @@
-import { Router, Request, Response } from 'express';
-import { state } from '../data/lesson';
+import { Router, Request, Response } from "express";
+import { state } from "../data/lesson";
 import {
   createClass,
   validateClassCode,
   getLatestClassCode,
   getAllClasses,
-  createStudentSession
-} from '../services/class.service';
+  createStudentSession,
+} from "../services/class.service";
 import { saveProfile } from "../services/profileService";
 
 const router = Router();
 
 // Get active class code (อ่านจาก Supabase)
-router.get('/class/code', async (req: Request, res: Response) => {
+router.get("/class/code", async (req: Request, res: Response) => {
   const activeClassCode = await getLatestClassCode();
 
   res.json({
-    activeClassCode
+    activeClassCode,
   });
 });
 
 // Generate or set a custom class code
-router.post('/class/generate', async (req: Request, res: Response) => {
+router.post("/class/generate", async (req: Request, res: Response) => {
   const { customCode } = req.body;
 
   if (customCode && customCode.trim()) {
     state.activeClassCode = customCode.trim().toUpperCase();
   } else {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
 
     for (let i = 0; i < 4; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -37,24 +37,20 @@ router.post('/class/generate', async (req: Request, res: Response) => {
     state.activeClassCode = `AEG-${result}`;
   }
 
-  await createClass(
-      state.activeClassCode,
-      state.currentLesson?.topic
-  );
+  await createClass(state.activeClassCode, state.currentLesson?.topic);
 
   res.json({
-    activeClassCode: state.activeClassCode
+    activeClassCode: state.activeClassCode,
   });
 });
 
 // Verify entered class code
-router.post('/class/verify', async (req: Request, res: Response) => {
-
+router.post("/class/verify", async (req: Request, res: Response) => {
   const { code, name, studentId } = req.body;
 
   if (!code) {
     return res.status(400).json({
-      error: 'Code is required'
+      error: "Code is required",
     });
   }
 
@@ -65,8 +61,8 @@ router.post('/class/verify', async (req: Request, res: Response) => {
   // Fallback
   if (!result.success && normalizedCode === state.activeClassCode) {
     const createdClass = await createClass(
-        normalizedCode,
-        state.currentLesson?.topic
+      normalizedCode,
+      state.currentLesson?.topic,
     ).catch(() => null);
 
     result = {
@@ -77,7 +73,7 @@ router.post('/class/verify', async (req: Request, res: Response) => {
     };
   }
 
-  let sessionId: number | null = null;
+  let sessionId: string | null = null;
 
   if (result.success) {
     // Do not sync memory here, as it changes the active class globally for the instructor dashboard
@@ -90,11 +86,7 @@ router.post('/class/verify', async (req: Request, res: Response) => {
       let profile: { id: string } | null = null;
 
       try {
-        profile = await saveProfile(
-            name,
-            studentId,
-            "student"
-        );
+        profile = await saveProfile(name, studentId, "student");
       } catch (err) {
         console.error("Save profile failed:", err);
       }
@@ -105,8 +97,8 @@ router.post('/class/verify', async (req: Request, res: Response) => {
         sessionId = await createStudentSession(profile.id, classId);
       } else {
         console.error(
-            "[CLASS VERIFY] Skipped creating student session — missing profile.id or class.id",
-            { profileId: profile?.id, classId }
+          "[CLASS VERIFY] Skipped creating student session — missing profile.id or class.id",
+          { profileId: profile?.id, classId },
         );
       }
     }
@@ -115,13 +107,12 @@ router.post('/class/verify', async (req: Request, res: Response) => {
   res.json({
     success: result.success,
     activeClassCode: normalizedCode,
-    sessionId
+    sessionId,
   });
-
 });
 
 // Get all classes
-router.get('/classes', async (req: Request, res: Response) => {
+router.get("/classes", async (req: Request, res: Response) => {
   const classes = await getAllClasses();
   res.json({ classes });
 });
