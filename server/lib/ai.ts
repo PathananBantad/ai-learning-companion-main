@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 // ตั้งค่าโมเดลหลัก โดยเลือกใช้ Gemini เป็นตัวเลือกแรกใน AI Studio และใช้ Qwen เป็นตัวสำรอง
 export const AI_MODEL = process.env.GEMINI_API_KEY
-  ? "gemini-2.5-flash"
+  ? "gemini-3.5-flash"
   : process.env.AI_MODEL || "qwen3.8-max-preview";
 
 let aiClient: OpenAI | null = null;
