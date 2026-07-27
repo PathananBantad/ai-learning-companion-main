@@ -58,7 +58,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
       {/* Upper Headers */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-6">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">แดชบอร์ดผู้สอน</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">ภาพรวมสำหรับผู้สอน</span>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-1">
             <h1 className="font-display font-bold text-3xl text-slate-900">สรุปผลการวิเคราะห์ชั้นเรียน</h1>
 

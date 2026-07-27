@@ -72,7 +72,7 @@ export default function QuizPage({ questions, onSubmitQuiz, isSubmitting }: Quiz
         <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
           <div className="flex items-center gap-1.5">
             <Compass className="w-4 h-4 text-brand-blue" />
-            <span>แบบทดสอบวินิจฉัยตามหลักสูตร</span>
+            <span>แบบทดสอบวัดความเข้าใจตามบทเรียน</span>
           </div>
           <span>ตอบแล้ว {answeredCount} จาก {totalQuestions} ข้อ</span>
         </div>

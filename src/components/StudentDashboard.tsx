@@ -44,13 +44,13 @@ export default function StudentDashboard({ lesson, quizAttempt, onNavigate, rece
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-blue/5 to-brand-purple/5 blur-3xl rounded-full -z-10" />
         <div className="space-y-2 max-w-xl">
           <div className="inline-flex items-center gap-1 bg-blue-50 text-brand-blue px-2.5 py-1 rounded-full text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" /> พอร์ทัลนักศึกษามหาวิทยาลัย
+            <Sparkles className="w-3.5 h-3.5" /> ระบบสำหรับนักศึกษา
           </div>
           <h1 className="font-display font-bold text-3xl text-slate-900">
             ยินดีต้อนรับกลับสู่ผู้ช่วยการเรียนของคุณ
           </h1>
           <p className="text-slate-500 text-sm leading-relaxed">
-            ผู้สอนของคุณได้โหลดฐานความรู้เฉพาะของสัปดาห์นี้แล้ว ถามคำถาม ทำแบบทดสอบเฉพาะบุคคล และแก้ไขความเข้าใจผิดด้วยผลตอบรับทันที
+            อาจารย์อัปเดตเนื้อหาบทเรียนของสัปดาห์นี้ให้แล้ว ลองถามคำถาม ทำแบบทดสอบ และดูผลตอบรับได้ทันที
           </p>
         </div>
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 shrink-0 flex items-center gap-4">

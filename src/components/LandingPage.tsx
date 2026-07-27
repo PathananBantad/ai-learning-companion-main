@@ -20,7 +20,7 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
           </span>
         </div>
         <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
-          <span>พอร์ทัลมหาวิทยาลัย</span>
+          <span>ระบบสำหรับมหาวิทยาลัย</span>
           <span className="text-slate-300">|</span>
           <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
             <CheckCircle className="w-3.5 h-3.5" /> ระบบ AI พร้อมใช้งาน
@@ -117,11 +117,11 @@ export default function LandingPage({ onSelectRole }: LandingPageProps) {
             {/* Soft decorative floaters */}
             <div className="absolute top-6 left-6 bg-white/95 backdrop-blur shadow-lg rounded-2xl p-3 border border-slate-100/50 flex items-center gap-2.5 animate-bounce [animation-duration:6s]">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-xs font-bold text-slate-700">ความก้าวหน้าของนักศึกษา : 82%</span>
+              <span className="text-xs font-bold text-slate-700">นักศึกษาคืบหน้าไปแล้ว 82%</span>
             </div>
             <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur shadow-lg rounded-2xl p-3 border border-slate-100/50 flex items-center gap-2.5 animate-bounce [animation-duration:8s]">
               <Sparkles className="w-4 h-4 text-brand-purple" />
-              <span className="text-xs font-bold text-slate-700">ผู้ช่วย AI : พร้อมใช้งาน</span>
+              <span className="text-xs font-bold text-slate-700">ผู้ช่วย AI พร้อมใช้งานแล้ว</span>
             </div>
           </motion.div>
         </div>

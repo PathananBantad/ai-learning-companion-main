@@ -810,7 +810,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-slate-400 text-xs font-medium">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Aegis Academic AI. Deployed in sandbox environment.</p>
+          <p>© 2569 Aegis Academic AI ระบบผู้ช่วยการเรียนรู้ด้วย AI สำหรับมหาวิทยาลัย</p>
           <div className="flex gap-4">
             <span className="flex items-center gap-1.5 text-emerald-600">
               <CheckCircle className="w-3.5 h-3.5" /> Full Stack Active
