@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { state } from "../data/lesson";
 import { getAnalytics } from "../services/analyticsService";
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 import { getAIClient, AI_MODEL } from "../lib/ai";
 
 const router = Router();

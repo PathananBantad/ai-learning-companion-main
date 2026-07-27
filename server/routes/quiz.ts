@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { state } from "../data/lesson";
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 import { saveQuizResult, getQuizResults } from "../services/quizResultService";
 import { generateFeedback } from "../services/feedbackService";
 import { detectQuizMisconceptions } from "../services/misconceptionService";
@@ -294,12 +294,10 @@ router.post(
         return;
       } catch (err) {
         console.error("Error generating lesson via AI:", err);
-        res
-          .status(500)
-          .json({
-            error:
-              "Failed to generate knowledge base via AI. Using fallback configuration.",
-          });
+        res.status(500).json({
+          error:
+            "Failed to generate knowledge base via AI. Using fallback configuration.",
+        });
         return;
       }
     }
