@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   GraduationCap,
@@ -13,6 +13,7 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
+  X,
 } from "lucide-react";
 
 // Import subcomponents
@@ -38,15 +39,39 @@ import {
 
 export default function App() {
   // Navigation State
-  const [role, setRole] = useState<"landing" | "student" | "teacher">(
-    "landing",
-  );
+  // Restore the last active role/tab from localStorage so a page refresh
+  // keeps the user where they were instead of bouncing back to the landing page.
+  const [role, setRole] = useState<"landing" | "student" | "teacher">(() => {
+    const saved = localStorage.getItem("aegis_role");
+    return saved === "student" || saved === "teacher" ? saved : "landing";
+  });
   const [studentView, setStudentView] = useState<
     "dashboard" | "chat" | "quiz" | "feedback"
-  >("dashboard");
+  >(() => {
+    const saved = localStorage.getItem("aegis_student_view");
+    return saved === "chat" || saved === "quiz" || saved === "feedback"
+      ? saved
+      : "dashboard";
+  });
   const [teacherView, setTeacherView] = useState<
     "setup" | "analytics" | "comments"
-  >("setup");
+  >(() => {
+    const saved = localStorage.getItem("aegis_teacher_view");
+    return saved === "analytics" || saved === "comments" ? saved : "setup";
+  });
+
+  // Keep localStorage in sync whenever the navigation state changes
+  useEffect(() => {
+    localStorage.setItem("aegis_role", role);
+  }, [role]);
+
+  useEffect(() => {
+    localStorage.setItem("aegis_student_view", studentView);
+  }, [studentView]);
+
+  useEffect(() => {
+    localStorage.setItem("aegis_teacher_view", teacherView);
+  }, [teacherView]);
 
   // Class Code System States
   const [classCode, setClassCode] = useState<string>("");
@@ -100,6 +125,17 @@ export default function App() {
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKeySet, setApiKeySet] = useState(true);
+
+  // Global popup notification (e.g. "knowledge base created")
+  const [toast, setToast] = useState<
+    { message: string; type: "success" | "error" } | null
+  >(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   // Sync initial lesson data and analytics from the Express server
   const syncSyllabus = async () => {
@@ -246,6 +282,37 @@ export default function App() {
     syncAnalytics();
   }, []);
 
+  // Restore the student's most recent quiz attempt from the backend so the
+  // Personalized Feedback page still has data after a page refresh (quizAttempt
+  // itself is only ever set in-memory after a live quiz submission).
+  useEffect(() => {
+    const restoreLastQuizAttempt = async () => {
+      if (role !== "student" || !studentJoinedCode || !studentId) return;
+      if (quizAttempt) return; // already have a fresh attempt this session
+
+      try {
+        const params = new URLSearchParams({
+          studentId,
+          classCode: studentJoinedCode,
+        });
+        const res = await fetch(`/api/quiz/last?${params.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.attempt) {
+          setQuizAttempt({ success: true, ...data.attempt });
+          setQuizSaveStatus("saved");
+        }
+      } catch (err) {
+        console.error("Failed to restore last quiz attempt", err);
+      }
+    };
+
+    restoreLastQuizAttempt();
+    // Only re-run when the student's identity/class actually changes, not on
+    // every quizAttempt update (that would immediately re-fetch after a submit).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, studentJoinedCode, studentId]);
+
   // Set default greeting message when student opens Chat
   useEffect(() => {
     if (lesson && chatHistory.length === 0) {
@@ -319,12 +386,13 @@ export default function App() {
       ]);
 
       setTeacherView("setup");
-      await fetchPastClasses();
     } catch (err) {
       console.error(err);
-      alert(
-        "Generation failed or took too long. Using robust fallback topic configuration.",
-      );
+      setToast({
+        message:
+          "การสร้างฐานความรู้ล้มเหลวหรือใช้เวลานานเกินไป ระบบใช้หลักสูตรสำรองชั่วคราวแทน",
+        type: "error",
+      });
     } finally {
       setIsGeneratingLesson(false);
     }
@@ -556,6 +624,49 @@ export default function App() {
       className="min-h-screen bg-slate-50 flex flex-col justify-between"
       id="full-app-root"
     >
+      {/* Global Popup Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed top-20 right-6 z-[100] w-full max-w-sm"
+          >
+            <div
+              className={`flex items-start gap-3 rounded-2xl border p-4 shadow-xl ${toast.type === "success"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  : "bg-red-50 border-red-200 text-red-800"
+                }`}
+            >
+              <div
+                className={`p-1.5 rounded-full shrink-0 ${toast.type === "success"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-red-100 text-red-600"
+                  }`}
+              >
+                {toast.type === "success" ? (
+                  <CheckCircle className="w-4.5 h-4.5" />
+                ) : (
+                  <AlertCircle className="w-4.5 h-4.5" />
+                )}
+              </div>
+              <p className="text-sm font-semibold leading-snug flex-1">
+                {toast.message}
+              </p>
+              <button
+                onClick={() => setToast(null)}
+                className="shrink-0 opacity-60 hover:opacity-100 transition"
+                aria-label="ปิดการแจ้งเตือน"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top Navigation */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -669,10 +780,14 @@ export default function App() {
                 localStorage.removeItem("aegis_joined_class_code");
                 localStorage.removeItem("aegis_student_name");
                 localStorage.removeItem("aegis_student_id");
+                localStorage.removeItem("aegis_student_view");
+                localStorage.removeItem("aegis_teacher_view");
 
                 setStudentJoinedCode(null);
                 setStudentName("");
                 setStudentId("");
+                setStudentView("dashboard");
+                setTeacherView("setup");
 
                 setRole("landing");
               }}
@@ -810,10 +925,10 @@ export default function App() {
           <p>© 2569 Aegis Academic AI ระบบผู้ช่วยการเรียนรู้ด้วย AI สำหรับมหาวิทยาลัย</p>
           <div className="flex gap-4">
             <span className="flex items-center gap-1.5 text-emerald-600">
-              <CheckCircle className="w-3.5 h-3.5" /> Full Stack Active
+              <CheckCircle className="w-3.5 h-3.5" /> นโยบายวิชาการ
             </span>
             <span>•</span>
-            <span className="text-slate-400">Node JS Port 3000</span>
+            <span className="text-slate-400">นโยบายความเป็นส่วนตัว</span>
           </div>
         </div>
       </footer>
