@@ -4,7 +4,7 @@
 
 
 import { Lesson } from '../data/lesson';
-import { getAIClient, AI_MODEL } from '../lib/ai';
+import { getChatCompletion, isAIAvailable } from '../lib/ai';
 
 
 interface GenerateLessonParams {
@@ -21,9 +21,7 @@ export async function generateLesson({
   const targetTopic = topic || 'Modern Web Engineering';
   const activeFiles = uploadedFiles || [];
 
-  const ai = getAIClient();
-
-  if (ai) {
+  if (isAIAvailable()) {
     const generationPrompt = `
 You are an experienced university professor, instructional designer, and curriculum expert.
 
@@ -78,8 +76,7 @@ Schema:
 
     try {
 
-      const response = await ai.chat.completions.create({
-        model: AI_MODEL,
+      const response = await getChatCompletion({
         messages: [{ role: 'user', content: generationPrompt }],
         response_format: { type: 'json_object' }
       });

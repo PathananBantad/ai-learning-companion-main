@@ -1,6 +1,6 @@
 // server/services/feedbackService.ts
 
-import { getAIClient, AI_MODEL } from '../lib/ai';
+import { getChatCompletion, isAIAvailable } from '../lib/ai';
 import { buildFeedbackPrompt } from '../prompts/feedbackPrompt';
 
 export interface FeedbackResult {
@@ -18,15 +18,12 @@ export async function generateFeedback(
     weaknesses: string[],
     misconceptions: string[]
 ): Promise<FeedbackResult> {
-  const ai = getAIClient();
-
-  if (ai) {
+  if (isAIAvailable()) {
     try {
       const prompt = buildFeedbackPrompt(score, strengths, weaknesses, misconceptions);
 
 
-      const response = await ai.chat.completions.create({
-        model: AI_MODEL,
+      const response = await getChatCompletion({
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' }
       });
