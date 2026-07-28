@@ -3,13 +3,11 @@
 // Lesson (not from the raw topic string). This is what makes the pipeline "sequential":
 // quiz content is grounded in lesson.keyConcepts / lesson.commonMisconceptions.
 
-import { getAIClient, AI_MODEL } from '../lib/ai';
+import { getChatCompletion, isAIAvailable } from '../lib/ai';
 import { Lesson, QuizQuestion } from '../data/lesson';
 
 export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuestion[]> {
-  const ai = getAIClient();
-
-  if (ai) {
+  if (isAIAvailable()) {
     const conceptList = lesson.keyConcepts
         .map((c, i) => `${i + 1}. ${c.title}: ${c.description}`)
         .join('\n');
@@ -55,8 +53,7 @@ export async function generateQuizFromLesson(lesson: Lesson): Promise<QuizQuesti
     `;
 
     try {
-      const response = await ai.chat.completions.create({
-        model: AI_MODEL,
+      const response = await getChatCompletion({
         messages: [{ role: 'user', content: generationPrompt }],
         response_format: { type: 'json_object' }
       });

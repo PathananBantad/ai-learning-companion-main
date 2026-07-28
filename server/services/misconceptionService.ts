@@ -1,4 +1,4 @@
-import { getAIClient, AI_MODEL } from "../lib/ai";
+import { getChatCompletion, isAIAvailable } from "../lib/ai";
 import { Lesson, QuizQuestion } from "../data/lesson";
 
 export interface MisconceptionResult {
@@ -13,12 +13,10 @@ export interface MisconceptionResult {
 // ใช้ตรวจ misconception จากข้อความที่นักศึกษาพิมพ์ถาม
 // ============================================================
 export async function detectMisconception(
-  studentAnswer: string,
-  lesson: Lesson,
+    studentAnswer: string,
+    lesson: Lesson,
 ): Promise<MisconceptionResult> {
-  const ai = getAIClient();
-
-  if (!ai) {
+  if (!isAIAvailable()) {
     return {
       detected: false,
     };
@@ -62,28 +60,28 @@ If there is no misconception:
 }
 `;
 
-  const response = await ai.chat.completions.create({
-    model: AI_MODEL,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an educational assessment AI. Return ONLY valid JSON.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
   try {
+    const response = await getChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content:
+              "You are an educational assessment AI. Return ONLY valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
     const text = response.choices[0]?.message?.content ?? "{}";
 
     const cleaned = text.replace("```json", "").replace("```", "").trim();
 
     return JSON.parse(cleaned);
-  } catch {
+  } catch (err) {
+    console.error("Error detecting misconception via AI:", err);
     return {
       detected: false,
     };
@@ -96,8 +94,8 @@ If there is no misconception:
 // โดยดูจาก misconceptionMap ของแต่ละข้อ
 // ============================================================
 export function detectQuizMisconceptions(
-  questions: QuizQuestion[],
-  answers: Record<string, number>,
+    questions: QuizQuestion[],
+    answers: Record<string, number>,
 ): string[] {
   const misconceptions: string[] = [];
 
