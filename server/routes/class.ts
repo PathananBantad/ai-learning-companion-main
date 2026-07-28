@@ -22,7 +22,7 @@ router.get("/class/code", async (req: Request, res: Response) => {
 
 // Generate or set a custom class code
 router.post("/class/generate", async (req: Request, res: Response) => {
-  const { customCode } = req.body;
+  const { customCode, topic } = req.body;
 
   if (customCode && customCode.trim()) {
     state.activeClassCode = customCode.trim().toUpperCase();
@@ -37,7 +37,8 @@ router.post("/class/generate", async (req: Request, res: Response) => {
     state.activeClassCode = `AEG-${result}`;
   }
 
-  await createClass(state.activeClassCode, state.currentLesson?.topic);
+  const classTopic = topic || state.currentLesson?.topic;
+  await createClass(state.activeClassCode, classTopic);
 
   res.json({
     activeClassCode: state.activeClassCode,

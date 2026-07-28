@@ -285,6 +285,7 @@ export default function App() {
       const formData = new FormData();
       formData.append("topic", topic);
       formData.append("manualPrompt", manualPrompt);
+      formData.append("classCode", classCode);
       files.forEach((f) => formData.append("files", f));
 
       const res = await fetch("/api/lesson/update", {
@@ -318,6 +319,7 @@ export default function App() {
       ]);
 
       setTeacherView("setup");
+      await fetchPastClasses();
     } catch (err) {
       console.error(err);
       alert(
@@ -488,7 +490,7 @@ export default function App() {
       const res = await fetch("/api/class/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customCode }),
+        body: JSON.stringify({ customCode, topic: lesson?.topic }),
       });
       if (!res.ok) throw new Error("Failed to generate code.");
       const data = await res.json();
@@ -497,6 +499,8 @@ export default function App() {
         `Updated Class Access Code: "${data.activeClassCode}"`,
         ...prev.slice(0, 4),
       ]);
+      // Refetch classes so the newly generated class appears in the dropdown in Analytics
+      await fetchPastClasses();
     } catch (err) {
       console.error(err);
       alert("Error updating class code.");
@@ -585,41 +589,37 @@ export default function App() {
               <>
                 <button
                   onClick={() => setStudentView("dashboard")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === "dashboard"
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === "dashboard"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => setStudentView("chat")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === "chat"
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === "chat"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Chat Assistant
                 </button>
                 <button
                   onClick={() => setStudentView("quiz")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === "quiz"
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === "quiz"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Quiz Page
                 </button>
                 <button
                   onClick={() => setStudentView("feedback")}
-                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${
-                    studentView === "feedback"
+                  className={`text-xs font-bold px-3.5 py-2 rounded-xl transition ${studentView === "feedback"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Personalized Feedback
                 </button>
@@ -628,11 +628,10 @@ export default function App() {
               <>
                 <button
                   onClick={() => setTeacherView("setup")}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === "setup"
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === "setup"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Weekly Lesson Setup
                 </button>
@@ -641,11 +640,10 @@ export default function App() {
                     setTeacherView("analytics");
                     syncAnalytics();
                   }}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === "analytics"
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === "analytics"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Course Analytics
                 </button>
@@ -654,11 +652,10 @@ export default function App() {
                     setTeacherView("comments");
                     fetchCourseFeedback(viewedClassCode || classCode);
                   }}
-                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                    teacherView === "comments"
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition ${teacherView === "comments"
                       ? "bg-slate-900 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   Student Comments
                 </button>

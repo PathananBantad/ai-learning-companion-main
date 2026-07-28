@@ -30,7 +30,8 @@ router.post(
     "/lesson/update",
     upload.array("files"),
     async (req: Request, res: Response) => {
-      const { topic, uploadedFiles, manualPrompt } = req.body;
+      const { topic, manualPrompt, classCode } = req.body;
+      const uploadedFiles = req.body.uploadedFiles || [];
 
       const targetTopic = topic || "Modern Web Engineering";
       const activeFiles = uploadedFiles || [];
@@ -245,6 +246,14 @@ router.post(
             }
           }
 
+          if (classCode) {
+            const { error: classUpdateError } = await supabase
+                .from("classes")
+                .update({ class_name: state.currentLesson.topic })
+                .eq("class_code", classCode);
+            if (classUpdateError) console.error("Class update error:", classUpdateError);
+          }
+
           state.simulatedSubmissionsCount = 0;
           state.simulatedAnalytics = {
             averageScore: 0,
@@ -422,6 +431,14 @@ router.post(
               `Persisted fallback ${materialInserts.length} files to lesson_materials`,
           );
         }
+      }
+
+      if (classCode) {
+        const { error: fallbackClassUpdateError } = await supabase
+            .from("classes")
+            .update({ class_name: state.currentLesson.topic })
+            .eq("class_code", classCode);
+        if (fallbackClassUpdateError) console.error("Fallback class update error:", fallbackClassUpdateError);
       }
 
       state.simulatedSubmissionsCount = 0;
