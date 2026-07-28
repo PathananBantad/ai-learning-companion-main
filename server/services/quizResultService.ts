@@ -18,9 +18,6 @@ interface SaveQuizResultParams {
     aiFeedback: QuizFeedback;
     misconceptionsTriggered: string[];
     answers: { [key: string]: number };
-    strengths: string[];
-    weaknesses: string[];
-    recommendations: string[];
 }
 
 export async function saveQuizResult({
@@ -32,9 +29,6 @@ export async function saveQuizResult({
                                          aiFeedback,
                                          misconceptionsTriggered,
                                          answers,
-                                         strengths,
-                                         weaknesses,
-                                         recommendations,
                                      }: SaveQuizResultParams) {
 
     console.log("===== saveQuizResult =====");
@@ -59,9 +53,6 @@ export async function saveQuizResult({
                 ai_feedback: aiFeedback,
                 misconceptions_triggered: misconceptionsTriggered,
                 answers,
-                strengths,
-                weaknesses,
-                recommendations,
             },
         ])
         .select()
@@ -83,14 +74,11 @@ export async function saveQuizResult({
     return data;
 }
 
-// ดึงผล Quiz ล่าสุดของนักเรียนคนหนึ่งในคลาสที่ระบุ (ใช้ตอนรีเฟรชหน้า Personalized Feedback)
+// ดึงผล Quiz ล่าสุดของนักเรียนคนหนึ่งในคลาสที่ระบุ
 export async function getLatestQuizResultForStudent(
     studentCode: string,
     classCode: string,
 ) {
-    // profiles.student_code is the human-entered student ID (e.g. university code),
-    // while quiz_results.student_id references profiles.id (uuid) — so look up the
-    // profile first, then find that profile's latest attempt for this class.
     const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id")

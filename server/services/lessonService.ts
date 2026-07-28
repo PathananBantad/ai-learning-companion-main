@@ -76,7 +76,8 @@ Schema:
 
     try {
 
-      const response = await getChatCompletion({
+      const response = await ai.chat.completions.create({
+        model: AI_MODEL,
         messages: [{ role: 'user', content: generationPrompt }],
         response_format: { type: 'json_object' }
       });
