@@ -10,7 +10,7 @@ import { generateFeedback } from "../services/feedbackService";
 import { detectQuizMisconceptions } from "../services/misconceptionService";
 import { generateRecommendations } from "../services/recommendationService";
 import multer from "multer";
-import { getChatCompletion, isAIAvailable } from "../lib/ai";
+import { AI_MODEL, getAIClient, getChatCompletion, isAIAvailable } from "../lib/ai";
 import { extractFileContent, ExtractedFile } from "../lib/fileExtract";
 import { saveProfile } from "../services/profileService";
 
@@ -22,7 +22,56 @@ const upload = multer({
 });
 
 // Get current lesson content
-router.get("/lesson", (req: Request, res: Response) => {
+router.get("/lesson", async (req: Request, res: Response) => {
+    const classCode = req.query.classCode as string;
+
+    if (classCode) {
+        try {
+            // Find class to get topic
+            const { data: classData } = await supabase
+                .from("classes")
+                .select("class_name")
+                .eq("class_code", classCode)
+                .single();
+
+            if (classData) {
+                // Find lesson by topic
+                const { data: lessonData } = await supabase
+                    .from("lessons")
+                    .select("*")
+                    .eq("topic", classData.class_name)
+                    .order("created_at", { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (lessonData) {
+                    const dbLesson = {
+                        id: lessonData.id,
+                        topic: lessonData.topic,
+                        learningOutcomes: typeof lessonData.learning_outcomes === 'string' ? JSON.parse(lessonData.learning_outcomes) : lessonData.learning_outcomes || [],
+                        keyConcepts: typeof lessonData.key_concepts === 'string' ? JSON.parse(lessonData.key_concepts) : lessonData.key_concepts || [],
+                        commonMisconceptions: typeof lessonData.misconceptions === 'string' ? JSON.parse(lessonData.misconceptions) : lessonData.misconceptions || [],
+                        knowledgeBaseStatus: 'ready' as const,
+                        uploadedFiles: [],
+                        summary: "Restored from database",
+                    };
+
+                    const dbQuestions = lessonData.quiz_questions
+                        ? (typeof lessonData.quiz_questions === 'string' ? JSON.parse(lessonData.quiz_questions) : lessonData.quiz_questions)
+                        : state.quizQuestions;
+
+                    res.json({
+                        lesson: dbLesson,
+                        questions: dbQuestions,
+                    });
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error("Error fetching lesson for classCode:", classCode, err);
+        }
+    }
+
     res.json({
         lesson: state.currentLesson,
         questions: state.quizQuestions,
@@ -220,6 +269,7 @@ router.post(
                         misconceptions: JSON.stringify(
                             state.currentLesson.commonMisconceptions,
                         ),
+                        quiz_questions: JSON.stringify(state.quizQuestions),
                     })
                     .select();
 
@@ -395,6 +445,7 @@ router.post(
                     misconceptions: JSON.stringify(
                         state.currentLesson.commonMisconceptions,
                     ),
+                    quiz_questions: JSON.stringify(state.quizQuestions),
                 })
                 .select();
 

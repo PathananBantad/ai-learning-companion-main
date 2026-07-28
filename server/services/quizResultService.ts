@@ -18,6 +18,9 @@ interface SaveQuizResultParams {
     aiFeedback: QuizFeedback;
     misconceptionsTriggered: string[];
     answers: { [key: string]: number };
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string[];
 }
 
 export async function saveQuizResult({
@@ -29,6 +32,9 @@ export async function saveQuizResult({
                                          aiFeedback,
                                          misconceptionsTriggered,
                                          answers,
+                                         strengths,
+                                         weaknesses,
+                                         recommendations,
                                      }: SaveQuizResultParams) {
 
     console.log("===== saveQuizResult =====");
@@ -53,6 +59,8 @@ export async function saveQuizResult({
                 ai_feedback: aiFeedback,
                 misconceptions_triggered: misconceptionsTriggered,
                 answers,
+                // strengths, weaknesses, and recommendations are already stored inside ai_feedback JSON
+                // but we include them here if we ever add native columns for them later
             },
         ])
         .select()
@@ -106,6 +114,13 @@ export async function getLatestQuizResultForStudent(
     if (error) {
         console.error("Error fetching latest quiz result:", error);
         throw error;
+    }
+
+    // Fallback to reading them from ai_feedback if native columns don't exist
+    if (data && data.ai_feedback) {
+        data.strengths = data.strengths || data.ai_feedback.strengths;
+        data.weaknesses = data.weaknesses || data.ai_feedback.weaknesses;
+        data.recommendations = data.recommendations || data.ai_feedback.recommendations;
     }
 
     return data;
