@@ -15,6 +15,15 @@ export async function submitCourseFeedback({
     studentName,
     studentId,
 }: SubmitCourseFeedbackParams) {
+
+    console.log({
+  classCode,
+  comment,
+  isAnonymous,
+  studentName,
+  studentId,
+});
+
     const { data, error } = await supabase
         .from("course_feedback")
         .insert([

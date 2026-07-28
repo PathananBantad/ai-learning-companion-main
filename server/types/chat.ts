@@ -1,7 +1,10 @@
 export interface ChatMessage {
-  role: "user" | "assistant";
+  id: string;
+  sender: "student" | "ai";
   text: string;
+  timestamp: string;
 }
+
 export interface ChatResponse {
   text: string;
   misconception?: MisconceptionResult;
