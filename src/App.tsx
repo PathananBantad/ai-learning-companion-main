@@ -41,10 +41,7 @@ export default function App() {
   // Navigation State
   // Restore the last active role/tab from localStorage so a page refresh
   // keeps the user where they were instead of bouncing back to the landing page.
-  const [role, setRole] = useState<"landing" | "student" | "teacher">(() => {
-    const saved = localStorage.getItem("aegis_role");
-    return saved === "student" || saved === "teacher" ? saved : "landing";
-  });
+  const [role, setRole] = useState<"landing" | "student" | "teacher">("landing");
   const [studentView, setStudentView] = useState<
     "dashboard" | "chat" | "quiz" | "feedback"
   >(() => {
@@ -137,27 +134,44 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  const fetchLessonForClass = async (targetCode: string) => {
+    try {
+      const res = await fetch(`/api/lesson?classCode=${targetCode}`);
+      if (res.ok) {
+        const data = await res.json();
+        setLesson(data.lesson);
+        setQuestions(data.questions);
+      }
+    } catch (err) {
+      console.error("Error fetching lesson for class:", err);
+    }
+  };
+
   // Sync initial lesson data and analytics from the Express server
   const syncSyllabus = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Parallel fetch for lesson and class code
-      const [lessonRes, classRes] = await Promise.all([
-        fetch("/api/lesson"),
-        fetch("/api/class/code"),
-      ]);
-
-      if (!lessonRes.ok) throw new Error("Failed to retrieve active lesson.");
-      const data = await lessonRes.json();
-      setLesson(data.lesson);
-      setQuestions(data.questions);
-
+      // Fetch class code first
+      const classRes = await fetch("/api/class/code");
+      let activeCode = "";
       if (classRes.ok) {
         const classData = await classRes.json();
-        setClassCode(classData.activeClassCode);
+        activeCode = classData.activeClassCode;
+        setClassCode(activeCode);
       }
+
+      // Determine which class code to fetch lesson for
+      // If student and joined a specific class, use that. Otherwise use the active class.
+      const targetCode = role === "student" && studentJoinedCode ? studentJoinedCode : activeCode;
+      
+      const lessonRes = await fetch(`/api/lesson${targetCode ? `?classCode=${targetCode}` : ""}`);
+      if (!lessonRes.ok) throw new Error("Failed to retrieve active lesson.");
+      const data = await lessonRes.json();
+      
+      setLesson(data.lesson);
+      setQuestions(data.questions);
 
       // Check if API key is injected (represented in response or verified separately)
       // This is for display warning cards to user only
@@ -191,10 +205,13 @@ export default function App() {
       if (!res.ok) throw new Error("Failed to retrieve class analytics.");
       const data = await res.json();
       setAnalytics(data);
+      
       if (targetClassCode) {
         setViewedClassCode(targetClassCode);
+        fetchLessonForClass(targetClassCode);
       } else if (data.classCode) {
         setViewedClassCode(data.classCode);
+        fetchLessonForClass(data.classCode);
       }
     } catch (err) {
       console.error(err);
@@ -385,6 +402,9 @@ export default function App() {
         "AI synthesized new knowledge base and practice quiz questions",
       ]);
 
+      // Auto-generate a new class code so the new lesson is bound to an active class
+      await handleGenerateClassCode(undefined, data.lesson.topic);
+
       setTeacherView("setup");
     } catch (err) {
       console.error(err);
@@ -552,13 +572,13 @@ export default function App() {
     ]);
   };
 
-  const handleGenerateClassCode = async (customCode?: string) => {
+  const handleGenerateClassCode = async (customCode?: string, overrideTopic?: string) => {
     try {
       setIsGeneratingClassCode(true);
       const res = await fetch("/api/class/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customCode, topic: lesson?.topic }),
+        body: JSON.stringify({ customCode, topic: overrideTopic || lesson?.topic }),
       });
       if (!res.ok) throw new Error("Failed to generate code.");
       const data = await res.json();
