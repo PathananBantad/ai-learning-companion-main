@@ -1,5 +1,5 @@
-# ใช้ Node.js LTS version 20 เป็นฐาน
-FROM node:20-alpine
+# ใช้ Node.js LTS version 22 เป็นฐาน
+FROM node:22-alpine
 
 # กำหนดโฟลเดอร์ทำงานหลักในคอนเทนเนอร์
 WORKDIR /app
