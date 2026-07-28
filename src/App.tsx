@@ -936,10 +936,10 @@ export default function App() {
             <p>© 2569 Aegis Academic AI ระบบผู้ช่วยการเรียนรู้ด้วย AI สำหรับมหาวิทยาลัย</p>
             <div className="flex gap-4">
             <span className="flex items-center gap-1.5 text-emerald-600">
-              <CheckCircle className="w-3.5 h-3.5" /> Full Stack Active
+              <CheckCircle className="w-3.5 h-3.5" /> นโยบายวิชาการ
             </span>
               <span>•</span>
-              <span className="text-slate-400">Node JS Port 3000</span>
+              <span className="text-slate-400">นโยบายความเป็นส่วนตัว</span>
             </div>
           </div>
         </footer>
