@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
   GraduationCap,
@@ -13,6 +13,7 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
+  X,
 } from "lucide-react";
 
 // Import subcomponents
@@ -124,6 +125,17 @@ export default function App() {
   const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKeySet, setApiKeySet] = useState(true);
+
+  // Global popup notification (e.g. "knowledge base created")
+  const [toast, setToast] = useState<
+      { message: string; type: "success" | "error" } | null
+  >(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   // Sync initial lesson data and analytics from the Express server
   const syncSyllabus = async () => {
@@ -373,11 +385,18 @@ export default function App() {
       ]);
 
       setTeacherView("setup");
+
+      setToast({
+        message: `สร้างฐานความรู้สำเร็จแล้ว! หัวข้อ "${data.lesson.topic}" พร้อมให้นักศึกษาใช้งานแล้ว`,
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
-      alert(
-          "Generation failed or took too long. Using robust fallback topic configuration.",
-      );
+      setToast({
+        message:
+            "การสร้างฐานความรู้ล้มเหลวหรือใช้เวลานานเกินไป ระบบใช้หลักสูตรสำรองชั่วคราวแทน",
+        type: "error",
+      });
     } finally {
       setIsGeneratingLesson(false);
     }
@@ -607,6 +626,51 @@ export default function App() {
           className="min-h-screen bg-slate-50 flex flex-col justify-between"
           id="full-app-root"
       >
+        {/* Global Popup Notification */}
+        <AnimatePresence>
+          {toast && (
+              <motion.div
+                  initial={{ opacity: 0, y: -16, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -16, scale: 0.95 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="fixed top-20 right-6 z-[100] w-full max-w-sm"
+              >
+                <div
+                    className={`flex items-start gap-3 rounded-2xl border p-4 shadow-xl ${
+                        toast.type === "success"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                            : "bg-red-50 border-red-200 text-red-800"
+                    }`}
+                >
+                  <div
+                      className={`p-1.5 rounded-full shrink-0 ${
+                          toast.type === "success"
+                              ? "bg-emerald-100 text-emerald-600"
+                              : "bg-red-100 text-red-600"
+                      }`}
+                  >
+                    {toast.type === "success" ? (
+                        <CheckCircle className="w-4.5 h-4.5" />
+                    ) : (
+                        <AlertCircle className="w-4.5 h-4.5" />
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold leading-snug flex-1">
+                    {toast.message}
+                  </p>
+                  <button
+                      onClick={() => setToast(null)}
+                      className="shrink-0 opacity-60 hover:opacity-100 transition"
+                      aria-label="ปิดการแจ้งเตือน"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Top Navigation */}
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
