@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { submitCourseFeedback, getCourseFeedback } from '../services/courseFeedbackService';
+import { saveProfile } from '../services/profileService';
 
 const router = Router();
 
@@ -13,12 +14,30 @@ router.post('/course-feedback', async (req: Request, res: Response) => {
   }
 
   try {
+    // course_feedback.student_id is a uuid FK -> profiles.id, but the frontend
+    // only ever knows the human-entered student code (e.g. "6709650244"), not
+    // the Supabase profile uuid. Resolve it here the same way quiz.ts already
+    // does before /quiz/submit, otherwise the insert fails with
+    // "invalid input syntax for type uuid".
+    let resolvedStudentId: string | undefined = undefined;
+
+    if (!isAnonymous && studentName && studentId) {
+      try {
+        const profile = await saveProfile(studentName, studentId, 'student');
+        resolvedStudentId = profile?.id;
+      } catch (err) {
+        console.error('Failed to resolve profile for course feedback:', err);
+        // Fall through and save the comment without a linked student_id
+        // rather than failing the whole submission.
+      }
+    }
+
     const saved = await submitCourseFeedback({
       classCode: classCode || state.activeClassCode,
       comment: comment.trim(),
       isAnonymous: !!isAnonymous,
       studentName,
-      studentId,
+      studentId: resolvedStudentId,
     });
 
     res.json({ success: true, feedback: saved });
