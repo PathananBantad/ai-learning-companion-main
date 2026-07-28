@@ -1,14 +1,14 @@
-
 import { Router, Request, Response } from "express";
 import { state } from "../data/lesson";
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 import { saveQuizResult, getQuizResults } from "../services/quizResultService";
 import { generateFeedback } from "../services/feedbackService";
 import { detectQuizMisconceptions } from "../services/misconceptionService";
 import { generateRecommendations } from "../services/recommendationService";
-import multer from 'multer';
-import { getAIClient, AI_MODEL } from '../lib/ai';
-import { extractFileContent, ExtractedFile } from '../lib/fileExtract';
+import multer from "multer";
+import { getAIClient, AI_MODEL } from "../lib/ai";
+import { extractFileContent, ExtractedFile } from "../lib/fileExtract";
+import { saveProfile } from "../services/profileService";
 
 const router = Router();
 
@@ -26,27 +26,34 @@ router.get("/lesson", (req: Request, res: Response) => {
 });
 
 // Generate Knowledge Base using AI or update lesson topic manually
-router.post('/lesson/update', upload.array('files'), async (req: Request, res: Response) => {
-  const { topic, uploadedFiles, manualPrompt } = req.body;
+router.post(
+  "/lesson/update",
+  upload.array("files"),
+  async (req: Request, res: Response) => {
+    const { topic, uploadedFiles, manualPrompt } = req.body;
 
-  const targetTopic = topic || 'Modern Web Engineering';
-  const activeFiles = uploadedFiles || [];
+    const targetTopic = topic || "Modern Web Engineering";
+    const activeFiles = uploadedFiles || [];
 
-  const uploadedFileObjs = (req.files as Express.Multer.File[]) || [];
-  const extractedFiles: ExtractedFile[] = await Promise.all(
-    uploadedFileObjs.map(extractFileContent)
-  );
+    const uploadedFileObjs = (req.files as Express.Multer.File[]) || [];
+    const extractedFiles: ExtractedFile[] = await Promise.all(
+      uploadedFileObjs.map(extractFileContent),
+    );
 
-  const materialBlock = extractedFiles.length > 0
-    ? extractedFiles
-        .map((f, i) => `--- เอกสารที่ ${i + 1}: ${f.filename} ---\n${f.content}`)
-        .join('\n\n')
-    : '';
+    const materialBlock =
+      extractedFiles.length > 0
+        ? extractedFiles
+            .map(
+              (f, i) =>
+                `--- เอกสารที่ ${i + 1}: ${f.filename} ---\n${f.content}`,
+            )
+            .join("\n\n")
+        : "";
 
-  const ai = getAIClient();
-  if (ai) {
-    try {
-      const generationPrompt = `
+    const ai = getAIClient();
+    if (ai) {
+      try {
+        const generationPrompt = `
         You are a world-class university syllabus and curriculum designer.
         Create a comprehensive, highly educational Knowledge Base and lesson plan for the topic: "${targetTopic}".
         ${manualPrompt ? `Additional instructor guidelines: "${manualPrompt}"` : ""}
@@ -57,9 +64,11 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
         - Each value in "recommendationMap" must give a specific, actionable review tip tied to that specific wrong option. Write in Thai.
         - Do not reuse the same misconception or recommendation text across different wrong options in the same question — each wrong option represents a distinct misunderstanding.
 
-        ${materialBlock
-          ? `Base the lesson and quiz STRICTLY on the following course material uploaded by the instructor. Do not invent concepts that are absent from these documents:\n\n${materialBlock}`
-          : 'No course material was uploaded — generate from general knowledge of the topic.'}
+        ${
+          materialBlock
+            ? `Base the lesson and quiz STRICTLY on the following course material uploaded by the instructor. Do not invent concepts that are absent from these documents:\n\n${materialBlock}`
+            : "No course material was uploaded — generate from general knowledge of the topic."
+        }
 
         IMPORTANT: Write ALL content (topic, learningOutcomes, keyConcepts, commonMisconceptions,
         summary, question, options, explanation, misconceptionMap, recommendationMap) in Thai
@@ -168,34 +177,211 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
         }
       `;
 
+        const response = await ai.chat.completions.create({
+          model: AI_MODEL,
+          messages: [{ role: "user", content: generationPrompt }],
+          response_format: { type: "json_object" },
+        });
 
-      const response = await ai.chat.completions.create({
-        model: AI_MODEL,
-        messages: [{ role: 'user', content: generationPrompt }],
-        response_format: { type: 'json_object' }
-      });
+        const textResponse = response.choices[0].message?.content?.trim() || "";
+        const cleanJSON = textResponse
+          .replace(/^```json\s*/, "")
+          .replace(/```$/, "")
+          .trim();
+        const parsed = JSON.parse(cleanJSON);
 
-      const textResponse = response.choices[0].message?.content?.trim() || '';
-      const cleanJSON = textResponse.replace(/^```json\s*/, '').replace(/```$/, '').trim();
-      const parsed = JSON.parse(cleanJSON);
+        state.currentLesson = {
+          id: "lesson-" + Date.now(),
+          topic: parsed.topic || targetTopic,
+          learningOutcomes: parsed.learningOutcomes || [],
+          keyConcepts: parsed.keyConcepts || [],
+          commonMisconceptions: parsed.commonMisconceptions || [],
+          knowledgeBaseStatus: "ready",
+          uploadedFiles:
+            activeFiles.length > 0 ? activeFiles : ["manually_configured.txt"],
+          summary: parsed.summary || "Summary generated successfully.",
+        };
 
-      state.currentLesson = {
-        id: "lesson-" + Date.now(),
-        topic: parsed.topic || targetTopic,
-        learningOutcomes: parsed.learningOutcomes || [],
-        keyConcepts: parsed.keyConcepts || [],
-        commonMisconceptions: parsed.commonMisconceptions || [],
-        knowledgeBaseStatus: "ready",
-        uploadedFiles:
-          activeFiles.length > 0 ? activeFiles : ["manually_configured.txt"],
-        summary: parsed.summary || "Summary generated successfully.",
-      };
+        state.quizQuestions = parsed.quizQuestions || [];
 
-      state.quizQuestions = parsed.quizQuestions || [];
+        //ใน feature/ai ลบไปแต่ตอนนี้ยังไม่ลบรอดูก่อน
+        // Persist the generated lesson to Supabase so it survives server restarts
+        const { data: lessonData, error: lessonInsertError } = await supabase
+          .from("lessons")
+          .insert({
+            topic: state.currentLesson.topic,
+            learning_outcomes: JSON.stringify(
+              state.currentLesson.learningOutcomes,
+            ),
+            key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
+            misconceptions: JSON.stringify(
+              state.currentLesson.commonMisconceptions,
+            ),
+          })
+          .select();
 
-//ใน feature/ai ลบไปแต่ตอนนี้ยังไม่ลบรอดูก่อน
-      // Persist the generated lesson to Supabase so it survives server restarts
-      const { data: lessonData, error: lessonInsertError } = await supabase
+        console.log("Lesson insert result:", lessonData);
+
+        if (lessonInsertError) {
+          console.error("Lesson insert error:", lessonInsertError);
+        }
+
+        // Persist uploaded files metadata into lesson_materials table
+        if (lessonData && lessonData[0] && extractedFiles.length > 0) {
+          const materialInserts = extractedFiles.map((f) => ({
+            lesson_id: lessonData[0].id,
+            file_name: f.filename,
+            file_url: null,
+          }));
+
+          const { error: materialError } = await supabase
+            .from("lesson_materials")
+            .insert(materialInserts);
+
+          if (materialError) {
+            console.error("Error inserting lesson materials:", materialError);
+          } else {
+            console.log(
+              `Persisted ${materialInserts.length} files to lesson_materials`,
+            );
+          }
+        }
+
+        state.simulatedSubmissionsCount = 0;
+        state.simulatedAnalytics = {
+          averageScore: 0,
+          outcomeAchievement: state.currentLesson.learningOutcomes.map(
+            (outcome: string) => ({
+              name:
+                outcome.length > 30
+                  ? outcome.substring(0, 30) + "..."
+                  : outcome,
+              score: 0,
+            }),
+          ),
+          mostIncorrectTopic:
+            state.currentLesson.keyConcepts[0]?.title || "None",
+          mostAskedQuestions: [
+            {
+              question: `Can you explain ${state.currentLesson.keyConcepts[0]?.title || "Topic"}?`,
+              count: 0,
+            },
+          ],
+          commonMisconceptions: state.currentLesson.commonMisconceptions.map(
+            (mis: any) => ({
+              topic: mis.title,
+              count: 0,
+              description: mis.explanation,
+            }),
+          ),
+          studentSubmissionsCount: 0,
+          weeklyTrend: [
+            { day: "Mon", averageScore: 0, activeStudents: 0 },
+            { day: "Tue", averageScore: 0, activeStudents: 0 },
+            { day: "Wed", averageScore: 0, activeStudents: 0 },
+            { day: "Thu", averageScore: 0, activeStudents: 0 },
+            { day: "Fri", averageScore: 0, activeStudents: 0 },
+          ],
+          aiInsight:
+            "A brand new knowledge base was generated. Encourage students to participate in the mock quiz to populate analytical insights.",
+        };
+
+        res.json({
+          success: true,
+          lesson: state.currentLesson,
+          questions: state.quizQuestions,
+        });
+        return;
+      } catch (err) {
+        console.error("Error generating lesson via AI:", err);
+        res.status(500).json({
+          error:
+            "Failed to generate knowledge base via AI. Using fallback configuration.",
+        });
+        return;
+      }
+    }
+
+    // Fallback manual lesson update if no API key is set
+    state.currentLesson = {
+      id: "lesson-" + Date.now(),
+      topic: targetTopic,
+      learningOutcomes: [
+        `Identify main concepts related to ${targetTopic}.`,
+        `Apply theoretical frameworks of ${targetTopic} to academic scenarios.`,
+        `Debug and improve design architectures of ${targetTopic}.`,
+      ],
+      keyConcepts: [
+        {
+          title: `${targetTopic} core frameworks`,
+          description: `Fundamental paradigms defining how ${targetTopic} operates in modern environments.`,
+        },
+        {
+          title: `${targetTopic} lifecycle`,
+          description: `Understanding states, pipelines, and transitions inside a simulated ${targetTopic} process.`,
+        },
+      ],
+      commonMisconceptions: [
+        {
+          title: `Over-complicating ${targetTopic}`,
+          explanation: `Many practitioners believe ${targetTopic} requires complex enterprise setups, whereas standard minimal strategies work best.`,
+        },
+      ],
+
+      knowledgeBaseStatus: "ready",
+      uploadedFiles:
+        activeFiles.length > 0 ? activeFiles : ["fallback_data.txt"],
+      summary: `You have successfully set up a fallback curriculum for ${targetTopic}. Add a real AI_API_KEY to experience fully customized academic syllabus generations.`,
+    };
+
+    state.quizQuestions = [
+      {
+        id: "fallback-q1",
+        question: `Which of the following is the most critical pillar when studying ${targetTopic}?`,
+        options: [
+          "Unstructured experimentation",
+          "Rigorous theoretical foundations",
+          "Ignoring safety constraints",
+          "Continuous redeployment",
+        ],
+        correctIndex: 1,
+
+        explanation:
+          "A strong academic understanding demands prioritizing robust foundations and systematic testing.",
+        conceptMatched: `${targetTopic} core frameworks`,
+        misconceptionMap: {
+          "0": "สับสนว่าการทดลองแบบไม่มีโครงสร้างสำคัญกว่าพื้นฐานทฤษฎี",
+        },
+        recommendationMap: {
+          "0": `ทบทวนหัวข้อ "${targetTopic} core frameworks" อีกครั้ง`,
+        },
+      },
+      {
+        id: "fallback-q2",
+        question: `What is a common pitfall when integrating ${targetTopic}?`,
+        options: [
+          "Reading documentation beforehand",
+          "Deploying minimal styled elements",
+          "Over-complicating configuration settings",
+          "Collaborating with peers",
+        ],
+        correctIndex: 2,
+
+        explanation:
+          "Over-complicating setups introduces tech debt and increases cognitive load, making the framework harder to maintain.",
+        conceptMatched: `Over-complicating ${targetTopic}`,
+        misconceptionMap: {
+          "1": "สับสนว่าการทำให้เรียบง่ายเกินไปคือปัญหา ทั้งที่จริงคือการทำให้ซับซ้อนเกินไปต่างหาก",
+        },
+        recommendationMap: {
+          "1": `กลับไปอ่านหัวข้อ "ความเข้าใจผิดที่พบบ่อย" เรื่อง "Over-complicating ${targetTopic}" อีกครั้ง`,
+        },
+      },
+    ];
+
+    // Persist the fallback lesson to Supabase too, so it survives server restarts
+    const { data: fallbackLessonData, error: fallbackLessonInsertError } =
+      await supabase
         .from("lessons")
         .insert({
           topic: state.currentLesson.topic,
@@ -209,192 +395,90 @@ router.post('/lesson/update', upload.array('files'), async (req: Request, res: R
         })
         .select();
 
-      console.log("Lesson insert result:", lessonData);
+    console.log("Fallback lesson insert result:", fallbackLessonData);
 
-      if (lessonInsertError) {
-        console.error("Lesson insert error:", lessonInsertError);
+    if (fallbackLessonInsertError) {
+      console.error("Fallback lesson insert error:", fallbackLessonInsertError);
+    }
+
+    // Persist uploaded files metadata into lesson_materials table for fallback flow
+    if (
+      fallbackLessonData &&
+      fallbackLessonData[0] &&
+      extractedFiles.length > 0
+    ) {
+      const materialInserts = extractedFiles.map((f) => ({
+        lesson_id: fallbackLessonData[0].id,
+        file_name: f.filename,
+        file_url: null,
+      }));
+
+      const { error: materialError } = await supabase
+        .from("lesson_materials")
+        .insert(materialInserts);
+
+      if (materialError) {
+        console.error("Fallback lesson materials insert error:", materialError);
+      } else {
+        console.log(
+          `Persisted fallback ${materialInserts.length} files to lesson_materials`,
+        );
       }
-
-   
-      state.simulatedSubmissionsCount = 0;
-      state.simulatedAnalytics = {
-        averageScore: 0,
-        outcomeAchievement: state.currentLesson.learningOutcomes.map(
-          (outcome: string) => ({
-            name:
-              outcome.length > 30 ? outcome.substring(0, 30) + "..." : outcome,
-            score: 0,
-          }),
-        ),
-        mostIncorrectTopic: state.currentLesson.keyConcepts[0]?.title || "None",
-        mostAskedQuestions: [
-          {
-            question: `Can you explain ${state.currentLesson.keyConcepts[0]?.title || "Topic"}?`,
-            count: 0,
-          },
-        ],
-        commonMisconceptions: state.currentLesson.commonMisconceptions.map(
-          (mis: any) => ({
-            topic: mis.title,
-            count: 0,
-            description: mis.explanation,
-          }),
-        ),
-        studentSubmissionsCount: 0,
-        weeklyTrend: [
-          { day: "Mon", averageScore: 0, activeStudents: 0 },
-          { day: "Tue", averageScore: 0, activeStudents: 0 },
-          { day: "Wed", averageScore: 0, activeStudents: 0 },
-          { day: "Thu", averageScore: 0, activeStudents: 0 },
-          { day: "Fri", averageScore: 0, activeStudents: 0 },
-        ],
-        aiInsight:
-          "A brand new knowledge base was generated. Encourage students to participate in the mock quiz to populate analytical insights.",
-      };
-
-      res.json({
-        success: true,
-        lesson: state.currentLesson,
-        questions: state.quizQuestions,
-      });
-      return;
-    } catch (err) {
-
-      console.error('Error generating lesson via Qwen:', err);
-      res.status(500).json({ error: 'Failed to generate knowledge base via Qwen. Using fallback configuration.' });
-      return;
     }
-  }
 
-  // Fallback manual lesson update if no API key is set
-  state.currentLesson = {
-    id: "lesson-" + Date.now(),
-    topic: targetTopic,
-    learningOutcomes: [
-      `Identify main concepts related to ${targetTopic}.`,
-      `Apply theoretical frameworks of ${targetTopic} to academic scenarios.`,
-      `Debug and improve design architectures of ${targetTopic}.`,
-    ],
-    keyConcepts: [
-      {
-        title: `${targetTopic} core frameworks`,
-        description: `Fundamental paradigms defining how ${targetTopic} operates in modern environments.`,
-      },
-      {
-        title: `${targetTopic} lifecycle`,
-        description: `Understanding states, pipelines, and transitions inside a simulated ${targetTopic} process.`,
-      },
-    ],
-    commonMisconceptions: [
-      {
-        title: `Over-complicating ${targetTopic}`,
-        explanation: `Many practitioners believe ${targetTopic} requires complex enterprise setups, whereas standard minimal strategies work best.`,
-      },
-    ],
-
-    knowledgeBaseStatus: 'ready',
-    uploadedFiles: activeFiles.length > 0 ? activeFiles : ['fallback_data.txt'],
-    summary: `You have successfully set up a fallback curriculum for ${targetTopic}. Add a real AI_API_KEY to experience fully customized academic syllabus generations.`
-  };
-
-  state.quizQuestions = [
-    {
-      id: "fallback-q1",
-      question: `Which of the following is the most critical pillar when studying ${targetTopic}?`,
-      options: [
-        "Unstructured experimentation",
-        "Rigorous theoretical foundations",
-        "Ignoring safety constraints",
-        "Continuous redeployment",
+    state.simulatedSubmissionsCount = 0;
+    state.simulatedAnalytics = {
+      averageScore: 0,
+      outcomeAchievement: state.currentLesson.learningOutcomes.map(
+        (o: string) => ({ name: o.substring(0, 30), score: 0 }),
+      ),
+      mostIncorrectTopic: "Over-complicating " + targetTopic,
+      mostAskedQuestions: [
+        { question: `What is the core of ${targetTopic}?`, count: 0 },
       ],
-      correctIndex: 1,
-
-      explanation: 'A strong academic understanding demands prioritizing robust foundations and systematic testing.',
-      conceptMatched: `${targetTopic} core frameworks`,
-      misconceptionMap: { '0': 'สับสนว่าการทดลองแบบไม่มีโครงสร้างสำคัญกว่าพื้นฐานทฤษฎี' },
-      recommendationMap: { '0': `ทบทวนหัวข้อ "${targetTopic} core frameworks" อีกครั้ง` }
-    },
-    {
-      id: "fallback-q2",
-      question: `What is a common pitfall when integrating ${targetTopic}?`,
-      options: [
-        "Reading documentation beforehand",
-        "Deploying minimal styled elements",
-        "Over-complicating configuration settings",
-        "Collaborating with peers",
+      commonMisconceptions: [
+        {
+          topic: `Over-complicating ${targetTopic}`,
+          count: 0,
+          description: "Assuming it requires a heavy setup.",
+        },
       ],
-      correctIndex: 2,
+      studentSubmissionsCount: 0,
+      weeklyTrend: [
+        { day: "Mon", averageScore: 0, activeStudents: 0 },
+        { day: "Tue", averageScore: 0, activeStudents: 0 },
+        { day: "Wed", averageScore: 0, activeStudents: 0 },
+        { day: "Thu", averageScore: 0, activeStudents: 0 },
+        { day: "Fri", averageScore: 0, activeStudents: 0 },
+      ],
 
-      explanation: 'Over-complicating setups introduces tech debt and increases cognitive load, making the framework harder to maintain.',
-      conceptMatched: `Over-complicating ${targetTopic}`,
-      misconceptionMap: { '1': 'สับสนว่าการทำให้เรียบง่ายเกินไปคือปัญหา ทั้งที่จริงคือการทำให้ซับซ้อนเกินไปต่างหาก' },
-      recommendationMap: { '1': `กลับไปอ่านหัวข้อ "ความเข้าใจผิดที่พบบ่อย" เรื่อง "Over-complicating ${targetTopic}" อีกครั้ง` }
-    }
-  ];
+      aiInsight:
+        "Knowledge Base loaded in offline mode. Setup AI_API_KEY inside the Secrets panel to activate live university syllabus generation!",
+    };
 
-  // Persist the fallback lesson to Supabase too, so it survives server restarts
-  const { data: fallbackLessonData, error: fallbackLessonInsertError } =
-    await supabase
-      .from("lessons")
-      .insert({
-        topic: state.currentLesson.topic,
-        learning_outcomes: JSON.stringify(state.currentLesson.learningOutcomes),
-        key_concepts: JSON.stringify(state.currentLesson.keyConcepts),
-        misconceptions: JSON.stringify(
-          state.currentLesson.commonMisconceptions,
-        ),
-      })
-      .select();
-
-  console.log("Fallback lesson insert result:", fallbackLessonData);
-
-  if (fallbackLessonInsertError) {
-    console.error("Fallback lesson insert error:", fallbackLessonInsertError);
-  }
-
-  state.simulatedSubmissionsCount = 0;
-  state.simulatedAnalytics = {
-    averageScore: 0,
-    outcomeAchievement: state.currentLesson.learningOutcomes.map(
-      (o: string) => ({ name: o.substring(0, 30), score: 0 }),
-    ),
-    mostIncorrectTopic: "Over-complicating " + targetTopic,
-    mostAskedQuestions: [
-      { question: `What is the core of ${targetTopic}?`, count: 0 },
-    ],
-    commonMisconceptions: [
-      {
-        topic: `Over-complicating ${targetTopic}`,
-        count: 0,
-        description: "Assuming it requires a heavy setup.",
-      },
-    ],
-    studentSubmissionsCount: 0,
-    weeklyTrend: [
-      { day: "Mon", averageScore: 0, activeStudents: 0 },
-      { day: "Tue", averageScore: 0, activeStudents: 0 },
-      { day: "Wed", averageScore: 0, activeStudents: 0 },
-      { day: "Thu", averageScore: 0, activeStudents: 0 },
-      { day: "Fri", averageScore: 0, activeStudents: 0 },
-    ],
-
-    aiInsight: 'Knowledge Base loaded in offline mode. Setup AI_API_KEY inside the Secrets panel to activate live university syllabus generation!'
-  };
-
-  res.json({
-    success: true,
-    lesson: state.currentLesson,
-    questions: state.quizQuestions,
-    simulated: true,
-  });
-});
+    res.json({
+      success: true,
+      lesson: state.currentLesson,
+      questions: state.quizQuestions,
+      simulated: true,
+    });
+  },
+);
 
 // Submit student quiz answers
 
-router.post('/quiz/submit', async (req: Request, res: Response) => {
-  const { answers } = req.body;
+router.post("/quiz/submit", async (req: Request, res: Response) => {
+  const { answers, name, studentId, classCode } = req.body;
+
   if (!answers) {
     res.status(400).json({ error: "Missing answers" });
+    return;
+  }
+
+  if (!name || !studentId || !classCode) {
+    res.status(400).json({
+      error: "Missing name, studentId, or classCode. Please rejoin the class.",
+    });
     return;
   }
 
@@ -420,48 +504,56 @@ router.post('/quiz/submit', async (req: Request, res: Response) => {
 
   const score = Math.round((correctCount / state.quizQuestions.length) * 100);
 
+  const misconceptionsTriggered = detectQuizMisconceptions(
+    state.quizQuestions,
+    answers,
+  );
+  const recommendations = generateRecommendations(
+    state.quizQuestions,
+    answers,
+    score,
+  );
+  const aiFeedback = await generateFeedback(
+    score,
+    strengths,
+    weaknesses,
+    misconceptionsTriggered,
+  );
 
-  const misconceptionsTriggered = detectQuizMisconceptions(state.quizQuestions, answers);
-  const recommendations = generateRecommendations(state.quizQuestions, answers, score);
-  const aiFeedback = await generateFeedback(score, strengths, weaknesses, misconceptionsTriggered);
+  // Persist the real result to Supabase using the name/studentId/classCode
+  // sent by the frontend. If this fails, tell the frontend honestly instead
+  // of pretending the submission succeeded.
+  try {
+    const profile = await saveProfile(name, studentId, "student");
 
-  const dynamicStudent = {
-    id: "STU-ACTIVE",
-    name: "Active Student (You)",
-    quizScore: score,
-    learningProgress: Math.min(100, Math.round(score * 1.15)),
-    learningOutcomeAchievement: [
-      { name: "Core HTTP Verbs & CRUD", score: score >= 75 ? 100 : 75 },
-      { name: "Stateless HTTP & Sessions", score: score >= 50 ? 80 : 50 },
-      {
-        name: "Idempotency Concepts",
-        score: score >= 100 ? 100 : score >= 75 ? 75 : 40,
-      },
-      { name: "Web Security (POST/HTTPS)", score: score >= 75 ? 90 : 60 },
-    ],
-    strengths: strengths.length > 0 ? strengths : ["General Web Basics"],
-    weaknesses: weaknesses.length > 0 ? weaknesses : ["None"],
-    commonMisconceptions:
-      misconceptionsTriggered.length > 0 ? misconceptionsTriggered : ["None"],
-    aiFeedbackSummary:
-      score >= 85
-        ? "Superb retention of Web architecture models. Confidently distinguishes HTTP methods, caching headers, and idempotency guarantees."
-        : "Understands core CRUD operations but shows minor gaps in HTTPS secure handshakes and stateful session caching. Recommend reviewing RFC specs.",
-    recommendedTopics:
-      recommendations.length > 0
-        ? recommendations
-        : ["Advanced GraphQL paradigms"],
-    lastActivity: "Completed diagnostic quiz just now",
-  };
-
-  if (!state.simulatedAnalytics.students) {
-    state.simulatedAnalytics.students = [];
+    await saveQuizResult({
+      name,
+      studentId: profile.id,
+      classCode,
+      score,
+      totalQuestions: state.quizQuestions.length,
+      aiFeedback,
+      misconceptionsTriggered,
+    });
+  } catch (err: any) {
+    console.error("[QUIZ SUBMIT] Failed to save quiz result:", err);
+    res.status(500).json({
+      success: false,
+      error: "บันทึกผลคะแนนไม่สำเร็จ กรุณาลองส่งอีกครั้ง",
+    });
+    return;
   }
 
-  state.simulatedAnalytics.students = state.simulatedAnalytics.students.filter((s: any) => s.id !== 'STU-ACTIVE');
-  state.simulatedAnalytics.students.unshift(dynamicStudent);
-
-  const attemptResult = { answers, score, strengths, weaknesses, misconceptionsTriggered, recommendations, aiFeedback };
+  const attemptResult = {
+    success: true,
+    answers,
+    score,
+    strengths,
+    weaknesses,
+    misconceptionsTriggered,
+    recommendations,
+    aiFeedback,
+  };
   res.json(attemptResult);
 });
 

@@ -58,7 +58,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
       {/* Upper Headers */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-6">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">แดชบอร์ดผู้สอน</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">ภาพรวมสำหรับผู้สอน</span>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-1">
             <h1 className="font-display font-bold text-3xl text-slate-900">สรุปผลการวิเคราะห์ชั้นเรียน</h1>
 
@@ -197,7 +197,7 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-slate-800 text-sm">ข้อมูลเชิงลึกจากผู้ช่วยอาจารย์ (AI)</h3>
-                    <p className="text-[10px] text-slate-400 font-semibold">ที่ปรึกษาด้านวิชาการ Gemini</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">ที่ปรึกษาด้านวิชาการ AI</p>
                   </div>
                 </div>
 
@@ -432,7 +432,14 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                         <tr key={student.student_id} className="hover:bg-slate-50/50 transition">
                           {/* ID / Name */}
                           <td className="py-4 px-4">
-                            <div className="font-semibold text-slate-800">{student.name}</div>
+                            <div className="font-semibold text-slate-800">
+                              {student.name}
+                              {student.attemptsCount && student.attemptsCount > 1 && (
+                                <span className="ml-2 text-[10px] text-brand-blue bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-100 whitespace-nowrap">
+                                  ทำ {student.attemptsCount} ครั้ง
+                                </span>
+                              )}
+                            </div>
                             <div className="font-mono text-[10px] text-slate-400 mt-0.5">{student.student_id}</div>
                           </td>
                           {/* Quiz Score */}
@@ -686,6 +693,36 @@ export default function TeacherDashboard({ analytics, isGeneratingInsight, apiKe
                     </ul>
                   </div>
                 </div>
+
+                {/* ประวัติการทำแบบทดสอบ */}
+                {selectedStudent.attempts && selectedStudent.attempts.length > 1 && (
+                  <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5 text-slate-400 shrink-0" /> ประวัติการทำแบบทดสอบ ({selectedStudent.attemptsCount} ครั้ง)
+                    </span>
+                    <div className="space-y-2">
+                      {selectedStudent.attempts.map((attempt, idx) => (
+                        <div key={idx} className="bg-white border border-slate-100 rounded-xl p-3 flex items-center justify-between shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+                              attempt.score >= 85 ? 'bg-emerald-50 text-emerald-600' : 
+                              attempt.score >= 70 ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'
+                            }`}>
+                              {attempt.score}%
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-slate-700">ครั้งที่ {selectedStudent.attempts!.length - idx}</span>
+                              <span className="text-[10px] text-slate-400">{new Date(attempt.lastActivity).toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <div className="text-[10px] text-slate-500 max-w-[200px] truncate hidden sm:block">
+                            {attempt.aiFeedbackSummary}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               </div>
             </motion.div>

@@ -1,11 +1,11 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin } from "../lib/supabase";
 
 export async function saveProfile(
     name: string,
     studentCode: string,
     role: "student" | "teacher"
 ) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from("profiles")
         .upsert(
             {

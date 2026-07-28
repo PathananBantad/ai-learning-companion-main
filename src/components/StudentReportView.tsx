@@ -332,8 +332,7 @@ export default function StudentReportView({
                 ข้อมูลเชิงลึกและคำแนะนำการเรียนรู้เฉพาะบุคคลจาก AI
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                การประเมินเชิงลึกแบบเรียลไทม์ ขับเคลื่อนโดย Google Gemini API
-              </p>
+                การประเมินเชิงลึกแบบเรียลไทม์ ขับเคลื่อนโดย OpenAI API  </p>
             </div>
           </div>
 
@@ -357,7 +356,7 @@ export default function StudentReportView({
               <div className="absolute inset-0 rounded-full border-4 border-t-brand-purple border-r-transparent border-b-transparent border-l-transparent animate-spin" />
             </div>
             <span className="text-xs font-semibold text-slate-500 animate-pulse">
-              กำลังประมวลผลประวัติการเรียนรู้ร่วมกับโมเดล Gemini...
+              กำลังประมวลผลประวัติการเรียนรู้ร่วมกับโมเดล AI...
             </span>
           </div>
         ) : error ? (

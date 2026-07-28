@@ -1,4 +1,3 @@
-
 import { Router, Request, Response } from 'express';
 import { state } from '../data/lesson';
 import { getAIClient, AI_MODEL } from '../lib/ai';
@@ -43,6 +42,7 @@ console.log(JSON.stringify(messages, null, 2));
 
 console.log("Conversation history:");
 console.log(JSON.stringify(conversationHistory, null, 2));
+
 
   try {
   const response = await ai.chat.completions.create({

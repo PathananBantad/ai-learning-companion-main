@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 
 export const validateClassCode = async (code: string) => {
   console.log("Searching class:", code);
@@ -43,6 +43,33 @@ export const createClass = async (classCode: string, className?: string) => {
   }
 
   return data;
+};
+
+// Create a row in student_sessions so we have a sessionId to attach to
+// conversation_logs (which requires a valid session_id foreign key).
+// NOTE: student_sessions.student_id and .class_id are uuid foreign keys
+// (to profiles.id and classes.id respectively) — the old text columns
+// `name` and `class_code` were dropped in 20260717092517_remote_schema.sql.
+export const createStudentSession = async (
+  profileId: string,
+  classId: string,
+): Promise<string | null> => {
+  const { data, error } = await supabase
+    .from("student_sessions")
+    .insert({
+      student_id: profileId,
+      class_id: classId,
+      activity_type: "chat",
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("Error creating student session:", error.message);
+    return null;
+  }
+
+  return data?.id ?? null;
 };
 
 export const enrollStudent = async (classCode: string, name: string) => {

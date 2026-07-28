@@ -1,9 +1,12 @@
-import { supabase } from "../lib/supabase";
+import { supabaseAdmin as supabase } from "../lib/supabase";
 
 export async function getAnalytics(classCode: string) {
     const { data, error } = await supabase
         .from("quiz_results")
-        .select("*")
+        .select(`
+            *,
+            profiles ( student_code )
+        `)
         .eq("class_code", classCode);
 
     if (error) {
@@ -127,34 +130,58 @@ export async function getAnalytics(classCode: string) {
     // =========================
     // Students
     // =========================
-    const students = quizResults.map((item: any) => ({
-        student_id: item.student_id,
-        name: item.name,
+    const studentMap = new Map<string, any[]>();
+    quizResults.forEach((item: any) => {
+        const sid = item.profiles?.student_code || item.student_id;
+        if (!studentMap.has(sid)) {
+            studentMap.set(sid, []);
+        }
+        studentMap.get(sid)!.push(item);
+    });
 
-        quizScore: Number(item.score),
+    const students = Array.from(studentMap.entries()).map(([sid, attempts]) => {
+        // Sort attempts by created_at descending (latest first)
+        attempts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        
+        const latest = attempts[0];
 
-        // score เป็นเปอร์เซ็นต์อยู่แล้ว
-        learningProgress: Math.min(Number(item.score), 100),
+        // Aggregate unique strengths, weaknesses, misconceptions across all attempts
+        const strengthsSet = new Set<string>();
+        const weaknessesSet = new Set<string>();
+        const misconceptionsSet = new Set<string>();
 
-        learningOutcomeAchievement: outcomeAchievement,
+        attempts.forEach(attempt => {
+            (attempt.ai_feedback?.strengths ?? []).forEach((s: string) => strengthsSet.add(s));
+            (attempt.ai_feedback?.weaknesses ?? []).forEach((w: string) => weaknessesSet.add(w));
+            (attempt.misconceptions_triggered ?? []).forEach((m: string) => misconceptionsSet.add(m));
+        });
 
-        strengths: item.ai_feedback?.strengths ?? [],
-
-        weaknesses: item.ai_feedback?.weaknesses ?? [],
-
-        commonMisconceptions:
-            item.misconceptions_triggered ?? [],
-
-        aiFeedbackSummary:
-            item.ai_feedback?.summary ?? "",
-
-        recommendedTopics:
-            item.ai_feedback?.recommendations ?? [],
-
-        lastActivity: item.created_at,
-    }));
+        return {
+            student_id: sid,
+            name: latest.name,
+            quizScore: Number(latest.score),
+            learningProgress: Math.min(Number(latest.score), 100),
+            learningOutcomeAchievement: outcomeAchievement,
+            strengths: Array.from(strengthsSet),
+            weaknesses: Array.from(weaknessesSet),
+            commonMisconceptions: Array.from(misconceptionsSet),
+            aiFeedbackSummary: latest.ai_feedback?.summary ?? "",
+            recommendedTopics: latest.ai_feedback?.recommendations ?? [],
+            lastActivity: latest.created_at,
+            attemptsCount: attempts.length,
+            attempts: attempts.map(attempt => ({
+                score: Number(attempt.score),
+                strengths: attempt.ai_feedback?.strengths ?? [],
+                weaknesses: attempt.ai_feedback?.weaknesses ?? [],
+                commonMisconceptions: attempt.misconceptions_triggered ?? [],
+                aiFeedbackSummary: attempt.ai_feedback?.summary ?? "",
+                lastActivity: attempt.created_at
+            }))
+        };
+    });
 
     return {
+        classCode,
         averageScore,
         studentSubmissionsCount: totalStudents,
 

@@ -1,6 +1,6 @@
 {
   "name": "AI Learning Companion",
-  "description": "A modern, minimal AI Learning Companion for university students and instructors to teach smarter and learn better.",
+  "description": "An interactive, personalized AI-powered teaching assistant and learning companion featuring Socratic feedback, automatic quiz misconception tracking, and instructor analytics dashboards.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

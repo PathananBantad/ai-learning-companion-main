@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { BookOpen, Sparkles, ArrowRight, ArrowLeft, Key, HelpCircle, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { motion } from "motion/react";
+import {
+  BookOpen,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  Key,
+  HelpCircle,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 interface JoinClassProps {
-  onJoinSuccess: (classCode: string, studentInfo: { studentId: string; studentName: string }) => void;
+  onJoinSuccess: (
+    classCode: string,
+    studentInfo: { studentId: string; studentName: string },
+    sessionId: string | null,
+  ) => void;
   onBackToLanding: () => void;
 }
 
-export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassProps) {
-  const [code, setCode] = useState('');
-  const [studentName, setStudentName] = useState('');
-  const [studentId, setStudentId] = useState('');
+export default function JoinClass({
+  onJoinSuccess,
+  onBackToLanding,
+}: JoinClassProps) {
+  const [code, setCode] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [studentId, setStudentId] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [classInfo, setClassInfo] = useState<{ topic?: string } | null>(null);
@@ -19,15 +35,15 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName.trim()) {
-      setErrorMsg('กรุณากรอกชื่อ-นามสกุลของคุณ');
+      setErrorMsg("กรุณากรอกชื่อ-นามสกุลของคุณ");
       return;
     }
     if (!studentId.trim()) {
-      setErrorMsg('กรุณากรอกรหัสนักศึกษา');
+      setErrorMsg("กรุณากรอกรหัสนักศึกษา");
       return;
     }
     if (!code.trim()) {
-      setErrorMsg('กรุณากรอกรหัสเข้าชั้นเรียน');
+      setErrorMsg("กรุณากรอกรหัสเข้าชั้นเรียน");
       return;
     }
 
@@ -35,39 +51,46 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/class/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/class/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.trim(),
           studentId: studentId.trim(),
-          name: studentName.trim()
-        })
+          name: studentName.trim(),
+        }),
       });
 
       if (!res.ok) {
-        throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        throw new Error("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
       }
 
       const data = await res.json();
       if (data.success) {
-        onJoinSuccess(code.trim().toUpperCase(), {
-          studentId: studentId.trim(),
-          studentName: studentName.trim()
-        });
+        onJoinSuccess(
+          code.trim().toUpperCase(),
+          {
+            studentId: studentId.trim(),
+            studentName: studentName.trim(),
+          },
+          data.sessionId ?? null,
+        );
       } else {
-        setErrorMsg('รหัสชั้นเรียนไม่ถูกต้อง กรุณาตรวจสอบกับอาจารย์ผู้สอน');
+        setErrorMsg("รหัสชั้นเรียนไม่ถูกต้อง กรุณาตรวจสอบกับอาจารย์ผู้สอน");
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+      setErrorMsg("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsVerifying(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-between" id="join-class-screen">
+    <div
+      className="min-h-screen bg-slate-50 flex flex-col justify-between"
+      id="join-class-screen"
+    >
       {/* Header */}
       <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between">
         <button
@@ -88,13 +111,14 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
           <div className="bg-brand-blue/10 p-1.5 rounded-lg text-brand-blue">
             <Sparkles className="w-4 h-4 animate-pulse" />
           </div>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ระบบเชื่อมต่อชั้นเรียน</span>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            ระบบเชื่อมต่อชั้นเรียน
+          </span>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="max-w-md mx-auto w-full px-6 py-12 flex-grow flex flex-col justify-center">
-        
         {/* Card wrapper */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -111,16 +135,22 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
 
           {/* Heading */}
           <div className="text-center space-y-1.5">
-            <h1 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">เข้าร่วมชั้นเรียน</h1>
+            <h1 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">
+              เข้าร่วมชั้นเรียน
+            </h1>
             <p className="text-slate-500 text-xs font-medium max-w-xs mx-auto leading-relaxed">
-            กรอกรหัสชั้นเรียนที่อาจารย์สร้างขึ้น เพื่อเข้าเรียน เข้าถึงเครื่องมือ AI และทำแบบทดสอบของบทเรียนนี้
+              กรอกรหัสชั้นเรียนที่อาจารย์สร้างขึ้น เพื่อเข้าเรียน
+              เข้าถึงเครื่องมือ AI และทำแบบทดสอบของบทเรียนนี้
             </p>
           </div>
 
           {/* Verification Form */}
           <form onSubmit={handleVerify} className="space-y-4">
             <div>
-              <label htmlFor="student-name-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              <label
+                htmlFor="student-name-input"
+                className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider"
+              >
                 ชื่อ-นามสกุล
               </label>
               <input
@@ -138,7 +168,10 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
             </div>
 
             <div>
-              <label htmlFor="student-id-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              <label
+                htmlFor="student-id-input"
+                className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider"
+              >
                 รหัสนักศึกษา
               </label>
               <input
@@ -155,7 +188,10 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
             </div>
 
             <div>
-              <label htmlFor="class-code-input" className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              <label
+                htmlFor="class-code-input"
+                className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider"
+              >
                 รหัสชั้นเรียน
               </label>
               <div className="relative">
@@ -191,9 +227,24 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
             >
               {isVerifying ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   <span>กำลังตรวจสอบรหัส...</span>
                 </>
@@ -210,11 +261,14 @@ export default function JoinClass({ onJoinSuccess, onBackToLanding }: JoinClassP
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-xs text-slate-500 leading-relaxed flex items-start gap-2.5">
             <HelpCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-slate-700 block mb-0.5">ยังไม่มีรหัสชั้นเรียน?</span>
-              อาจารย์สามารถสร้างชั้นเรียนและสร้างรหัสได้จากระบบผู้สอน <strong className="text-slate-800">ระบบผู้สอน</strong> กรุณาติดต่ออาจารย์เพื่อขอรหัสของบทเรียนที่กำลังเปิดสอน
+              <span className="font-bold text-slate-700 block mb-0.5">
+                ยังไม่มีรหัสชั้นเรียน?
+              </span>
+              อาจารย์สามารถสร้างชั้นเรียนและสร้างรหัสได้จากระบบผู้สอน{" "}
+              <strong className="text-slate-800">ระบบผู้สอน</strong>{" "}
+              กรุณาติดต่ออาจารย์เพื่อขอรหัสของบทเรียนที่กำลังเปิดสอน
             </div>
           </div>
-
         </motion.div>
       </main>
 

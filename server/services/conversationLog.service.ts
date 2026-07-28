@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "../lib/supabase";
 
 interface SaveConversationLogParams {
-  sessionId?: number | null;
+  sessionId?: string | number | null;
   role: "user" | "assistant";
   message: string;
   intent?: string | null;

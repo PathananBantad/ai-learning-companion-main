@@ -21,6 +21,7 @@ export interface QuizQuestion {
 }
 
 export interface QuizAttempt {
+  success?: boolean; // whether the result was actually saved to the database
   answers: { [key: string]: number }; // questionId -> selectedIndex
   score: number; // percentage
   strengths: string[];
@@ -49,6 +50,15 @@ export interface StudentAnalytics {
   aiFeedbackSummary: string;
   recommendedTopics: string[];
   lastActivity: string;
+  attemptsCount?: number;
+  attempts?: {
+    score: number;
+    strengths: string[];
+    weaknesses: string[];
+    commonMisconceptions: string[];
+    lastActivity: string;
+    aiFeedbackSummary: string;
+  }[];
 }
 
 export interface AnalyticsData {
