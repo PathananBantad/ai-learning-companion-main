@@ -17,6 +17,10 @@ interface SaveQuizResultParams {
     totalQuestions: number;
     aiFeedback: QuizFeedback;
     misconceptionsTriggered: string[];
+    answers: { [key: string]: number };
+    strengths: string[];
+    weaknesses: string[];
+    recommendations: string[];
 }
 
 export async function saveQuizResult({
@@ -27,6 +31,10 @@ export async function saveQuizResult({
                                          totalQuestions,
                                          aiFeedback,
                                          misconceptionsTriggered,
+                                         answers,
+                                         strengths,
+                                         weaknesses,
+                                         recommendations,
                                      }: SaveQuizResultParams) {
 
     console.log("===== saveQuizResult =====");
@@ -50,6 +58,10 @@ export async function saveQuizResult({
                 total_questions: totalQuestions,
                 ai_feedback: aiFeedback,
                 misconceptions_triggered: misconceptionsTriggered,
+                answers,
+                strengths,
+                weaknesses,
+                recommendations,
             },
         ])
         .select()
@@ -67,6 +79,46 @@ export async function saveQuizResult({
     }
 
     console.log("Quiz result saved successfully.");
+
+    return data;
+}
+
+// ดึงผล Quiz ล่าสุดของนักเรียนคนหนึ่งในคลาสที่ระบุ (ใช้ตอนรีเฟรชหน้า Personalized Feedback)
+export async function getLatestQuizResultForStudent(
+    studentCode: string,
+    classCode: string,
+) {
+    // profiles.student_code is the human-entered student ID (e.g. university code),
+    // while quiz_results.student_id references profiles.id (uuid) — so look up the
+    // profile first, then find that profile's latest attempt for this class.
+    const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("student_code", studentCode)
+        .maybeSingle();
+
+    if (profileError) {
+        console.error("Error looking up profile for quiz result:", profileError);
+        throw profileError;
+    }
+
+    if (!profile) {
+        return null;
+    }
+
+    const { data, error } = await supabase
+        .from("quiz_results")
+        .select("*")
+        .eq("student_id", profile.id)
+        .eq("class_code", classCode)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Error fetching latest quiz result:", error);
+        throw error;
+    }
 
     return data;
 }

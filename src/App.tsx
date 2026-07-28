@@ -270,6 +270,37 @@ export default function App() {
     syncAnalytics();
   }, []);
 
+  // Restore the student's most recent quiz attempt from the backend so the
+  // Personalized Feedback page still has data after a page refresh (quizAttempt
+  // itself is only ever set in-memory after a live quiz submission).
+  useEffect(() => {
+    const restoreLastQuizAttempt = async () => {
+      if (role !== "student" || !studentJoinedCode || !studentId) return;
+      if (quizAttempt) return; // already have a fresh attempt this session
+
+      try {
+        const params = new URLSearchParams({
+          studentId,
+          classCode: studentJoinedCode,
+        });
+        const res = await fetch(`/api/quiz/last?${params.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.attempt) {
+          setQuizAttempt({ success: true, ...data.attempt });
+          setQuizSaveStatus("saved");
+        }
+      } catch (err) {
+        console.error("Failed to restore last quiz attempt", err);
+      }
+    };
+
+    restoreLastQuizAttempt();
+    // Only re-run when the student's identity/class actually changes, not on
+    // every quizAttempt update (that would immediately re-fetch after a submit).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, studentJoinedCode, studentId]);
+
   // Set default greeting message when student opens Chat
   useEffect(() => {
     if (lesson && chatHistory.length === 0) {
