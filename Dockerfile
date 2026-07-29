@@ -13,8 +13,10 @@ RUN npm install
 # คัดลอกโค้ดทั้งหมดในโปรเจกต์เข้าไปในคอนเทนเนอร์
 COPY . .
 
+RUN npm run build
+
 # เปิดพอร์ตสำหรับเรียกใช้งาน (สมมติว่าใช้พอร์ต 3000 สำหรับ Backend)
 EXPOSE 3000
 
 # รันระบบในโหมดพัฒนา (Development) อ้างอิงคำสั่งตามที่มีใน package.json ของคุณ
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
