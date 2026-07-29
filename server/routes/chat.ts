@@ -10,9 +10,11 @@ router.post("/chat", async (req: Request, res: Response) => {
   const {
     messages,
     sessionId,
+    activeLessonContext,
   }: {
     messages: ChatMessage[];
     sessionId?: number | null;
+    activeLessonContext?: any;
   } = req.body;
 
   if (!messages || messages.length === 0) {
@@ -52,9 +54,9 @@ router.post("/chat", async (req: Request, res: Response) => {
 You are a highly helpful, patient, and knowledgeable university AI Learning Companion.
 
 You are tutoring a student regarding this current weekly lesson:
-- Lesson Topic: "${state.currentLesson.topic}"
-- Key Concepts: ${JSON.stringify(state.currentLesson.keyConcepts)}
-- Common Misconceptions: ${JSON.stringify(state.currentLesson.commonMisconceptions)}
+- Lesson Topic: "${activeLessonContext?.topic || state.currentLesson.topic}"
+- Key Concepts: ${JSON.stringify(activeLessonContext?.keyConcepts || state.currentLesson.keyConcepts)}
+- Common Misconceptions: ${JSON.stringify(activeLessonContext?.commonMisconceptions || state.currentLesson.commonMisconceptions)}
 
 Use clear, academic but approachable language.
 Break down complex things into bite-sized analogies.
